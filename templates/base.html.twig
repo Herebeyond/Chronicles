@@ -18,22 +18,46 @@
                 <div id="divTitre">
                     <span class="Title">The Rift Chronicles</span>
                     <span class="Title">The Forgotten Worlds</span>
-                </div>
-
-                <div id="library-link">
-                    <a href="{{ path('homepage') }}" class="great-library">The Great Library</a>
-                </div>
+                </div>  
 
                 <nav id="nav">
                     <ul class="menu">
                         <li class="menu-item">
-                            <div class="divLi" onclick="window.location.href='{{ path('homepage') }}'">
+                            <div class="divLi nav-trigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
                                 <a>Navigation</a>
-                                <img class="small-icon" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><polygon points='2,3 8,3 5,7' fill='white'/></svg>">
+                                <img class="small-icon dropdown-arrow" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><polygon points='2,3 8,3 5,7' fill='white'/></svg>">
                             </div>
+                            <ul class="dropdown" role="menu" aria-label="Navigation menu">
+                                <li class="dropdownFirstLevel" role="none">
+                                    <div class="liIntro" onclick="window.location.href='{{ path('beings_index') }}'" role="menuitem" tabindex="-1">
+                                        <span>🧙‍♂️ Beings</span>
+                                    </div>
+                                </li>
+                                <li class="dropdownFirstLevel" role="none">
+                                    <div class="liIntro" onclick="window.location.href='{{ path('characters_index') }}'" role="menuitem" tabindex="-1">
+                                        <span>⚔️ Characters</span>
+                                    </div>
+                                </li>
+                                <li class="dropdownFirstLevel" role="none">
+                                    <div class="liIntro disabled" role="menuitem" tabindex="-1" title="Coming soon">
+                                        <span>🗺️ Map View</span>
+                                    </div>
+                                </li>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                <li class="dropdownFirstLevel" role="none">
+                                    <div class="liIntro" onclick="window.location.href='{{ path('admin_dashboard') }}'" role="menuitem" tabindex="-1">
+                                        <span>⚙️ Administration</span>
+                                    </div>
+                                </li>
+                                {% endif %}
+                            </ul>
                         </li>
                     </ul>
                 </nav>
+
+                <div id="library-link">
+                    <a href="{{ path('homepage') }}" class="great-library">The Great Library</a>
+                </div>
             </div>
 
             <!-- Main content -->
@@ -75,8 +99,68 @@
 
         {% block javascripts %}
         <script>
-            // Basic JavaScript for future enhancements
-            console.log('Chronicles application loaded');
+            // Enhanced Navigation Dropdown Functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                const navTrigger = document.querySelector('.nav-trigger');
+                const dropdown = document.querySelector('.dropdown');
+                const menuItems = document.querySelectorAll('.liIntro:not(.disabled)');
+                
+                // Keyboard navigation
+                navTrigger.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.focus();
+                        if (menuItems.length > 0) {
+                            menuItems[0].focus();
+                        }
+                    }
+                });
+                
+                // Arrow key navigation in dropdown
+                menuItems.forEach((item, index) => {
+                    item.addEventListener('keydown', function(e) {
+                        switch(e.key) {
+                            case 'ArrowDown':
+                                e.preventDefault();
+                                const nextIndex = (index + 1) % menuItems.length;
+                                menuItems[nextIndex].focus();
+                                break;
+                            case 'ArrowUp':
+                                e.preventDefault();
+                                const prevIndex = (index - 1 + menuItems.length) % menuItems.length;
+                                menuItems[prevIndex].focus();
+                                break;
+                            case 'Escape':
+                                navTrigger.focus();
+                                break;
+                            case 'Enter':
+                            case ' ':
+                                e.preventDefault();
+                                item.click();
+                                break;
+                        }
+                    });
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!navTrigger.contains(e.target) && !dropdown.contains(e.target)) {
+                        navTrigger.setAttribute('aria-expanded', 'false');
+                    }
+                });
+                
+                // Update aria-expanded on hover
+                const menuItem = navTrigger.closest('.menu-item');
+                menuItem.addEventListener('mouseenter', function() {
+                    navTrigger.setAttribute('aria-expanded', 'true');
+                });
+                
+                menuItem.addEventListener('mouseleave', function() {
+                    navTrigger.setAttribute('aria-expanded', 'false');
+                });
+                
+                console.log('Chronicles application loaded with enhanced navigation');
+            });
         </script>
         {% endblock %}
     </body>

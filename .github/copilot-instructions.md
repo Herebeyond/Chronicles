@@ -147,5 +147,6 @@ Critical for development - creates realistic sample data:
 - **Missing Symfony Asset Component**: If templates using `asset()` function fail with "Unknown function 'asset'" error, install with `composer require symfony/asset` and clear cache
 - **Duplicate Twig Blocks**: Template inheritance errors like "block already defined" require removing duplicate block definitions while preserving functionality
 - **Docker Container Issues**: Ensure containers are running with `docker compose ps` and restart with `docker compose up --wait` if needed
+- **Template Changes Not Visible**: Browser caching is the most common cause. Solutions: Hard refresh (`Ctrl + F5`), clear browser cache, or use Developer Tools with "Disable cache" checked during development
 
 When working with this codebase, prioritize maintaining the hierarchical Species→Race→Character model and the rich French-language fantasy theme throughout all additions.
