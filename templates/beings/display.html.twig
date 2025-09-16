@@ -1,0 +1,144 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails - Espèce {{ specie_name|default('Inconnue') }} - Chronicles{% endblock %}
+
+{% block page_title %}Détails de l'Espèce{% endblock %}
+
+{% block body %}
+<div style="margin-bottom: 2rem;">
+    <a href="{{ path('beings_index') }}" class="btn">← Retour aux Espèces</a>
+</div>
+
+{% if specie_id %}
+    <!-- Species Information Section -->
+    <div style="background: #f8f9fa; padding: 2rem; border-radius: 8px; margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 2rem;">
+            <div style="width: 120px; height: 120px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                <!-- Species icon will be loaded here -->
+                <span style="font-size: 4rem;">🧬</span>
+            </div>
+            
+            <div style="flex: 1;">
+                <h2 style="margin: 0 0 1rem 0;">Nom de l'Espèce</h2>
+                <p style="color: #666; margin-bottom: 1rem;">
+                    <strong>Races associées :</strong> <span id="race-count">En cours de chargement...</span>
+                </p>
+                
+                {% if is_granted('ROLE_ADMIN') %}
+                <button onclick="editCurrentSpecies()" class="btn" style="background: #6c757d; margin-right: 0.5rem;">Modifier</button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+            <h3>Description</h3>
+            <div id="species-description">
+                <p>Description de l'espèce en cours de chargement...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Race Details Section -->
+    {% if race_id %}
+        <div style="background: white; border: 2px solid #3498db; border-radius: 8px; padding: 2rem; margin-bottom: 2rem;">
+            <h3 style="color: #3498db; margin-top: 0;">Détails de la Race</h3>
+            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div style="width: 80px; height: 80px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 2.5rem;">🏃</span>
+                </div>
+                
+                <div>
+                    <h4 style="margin: 0 0 0.5rem 0;">Nom de la Race</h4>
+                    <p style="margin: 0; color: #666;">Caractéristiques et informations spécifiques à cette race</p>
+                </div>
+            </div>
+            
+            <div id="race-details">
+                <p>Détails de la race en cours de chargement...</p>
+            </div>
+
+            {% if is_granted('ROLE_ADMIN') %}
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                <button onclick="editCurrentRace()" class="btn" style="background: #6c757d;">Modifier la Race</button>
+            </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <!-- All Races for this Species -->
+    <div style="background: white; border-radius: 8px; padding: 2rem;">
+        <h3>Toutes les Races de cette Espèce</h3>
+        <div id="all-races" style="margin-top: 1rem;">
+            <div class="alert alert-info">
+                <p>Chargement des races en cours...</p>
+            </div>
+        </div>
+
+        {% if is_granted('ROLE_ADMIN') %}
+        <div style="margin-top: 2rem; text-align: center;">
+            <button onclick="addNewRace()" class="btn">Ajouter une Nouvelle Race</button>
+        </div>
+        {% endif %}
+    </div>
+
+{% else %}
+    <div class="alert alert-error">
+        <h3>Erreur</h3>
+        <p>Aucune espèce sélectionnée ou espèce introuvable.</p>
+        <a href="{{ path('beings_index') }}" class="btn">Retour à la liste des espèces</a>
+    </div>
+{% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+// This will be populated with actual data later when entities are created
+const specieId = {{ specie_id|default(0) }};
+const raceId = {{ race_id|default(0) }};
+
+function loadSpeciesData() {
+    // TODO: Load species data via AJAX when backend is ready
+    console.log('Loading species data for ID:', specieId);
+    
+    // Placeholder data display
+    if (specieId) {
+        document.getElementById('race-count').textContent = 'Données en cours de chargement...';
+        document.getElementById('species-description').innerHTML = '<p><em>Les données seront chargées une fois les entités Doctrine créées.</em></p>';
+        document.getElementById('all-races').innerHTML = '<div class="alert alert-info"><p>Les races seront affichées ici une fois la base de données configurée.</p></div>';
+    }
+}
+
+function loadRaceData() {
+    // TODO: Load specific race data via AJAX when backend is ready
+    if (raceId) {
+        console.log('Loading race data for ID:', raceId);
+        document.getElementById('race-details').innerHTML = '<p><em>Les détails de la race seront chargés une fois les entités créées.</em></p>';
+    }
+}
+
+function editCurrentSpecies() {
+    alert('Redirection vers l\'édition de l\'espèce (ID: ' + specieId + ')');
+    // TODO: Redirect to species edit form
+}
+
+function editCurrentRace() {
+    alert('Redirection vers l\'édition de la race (ID: ' + raceId + ')');
+    // TODO: Redirect to race edit form
+}
+
+function addNewRace() {
+    alert('Redirection vers l\'ajout d\'une nouvelle race pour l\'espèce (ID: ' + specieId + ')');
+    // TODO: Redirect to race creation form
+}
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadSpeciesData();
+    if (raceId) {
+        loadRaceData();
+    }
+});
+</script>
+{% endblock %}

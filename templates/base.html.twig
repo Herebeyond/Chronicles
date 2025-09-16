@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}The Rift Chronicles - The Forgotten Worlds{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>👁️</text></svg>">
+        <link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ 'now'|date('U') }}">
+        {% block stylesheets %}{% endblock %}
+    </head>
+
+    <body>
+        <div id="global">
+            <!-- Header -->
+            <div id="header">
+                <img id="icon" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23654321' stroke='%23000' stroke-width='2'/><circle cx='50' cy='50' r='20' fill='%23000'/><circle cx='50' cy='50' r='8' fill='%23fff'/></svg>" alt="Eye Icon">
+                
+                <div id="divTitre">
+                    <span class="Title">The Rift Chronicles</span>
+                    <span class="Title">The Forgotten Worlds</span>
+                </div>
+
+                <div id="library-link">
+                    <a href="{{ path('homepage') }}" class="great-library">The Great Library</a>
+                </div>
+
+                <nav id="nav">
+                    <ul class="menu">
+                        <li class="menu-item">
+                            <div class="divLi" onclick="window.location.href='{{ path('homepage') }}'">
+                                <a>Navigation</a>
+                                <img class="small-icon" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><polygon points='2,3 8,3 5,7' fill='white'/></svg>">
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Main content -->
+            {% if block('leftContent') is defined %}
+            <div id="englobe">
+                <div class="leftText">
+                    <div id="leftHeaderText">
+                        {% for i in 0..3 %}
+                        <div><img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'><rect width='50' height='50' fill='%23444'/><text x='25' y='30' text-anchor='middle' fill='white' font-size='20'>🌟</text></svg>"></div>
+                        {% endfor %}
+                    </div>
+                    {% block leftContent %}{% endblock %}
+                </div>
+                
+                <div id="mainText">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success">{{ message }}</div>
+                    {% endfor %}
+                    
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-error">{{ message }}</div>
+                    {% endfor %}
+
+                    {% block body %}{% endblock %}
+                </div>
+            </div>
+            {% else %}
+            <div id="mainText" style="margin: 50px auto; max-width: 1200px;">
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+                
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-error">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        {% block javascripts %}
+        <script>
+            // Basic JavaScript for future enhancements
+            console.log('Chronicles application loaded');
+        </script>
+        {% endblock %}
+    </body>
+</html>

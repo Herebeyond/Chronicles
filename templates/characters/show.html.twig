@@ -1,0 +1,175 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ character.name }} - Chronicles{% endblock %}
+
+{% block page_title %}{{ character.name }}{% endblock %}
+
+{% block body %}
+<div style="margin-bottom: 2rem;">
+    <nav style="margin-bottom: 1rem;">
+        <a href="{{ path('characters_index') }}" class="btn">← Retour aux Personnages</a>
+        {% if character.species %}
+            <a href="{{ path('characters_by_species', {speciesId: character.species.id}) }}" class="btn">Voir tous les {{ character.species.name }}</a>
+        {% endif %}
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('admin_characters') }}" class="btn btn-admin">Mode Admin</a>
+        {% endif %}
+    </nav>
+</div>
+
+<div class="grid" style="grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start;">
+    <!-- Character Image/Avatar -->
+    <div>
+        <div style="width: 100%; aspect-ratio: 1; background: #f8f9fa; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;">
+            {% if character.avatar %}
+                <img src="{{ asset('images/characters/' ~ character.avatar) }}" alt="{{ character.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">
+            {% else %}
+                <span style="font-size: 4rem; color: #6c757d;">👤</span>
+            {% endif %}
+        </div>
+        
+        <!-- Quick Info Card -->
+        <div style="background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem;">
+            <h3 style="margin: 0 0 1rem 0; color: #495057;">Informations</h3>
+            
+            <div style="margin-bottom: 0.5rem;">
+                <strong>Espèce :</strong> 
+                {% if character.species %}
+                    <a href="{{ path('characters_by_species', {speciesId: character.species.id}) }}" style="color: #007bff; text-decoration: none;">
+                        {{ character.species.name }}
+                    </a>
+                {% else %}
+                    <span style="color: #6c757d;">Non définie</span>
+                {% endif %}
+            </div>
+            
+            {% if character.race %}
+            <div style="margin-bottom: 0.5rem;">
+                <strong>Race :</strong> 
+                <a href="{{ path('beings_display', {speciesId: character.species.id, raceId: character.race.id}) }}" style="color: #007bff; text-decoration: none;">
+                    {{ character.race.name }}
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if character.gender %}
+            <div style="margin-bottom: 0.5rem;">
+                <strong>Genre :</strong> 
+                {% if character.gender == 'male' %}
+                    Masculin
+                {% elseif character.gender == 'female' %}
+                    Féminin
+                {% else %}
+                    {{ character.gender }}
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            {% if character.age %}
+            <div style="margin-bottom: 0.5rem;">
+                <strong>Âge :</strong> {{ character.ageDisplay }}
+            </div>
+            {% endif %}
+            
+            {% if character.birthplace %}
+            <div style="margin-bottom: 0.5rem;">
+                <strong>Lieu de naissance :</strong> {{ character.birthplace }}
+            </div>
+            {% endif %}
+            
+            {% if character.occupation %}
+            <div style="margin-bottom: 0.5rem;">
+                <strong>Occupation :</strong> {{ character.occupation }}
+            </div>
+            {% endif %}
+            
+            <div style="margin-bottom: 0.5rem;">
+                <strong>Créé le :</strong> {{ character.createdAt|date('d/m/Y') }}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Character Details -->
+    <div>
+        <!-- Description -->
+        {% if character.description %}
+        <div style="background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0 0 1rem 0; color: #495057;">Description</h3>
+            <div style="line-height: 1.6; color: #212529;">
+                {{ character.description|nl2br }}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Traits -->
+        {% if character.traits and character.traits is not empty %}
+        <div style="background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0 0 1rem 0; color: #495057;">Traits de caractère</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                {% for trait in character.traits %}
+                    <span style="background: #e3f2fd; color: #1565c0; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.9rem;">
+                        {{ trait }}
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Background/History -->
+        {% if character.background %}
+        <div style="background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0 0 1rem 0; color: #495057;">Histoire & Contexte</h3>
+            <div style="line-height: 1.6; color: #212529;">
+                {{ character.background|nl2br }}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Species and Race Info -->
+        {% if character.species %}
+        <div style="background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 1.5rem;">
+            <h3 style="margin: 0 0 1rem 0; color: #495057;">À propos de l'espèce {{ character.species.name }}</h3>
+            <div style="line-height: 1.6; color: #212529; margin-bottom: 1rem;">
+                {{ character.species.description }}
+            </div>
+            
+            {% if character.race and character.race.description %}
+            <h4 style="margin: 1rem 0 0.5rem 0; color: #495057;">Race : {{ character.race.name }}</h4>
+            <div style="line-height: 1.6; color: #212529;">
+                {{ character.race.description }}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if is_granted('ROLE_ADMIN') %}
+<div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px;">
+    <h4 style="margin: 0 0 0.5rem 0; color: #856404;">Actions administrateur</h4>
+    <div>
+        <button onclick="editCharacter({{ character.id }})" class="btn" style="background: #28a745;">Modifier</button>
+        <button onclick="deleteCharacter({{ character.id }})" class="btn" style="background: #dc3545; margin-left: 0.5rem;">Supprimer</button>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+{% if is_granted('ROLE_ADMIN') %}
+function editCharacter(characterId) {
+    window.location.href = '{{ path('admin_characters') }}#character-' + characterId;
+}
+
+function deleteCharacter(characterId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce personnage ?')) {
+        // TODO: Implement AJAX deletion
+        alert('Fonction de suppression à implémenter');
+    }
+}
+{% endif %}
+</script>
+{% endblock %}

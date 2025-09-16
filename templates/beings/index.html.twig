@@ -1,0 +1,155 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Espèces et Races - Chronicles{% endblock %}
+
+{% block page_title %}Espèces et Races{% endblock %}
+
+{% block body %}
+<div style="margin-bottom: 2rem;">
+    <h2>Catalogue des Espèces</h2>
+    <p>Explorez les différentes espèces de cet univers et leurs races associées.</p>
+    
+    {% if is_granted('ROLE_ADMIN') %}
+    <div style="margin-bottom: 1rem;">
+        <a href="{{ path('admin_species') }}" class="btn btn-admin">Gérer les Espèces</a>
+    </div>
+    {% endif %}
+</div>
+
+{% if species is empty %}
+    <div class="alert alert-info">
+        <h3>Aucune espèce trouvée</h3>
+        <p>Il n'y a actuellement aucune espèce dans la base de données.</p>
+        {% if is_granted('ROLE_ADMIN') %}
+            <p><a href="{{ path('admin_species') }}" class="btn">Créer la première espèce</a></p>
+        {% endif %}
+    </div>
+{% else %}
+    <div class="grid">
+        {% for specie in species %}
+        <div class="card" data-species="{{ specie.name }}" data-species-id="{{ specie.id }}">
+            <!-- Species Header -->
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <div style="width: 80px; height: 80px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                    {% if specie.icon %}
+                        <img src="{{ asset('images/' ~ specie.icon) }}" alt="{{ specie.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    {% else %}
+                        <span style="font-size: 2rem;">🧬</span>
+                    {% endif %}
+                </div>
+                
+                <div style="flex: 1;">
+                    <h3 style="margin: 0;">{{ specie.name }}</h3>
+                    <p style="margin: 0.5rem 0; color: #666;">
+                        {{ specie.races|length }} race(s)
+                    </p>
+                    {% if specie.description %}
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                            {{ specie.description|slice(0, 100) }}{% if specie.description|length > 100 %}...{% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <button onclick="toggleSpeciesRaces({{ specie.id }})" class="btn" style="background: transparent; color: #333; font-size: 1.5rem;">▼</button>
+                </div>
+            </div>
+
+            <!-- Races Section (hidden by default) -->
+            <div id="races-{{ specie.id }}" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                {% if specie.races is empty %}
+                    <div style="text-align: center; color: #666; padding: 1rem;">
+                        <p>Aucune race définie pour cette espèce.</p>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <button onclick="addRaceToSpecies({{ specie.id }})" class="btn">Ajouter une Race</button>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                        {% for race in specie.races %}
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <div style="width: 40px; height: 40px; background: #e9ecef; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    {% if race.icon %}
+                                        <img src="{{ asset('images/' ~ race.icon) }}" alt="{{ race.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+                                    {% else %}
+                                        <span>🧬</span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem;">{{ race.name }}</h4>
+                                    <p style="margin: 0; font-size: 0.8rem; color: #666;">{{ race.characters|length }} personnage(s)</p>
+                                </div>
+                            </div>
+                            
+                            {% if race.description %}
+                                <p style="font-size: 0.9rem; margin: 0.5rem 0;">
+                                    {{ race.description|slice(0, 80) }}{% if race.description|length > 80 %}...{% endif %}
+                                </p>
+                            {% endif %}
+                            
+                            <div style="margin-top: 0.5rem;">
+                                <a href="{{ path('beings_display', {specieId: specie.id, raceId: race.id}) }}" class="btn" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;">Voir Détails</a>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <button onclick="editRace({{ race.id }})" class="btn" style="font-size: 0.8rem; padding: 0.3rem 0.6rem; background: #6c757d;">Modifier</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Admin Actions for Species -->
+            {% if is_granted('ROLE_ADMIN') %}
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; text-align: center;">
+                <button onclick="editSpecies({{ specie.id }})" class="btn" style="background: #6c757d; margin-right: 0.5rem;">Modifier Espèce</button>
+                <button onclick="confirmDeleteSpecies({{ specie.id }}, '{{ specie.name }}')" class="btn" style="background: #dc3545;">Supprimer</button>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+function toggleSpeciesRaces(speciesId) {
+    const racesSection = document.getElementById('races-' + speciesId);
+    const toggleButton = event.target;
+    
+    if (racesSection.style.display === 'none') {
+        racesSection.style.display = 'block';
+        toggleButton.textContent = '▲';
+    } else {
+        racesSection.style.display = 'none';
+        toggleButton.textContent = '▼';
+    }
+}
+
+function editSpecies(speciesId) {
+    // TODO: Implement species editing
+    alert('Fonction de modification d\'espèce à implémenter (ID: ' + speciesId + ')');
+}
+
+function editRace(raceId) {
+    // TODO: Implement race editing
+    alert('Fonction de modification de race à implémenter (ID: ' + raceId + ')');
+}
+
+function addRaceToSpecies(speciesId) {
+    // TODO: Implement race addition
+    alert('Fonction d\'ajout de race à implémenter (Espèce ID: ' + speciesId + ')');
+}
+
+function confirmDeleteSpecies(speciesId, speciesName) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer l\'espèce "' + speciesName + '" et toutes ses races associées ?')) {
+        // TODO: Implement species deletion
+        alert('Fonction de suppression d\'espèce à implémenter (ID: ' + speciesId + ')');
+    }
+}
+</script>
+{% endblock %}

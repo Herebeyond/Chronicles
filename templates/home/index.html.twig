@@ -1,0 +1,153 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}The Rift Chronicles - The Forgotten Worlds{% endblock %}
+
+{% block leftContent %}
+    <span>
+        Bienvenue dans l'univers des Chronicles, un système de gestion d'univers fictif 
+        qui vous permet de créer et organiser vos espèces, races et personnages.
+        
+        Ce site a pour but de créer des races, des espèces et des personnages d'un univers fictif. 
+        Pour le moment, seules les personnes avec un droit administrateur ont la possibilité de les créer.
+        
+        Fonctionnalités disponibles :
+        - Espèces : Consultez la liste des différentes espèces avec leurs descriptions
+        - Races : Découvrez les races associées à chaque espèce  
+        - Personnages : Explorez les personnages de cet univers
+        - Dimensions : Naviguez dans les différents plans d'existence
+    </span>
+{% endblock %}
+
+{% block body %}
+    <button id="Return" onclick="window.history.back()">Return</button><br>
+    
+    {% set pages = ['Beings', 'Characters', 'Dimensions', 'Ideas', 'User_profil'] %}
+    {% set current_letter = '' %}
+    
+    {% for page in pages %}
+        {% set first_letter = page|first|upper %}
+        {% if first_letter != current_letter %}
+            {% if current_letter != '' %}</ul>{% endif %}
+            <span class='firstLetter'>{{ first_letter }}</span>
+            <ul class='homepageLetterGroup'>
+            {% set current_letter = first_letter %}
+        {% endif %}
+        
+        <li class='homepageList'>
+            {% if page == 'Beings' %}
+                <a href='{{ path('beings_index') }}'>{{ page|replace({'_': ' '}) }}</a>
+            {% elseif page == 'Characters' %}
+                <a href='{{ path('characters_index') }}'>{{ page|replace({'_': ' '}) }}</a>
+            {% elseif page == 'User_profil' %}
+                <a href='#'>{{ page|replace({'_': ' '}) }}</a>
+            {% else %}
+                <a href='#'>{{ page|replace({'_': ' '}) }}</a>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+    
+    <!-- Statistics Section -->
+    <div class="stats-section">
+        <h3>Statistiques de l'Univers</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number stat-species">{{ stats.species_count }}</div>
+                <div>Espèces</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number stat-races">{{ stats.races_count }}</div>
+                <div>Races</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number stat-characters">{{ stats.characters_count }}</div>
+                <div>Personnages</div>
+            </div>
+        </div>
+    </div>
+
+    {% if is_granted('ROLE_ADMIN') %}
+    <div class="margin-bottom-20">
+        <a href="{{ path('admin_dashboard') }}" class="btn-admin">Administration</a>
+    </div>
+    {% endif %}
+                    <div style="font-size: 0.9rem; color: #666;">Espèces</div>
+                </div>
+                <div style="text-align: center; padding: 0.5rem; background: #e8f5e8; border-radius: 4px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #388e3c;">{{ stats.races_count }}</div>
+                    <div style="font-size: 0.9rem; color: #666;">Races</div>
+                </div>
+                <div style="text-align: center; padding: 0.5rem; background: #fff3e0; border-radius: 4px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #f57c00;">{{ stats.characters_count }}</div>
+                    <div style="font-size: 0.9rem; color: #666;">Personnages</div>
+                </div>
+                <div style="text-align: center; padding: 0.5rem; background: #fce4ec; border-radius: 4px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #c2185b;">{{ stats.average_age }}</div>
+                    <div style="font-size: 0.9rem; color: #666;">Âge Moyen</div>
+                </div>
+            </div>
+        </div>
+
+        <h3>Navigation Rapide</h3>
+        
+        <div class="grid" style="grid-template-columns: 1fr; gap: 1rem;">
+            <div class="card">
+                <h4>🦄 Espèces et Races</h4>
+                <p>Explorez les différentes espèces et leurs races associées</p>
+                <a href="{{ path('beings_index') }}" class="btn">Voir les Espèces</a>
+            </div>
+
+            <div class="card">
+                <h4>👥 Personnages</h4>
+                <p>Découvrez les personnages organisés par race et espèce</p>
+                <a href="{{ path('characters_index') }}" class="btn">Voir les Personnages</a>
+            </div>
+
+            <div class="card">
+                <h4>🌍 Dimensions</h4>
+                <p>Explorez les différents plans d'existence de cet univers</p>
+                <a href="#" class="btn">Voir les Dimensions</a>
+            </div>
+
+            <div class="card">
+                <h4>🗺️ Carte</h4>
+                <p>Consultez la carte du monde des "Mondes Oubliés"</p>
+                <a href="#" class="btn">Voir la Carte</a>
+            </div>
+        </div>
+
+        {% if is_granted('ROLE_ADMIN') %}
+        <div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border-radius: 8px;">
+            <h4>Administration</h4>
+            <p>Accès administrateur détecté</p>
+            <a href="{{ path('admin_dashboard') }}" class="btn btn-admin">Panneau d'Administration</a>
+        </div>
+        {% endif %}
+
+        <!-- Recent Characters Section -->
+        {% if recent_characters is defined and recent_characters|length > 0 %}
+        <div style="margin-top: 2rem; background: white; border-radius: 8px; padding: 1rem;">
+            <h4>Personnages Récents</h4>
+            {% for character in recent_characters %}
+            <div style="display: flex; align-items: center; padding: 0.5rem; border-bottom: 1px solid #eee; margin-bottom: 0.5rem;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #{{ character.species.name == 'Humains' ? '4CAF50' : (character.species.name == 'Elfes' ? '2196F3' : (character.species.name == 'Nains' ? '795548' : (character.species.name == 'Dragons' ? 'F44336' : 'E91E63'))) }}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 1rem;">
+                    {{ character.name|first }}
+                </div>
+                <div>
+                    <div style="font-weight: bold;">{{ character.name }}</div>
+                    <div style="font-size: 0.8rem; color: #666;">{{ character.fullSpeciesName }}</div>
+                </div>
+            </div>
+            {% endfor %}
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="{{ path('characters_index') }}" class="btn" style="font-size: 0.9rem;">Voir tous les personnages</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div style="margin-top: 2rem; text-align: center; color: #666;">
+    <p><em>Système développé avec Symfony 7.3 - Version migrant du système PHP legacy</em></p>
+</div>
+{% endblock %}

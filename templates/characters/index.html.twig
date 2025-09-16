@@ -1,0 +1,150 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Characters - The Rift Chronicles{% endblock %}
+
+{% block body %}
+    <button id="Return" onclick="window.history.back()">Return</button>
+    
+    {% if is_granted('ROLE_ADMIN') %}
+    <div class="margin-bottom-20">
+        <a href="{{ path('admin_characters') }}" class="btn-admin">Gérer les Personnages</a>
+    </div>
+    {% endif %}
+    
+    <!-- Search and Filters -->
+    <div class="search-filter-form">
+        <form method="GET">
+            <div class="form-group">
+                <label>Rechercher un personnage</label>
+                <input type="text" name="search" value="{{ search }}" placeholder="Nom du personnage...">
+            </div>
+            <div class="form-group" style="min-width: 150px;">
+                <label>Filtrer par espèce</label>
+                <select name="species">
+                    <option value="">Toutes les espèces</option>
+                    {% for specie in species %}
+                        <option value="{{ specie.id }}" {% if species_filter == specie.id %}selected{% endif %}>{{ specie.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <button type="submit">Rechercher</button>
+                {% if search or species_filter %}
+                    <a href="{{ path('characters_index') }}" class="btn-reset">Réinitialiser</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {% if characters is empty %}
+        <div class="no-content-message">
+            <h3>Aucun personnage trouvé</h3>
+            {% if search %}
+                <p>Aucun personnage ne correspond à votre recherche "{{ search }}".</p>
+            {% elseif species_filter %}
+                <p>Aucun personnage trouvé pour l'espèce sélectionnée.</p>
+        {% else %}
+            <p>Il n'y a actuellement aucun personnage dans la base de données.</p>
+        {% endif %}
+        {% if is_granted('ROLE_ADMIN') %}
+            <p><a href="{{ path('admin_characters') }}" class="btn">Créer le premier personnage</a></p>
+        {% endif %}
+        </div>
+    {% else %}
+        <!-- Characters display in hierarchical structure like the old project -->
+        {% for species in species %}
+            {% set species_characters = [] %}
+            {% for character in characters %}
+                {% if character.species and character.species.id == species.id %}
+                    {% set species_characters = species_characters|merge([character]) %}
+                {% endif %}
+            {% endfor %}
+            
+            {% if species_characters|length > 0 %}
+                <div class="species-item">
+                    <span class="species-name" id="specie-{{ species.id }}">{{ species.name }}</span>
+                    
+                    <ul class="races-list">
+                        {% set races_with_characters = {} %}
+                        {% for character in species_characters %}
+                            {% set race_id = character.race ? character.race.id : 'no_race' %}
+                            {% set race_name = character.race ? character.race.name : 'Sans race' %}
+                            {% if not races_with_characters[race_id] is defined %}
+                                {% set races_with_characters = races_with_characters|merge({(race_id): {'name': race_name, 'characters': []}}) %}
+                            {% endif %}
+                            {% set temp_chars = races_with_characters[race_id]['characters']|merge([character]) %}
+                            {% set races_with_characters = races_with_characters|merge({(race_id): {'name': race_name, 'characters': temp_chars}}) %}
+                        {% endfor %}
+                        
+                        {% for race_id, race_data in races_with_characters %}
+                            <li class="race-item" data-race-id="{{ race_id }}">
+                                <span class="race-name" id="race-{{ race_id }}">{{ race_data.name }}</span>
+                                <img class="small-icon-list" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><polygon points='2,3 8,3 5,7' fill='white'/></svg>">
+                                
+                                <ul class="characters-list" id="characters-{{ race_id }}" style="display: none;">
+                                    {% for character in race_data.characters %}
+                                        <li class="character-item" onclick="window.location.href='{{ path('characters_show', {characterId: character.id}) }}'">
+                                            <span>{{ character.name }}</span>
+                                            {% if character.occupation %}
+                                                <small style="color: #aaa; margin-left: 10px;">({{ character.occupation }})</small>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+<script>
+// Function to display the list of characters when clicking on a race (replicated from old project)
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.race-item').forEach(function (raceItem) {
+        raceItem.addEventListener('click', function (event) {
+            event.stopPropagation();
+
+            // Check if the clicked element has a child with class 'small-icon-list'
+            const hasArrow = this.querySelector('.small-icon-list');
+            if (!hasArrow) {
+                return;
+            }
+
+            const raceId = this.getAttribute('data-race-id');
+            const charactersList = document.getElementById(`characters-${raceId}`);
+
+            // Toggle visibility
+            if (charactersList.style.display === 'none') {
+                charactersList.style.display = 'block';
+            } else {
+                charactersList.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+// Auto-submit form when species filter changes
+document.querySelector('select[name="species"]').addEventListener('change', function() {
+    this.form.submit();
+});
+</script>
+{% endblock %}
+            </div>
+        </div>
+
+        {% for race_name, race_data in species_data.races %}
+        <div class="race-section" style="background: white; border-left: 4px solid #3498db; padding: 1.5rem; margin-bottom: 1rem; border-radius: 0 8px 8px 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+{% endblock %}

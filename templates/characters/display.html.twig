@@ -1,0 +1,184 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Personnages - {{ specie_name|default('Espèce') }} - Chronicles{% endblock %}
+
+{% block page_title %}Personnages par Espèce{% endblock %}
+
+{% block body %}
+<div style="margin-bottom: 2rem;">
+    <a href="{{ path('characters_index') }}" class="btn">← Retour aux Personnages</a>
+</div>
+
+{% if specie_id %}
+    <!-- Species Header -->
+    <div style="background: #f8f9fa; padding: 2rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h2 style="margin: 0 0 1rem 0;">Personnages de l'Espèce</h2>
+        <p style="color: #666; margin: 0;">Tous les personnages appartenant à cette espèce, organisés par race</p>
+        
+        {% if is_granted('ROLE_ADMIN') %}
+        <div style="margin-top: 1rem;">
+            <button onclick="openCharacterAdminModal()" class="btn btn-admin">
+                <span>⚙️</span> Gérer les Personnages
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Characters organized by Race -->
+    {% if races_with_characters is empty %}
+        <div class="alert alert-info">
+            <h3>Aucune race trouvée</h3>
+            <p>Aucune race n'est définie pour cette espèce.</p>
+            {% if is_granted('ROLE_ADMIN') %}
+                <p><a href="{{ path('admin_species') }}" class="btn">Créer des races d'abord</a></p>
+            {% endif %}
+        </div>
+    {% else %}
+        {% for race in races_with_characters %}
+        <div class="race-section" style="background: white; border: 1px solid #dee2e6; border-radius: 8px; margin-bottom: 2rem; overflow: hidden;">
+            <!-- Race Header -->
+            <div style="background: #3498db; color: white; padding: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        {% if race.icon %}
+                            <img src="{{ asset('images/' ~ race.icon) }}" alt="{{ race.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                        {% else %}
+                            <span style="font-size: 2rem;">🏃</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0;">{{ race.name }}</h3>
+                        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">
+                            {{ race.characters|length }} personnage(s)
+                        </p>
+                    </div>
+
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <div>
+                        <button onclick="addCharacterToRace({{ race.id }})" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                            Ajouter Personnage
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if race.description %}
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2);">
+                    <p style="margin: 0; opacity: 0.9;">{{ race.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Characters List -->
+            <div style="padding: 1.5rem;">
+                {% if race.characters is empty %}
+                    <div style="text-align: center; padding: 2rem; color: #666;">
+                        <span style="font-size: 3rem; opacity: 0.5;">👤</span>
+                        <h4>Aucun personnage</h4>
+                        <p>Aucun personnage n'est encore défini pour cette race.</p>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <button onclick="addCharacterToRace({{ race.id }})" class="btn">Créer le premier personnage</button>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+                        {% for character in race.characters %}
+                        <div class="card" style="background: #f8f9fa; border: 1px solid #e9ecef;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                <div style="width: 80px; height: 80px; background: #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    {% if character.icon %}
+                                        <img src="{{ asset('images/' ~ character.icon) }}" alt="{{ character.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                    {% else %}
+                                        <span style="font-size: 2rem;">👤</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div style="flex: 1;">
+                                    <h4 style="margin: 0 0 0.5rem 0;">{{ character.name }}</h4>
+                                    <div style="font-size: 0.9rem; color: #666;">
+                                        {% if character.age %}
+                                            <p style="margin: 0.25rem 0;">Âge: {{ character.age }}</p>
+                                        {% endif %}
+                                        {% if character.country %}
+                                            <p style="margin: 0.25rem 0;">Origine: {{ character.country }}</p>
+                                        {% endif %}
+                                        {% if character.habitat %}
+                                            <p style="margin: 0.25rem 0;">Habitat: {{ character.habitat }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if character.description %}
+                                <div style="margin-bottom: 1rem;">
+                                    <p style="margin: 0; font-size: 0.9rem; line-height: 1.4;">
+                                        {{ character.description|slice(0, 150) }}{% if character.description|length > 150 %}...{% endif %}
+                                    </p>
+                                </div>
+                            {% endif %}
+
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                <button onclick="viewCharacterDetails({{ character.id }})" class="btn" style="flex: 1; font-size: 0.9rem;">Voir Détails</button>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <button onclick="editCharacter({{ character.id }})" class="btn" style="background: #6c757d; font-size: 0.9rem;">Modifier</button>
+                                    <button onclick="deleteCharacter({{ character.id }}, '{{ character.name }}')" class="btn" style="background: #dc3545; font-size: 0.9rem;">Supprimer</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+{% else %}
+    <div class="alert alert-error">
+        <h3>Erreur</h3>
+        <p>Aucune espèce sélectionnée ou espèce introuvable.</p>
+        <a href="{{ path('characters_index') }}" class="btn">Retour à la liste des personnages</a>
+    </div>
+{% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+const specieId = {{ specie_id|default(0) }};
+
+function viewCharacterDetails(characterId) {
+    // TODO: Implement character detail modal or page
+    alert('Affichage des détails complets du personnage (ID: ' + characterId + ')');
+}
+
+function editCharacter(characterId) {
+    // TODO: Redirect to character edit form
+    alert('Redirection vers l\'édition du personnage (ID: ' + characterId + ')');
+}
+
+function deleteCharacter(characterId, characterName) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer le personnage "' + characterName + '" ?')) {
+        // TODO: Implement character deletion via AJAX
+        alert('Suppression du personnage (ID: ' + characterId + ')');
+    }
+}
+
+function addCharacterToRace(raceId) {
+    // TODO: Redirect to character creation form with pre-selected race
+    alert('Création d\'un nouveau personnage pour la race (ID: ' + raceId + ')');
+}
+
+function openCharacterAdminModal() {
+    // TODO: Open admin modal for character management
+    alert('Ouverture du panneau d\'administration des personnages');
+}
+
+// Add some responsive behavior
+window.addEventListener('resize', function() {
+    // Could add responsive layout adjustments here
+});
+</script>
+{% endblock %}

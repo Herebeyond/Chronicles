@@ -1,0 +1,226 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration - Chronicles{% endblock %}
+
+{% block page_title %}Panneau d'Administration{% endblock %}
+
+{% block body %}
+<div style="margin-bottom: 2rem;">
+    <h2>Tableau de Bord Administrateur</h2>
+    <p>Gérez votre univers fictif : espèces, races, personnages et plus encore.</p>
+</div>
+
+<!-- Quick Stats -->
+<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-bottom: 3rem;">
+    <div class="card" style="background: #3498db; color: white; text-align: center;">
+        <h3 style="margin: 0 0 0.5rem 0;">Espèces</h3>
+        <div style="font-size: 2.5rem; font-weight: bold;">0</div>
+        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Total des espèces</p>
+    </div>
+    
+    <div class="card" style="background: #2ecc71; color: white; text-align: center;">
+        <h3 style="margin: 0 0 0.5rem 0;">Races</h3>
+        <div style="font-size: 2.5rem; font-weight: bold;">0</div>
+        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Total des races</p>
+    </div>
+    
+    <div class="card" style="background: #e74c3c; color: white; text-align: center;">
+        <h3 style="margin: 0 0 0.5rem 0;">Personnages</h3>
+        <div style="font-size: 2.5rem; font-weight: bold;">0</div>
+        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Total des personnages</p>
+    </div>
+    
+    <div class="card" style="background: #f39c12; color: white; text-align: center;">
+        <h3 style="margin: 0 0 0.5rem 0;">Utilisateurs</h3>
+        <div style="font-size: 2.5rem; font-weight: bold;">1</div>
+        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Utilisateurs actifs</p>
+    </div>
+</div>
+
+<!-- Main Admin Actions -->
+<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
+    
+    <!-- Species Management -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="font-size: 3rem;">🧬</span>
+            <div>
+                <h3 style="margin: 0;">Gestion des Espèces</h3>
+                <p style="margin: 0.5rem 0 0 0; color: #666;">Créer, modifier et supprimer des espèces</p>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <p>Gérez les différentes espèces de votre univers, leurs caractéristiques et leurs descriptions.</p>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{{ path('admin_species') }}" class="btn" style="flex: 1;">Gérer les Espèces</a>
+            <button onclick="quickAddSpecies()" class="btn" style="background: #2ecc71;">+ Nouveau</button>
+        </div>
+    </div>
+
+    <!-- Character Management -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="font-size: 3rem;">👥</span>
+            <div>
+                <h3 style="margin: 0;">Gestion des Personnages</h3>
+                <p style="margin: 0.5rem 0 0 0; color: #666;">Créer, modifier et supprimer des personnages</p>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <p>Ajoutez des personnages à vos races et espèces, gérez leurs informations et caractéristiques.</p>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{{ path('admin_characters') }}" class="btn" style="flex: 1;">Gérer les Personnages</a>
+            <button onclick="quickAddCharacter()" class="btn" style="background: #2ecc71;">+ Nouveau</button>
+        </div>
+    </div>
+
+    <!-- Database Management -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="font-size: 3rem;">🗄️</span>
+            <div>
+                <h3 style="margin: 0;">Base de Données</h3>
+                <p style="margin: 0.5rem 0 0 0; color: #666;">Opérations sur la base de données</p>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <p>Exportez, importez et gérez les données de votre univers fictif.</p>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+            <button onclick="exportData()" class="btn" style="background: #f39c12;">Exporter</button>
+            <button onclick="importData()" class="btn" style="background: #9b59b6;">Importer</button>
+        </div>
+    </div>
+
+    <!-- User Management -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="font-size: 3rem;">👤</span>
+            <div>
+                <h3 style="margin: 0;">Gestion des Utilisateurs</h3>
+                <p style="margin: 0.5rem 0 0 0; color: #666;">Gérer les comptes utilisateurs</p>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <p>Administrez les comptes utilisateurs, leurs permissions et leur accès.</p>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+            <button onclick="manageUsers()" class="btn" style="flex: 1;">Gérer les Utilisateurs</button>
+        </div>
+    </div>
+
+    <!-- Dimensions Management -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="font-size: 3rem;">🌍</span>
+            <div>
+                <h3 style="margin: 0;">Dimensions & Lieux</h3>
+                <p style="margin: 0.5rem 0 0 0; color: #666;">Gérer les dimensions et les lieux</p>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <p>Créez et gérez les différentes dimensions, mondes et lieux de votre univers.</p>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+            <button onclick="manageDimensions()" class="btn" style="flex: 1;">Gérer les Dimensions</button>
+        </div>
+    </div>
+
+    <!-- Ideas Management -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="font-size: 3rem;">💡</span>
+            <div>
+                <h3 style="margin: 0;">Idées & Suggestions</h3>
+                <p style="margin: 0.5rem 0 0 0; color: #666;">Gérer les idées d'amélioration</p>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <p>Consultez et gérez les idées et suggestions pour l'amélioration de l'univers.</p>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+            <button onclick="manageIdeas()" class="btn" style="flex: 1;">Gérer les Idées</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Recent Activity -->
+<div style="margin-top: 3rem;">
+    <div class="card">
+        <h3>Activité Récente</h3>
+        <div id="recent-activity">
+            <div style="text-align: center; padding: 2rem; color: #666;">
+                <span style="font-size: 3rem; opacity: 0.5;">📊</span>
+                <p>Les logs d'activité seront affichés ici une fois le système complet</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+function quickAddSpecies() {
+    // TODO: Open quick add species modal
+    alert('Ouverture du formulaire de création rapide d\'espèce');
+}
+
+function quickAddCharacter() {
+    // TODO: Open quick add character modal
+    alert('Ouverture du formulaire de création rapide de personnage');
+}
+
+function exportData() {
+    // TODO: Implement data export functionality
+    alert('Fonction d\'exportation des données à implémenter');
+}
+
+function importData() {
+    // TODO: Implement data import functionality
+    alert('Fonction d\'importation des données à implémenter');
+}
+
+function manageUsers() {
+    // TODO: Redirect to user management page
+    alert('Redirection vers la gestion des utilisateurs');
+}
+
+function manageDimensions() {
+    // TODO: Redirect to dimensions management page
+    alert('Redirection vers la gestion des dimensions');
+}
+
+function manageIdeas() {
+    // TODO: Redirect to ideas management page
+    alert('Redirection vers la gestion des idées');
+}
+
+// Load dashboard statistics
+function loadDashboardStats() {
+    // TODO: Load real statistics via AJAX when backend is ready
+    console.log('Loading dashboard statistics...');
+}
+
+// Initialize dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardStats();
+});
+</script>
+{% endblock %}
