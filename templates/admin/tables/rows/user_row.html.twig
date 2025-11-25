@@ -1,0 +1,62 @@
+<td class="id-cell">{{ user.id }}</td>
+<td class="name-cell">
+    <a href="{{ path('admin_table_detail', {'table': 'users', 'id': user.id}) }}" 
+       class="name-link">
+        {{ user.username }}
+    </a>
+</td>
+<td class="description-cell">
+    {{ user.email }}
+</td>
+<td class="text-center">
+    {% if user.firstName %}
+        {{ user.firstName }}
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="text-center">
+    {% if user.lastName %}
+        {{ user.lastName }}
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="description-cell">
+    {% for role in user.roles %}
+        {% if role != 'ROLE_USER' %}
+            <span class="role-badge role-{{ role|lower|replace({'role_': ''}) }}">
+                {{ role|replace({'ROLE_': ''})|title }}
+            </span>
+        {% endif %}
+    {% else %}
+        <span class="role-badge role-user">User</span>
+    {% endfor %}
+</td>
+<td class="text-center">
+    <span class="status-{{ user.isActive ? 'active' : 'inactive' }}">
+        {{ user.isActive ? '✓ Active' : '✗ Inactive' }}
+    </span>
+</td>
+<td class="date-cell">
+    {{ user.createdAt|date('Y-m-d H:i') }}
+</td>
+<td class="date-cell">
+    {% if user.lastLoginAt %}
+        {{ user.lastLoginAt|date('Y-m-d H:i') }}
+    {% else %}
+        <span class="no-data">Never</span>
+    {% endif %}
+</td>
+<td class="actions-cell">
+    <div class="action-buttons">
+        <a href="{{ path('admin_table_detail', {'table': 'users', 'id': user.id}) }}" 
+           class="btn btn-sm btn-outline" title="View Details">
+            👁️
+        </a>
+        <a href="{{ path('admin_users_edit', {'id': user.id}) }}" 
+           class="btn btn-sm btn-primary" title="Edit">
+            ✏️
+        </a>
+    </div>
+</td>

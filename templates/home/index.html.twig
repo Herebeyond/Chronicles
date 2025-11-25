@@ -3,151 +3,158 @@
 {% block title %}The Rift Chronicles - The Forgotten Worlds{% endblock %}
 
 {% block leftContent %}
-    <span>
-        Bienvenue dans l'univers des Chronicles, un système de gestion d'univers fictif 
-        qui vous permet de créer et organiser vos espèces, races et personnages.
+    <div class="homepage-welcome">
+        <h2 class="welcome-title">🏰 Bienvenue dans les Chronicles</h2>
+        <p class="welcome-description">
+            Plongez dans l'univers des <strong>Chronicles</strong>, un système de gestion d'univers fictif 
+            qui vous permet de créer et organiser vos espèces, races et personnages fantastiques.
+        </p>
         
-        Ce site a pour but de créer des races, des espèces et des personnages d'un univers fictif. 
-        Pour le moment, seules les personnes avec un droit administrateur ont la possibilité de les créer.
-        
-        Fonctionnalités disponibles :
-        - Espèces : Consultez la liste des différentes espèces avec leurs descriptions
-        - Races : Découvrez les races associées à chaque espèce  
-        - Personnages : Explorez les personnages de cet univers
-        - Dimensions : Naviguez dans les différents plans d'existence
-    </span>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.species_count ?? 0 }}</div>
+                <div class="stat-label">Espèces</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.races_count ?? 0 }}</div>
+                <div class="stat-label">Races</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.characters_count ?? 0 }}</div>
+                <div class="stat-label">Personnages</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.average_age ?? 0 }}</div>
+                <div class="stat-label">Âge Moyen</div>
+            </div>
+        </div>
+
+        {% if recent_characters and recent_characters|length > 0 %}
+        <div class="recent-section">
+            <h3 class="recent-title">📖 Personnages Récents</h3>
+            <div class="recent-characters">
+                {% for character in recent_characters %}
+                <div class="recent-character">
+                    <div class="character-info">
+                        <strong>{{ character.name }}</strong>
+                        <span class="character-species">{{ character.species.name }}</span>
+                        {% if character.race %}
+                            <span class="character-race">• {{ character.race.name }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="features-section">
+            <h3 class="features-title">✨ Fonctionnalités</h3>
+            <ul class="features-list">
+                <li><span class="feature-icon">🧬</span> <strong>Espèces</strong> : Consultez les différentes espèces avec leurs descriptions</li>
+                <li><span class="feature-icon">👥</span> <strong>Races</strong> : Découvrez les races associées à chaque espèce</li>
+                <li><span class="feature-icon">🎭</span> <strong>Personnages</strong> : Explorez les personnages de cet univers</li>
+                <li><span class="feature-icon">🌌</span> <strong>Dimensions</strong> : Naviguez dans les différents plans d'existence</li>
+            </ul>
+        </div>
+
+        {% if not app.user %}
+        <div class="auth-prompt">
+            <p class="auth-text">
+                <span class="auth-icon">🔐</span>
+                <a href="{{ path('login') }}" class="auth-link">Connectez-vous</a> pour accéder à toutes les fonctionnalités
+                ou <a href="{{ path('register') }}" class="auth-link">créez un compte</a> pour rejoindre l'aventure !
+            </p>
+        </div>
+        {% elseif not app.user.hasAnyRoles %}
+        <div class="role-info">
+            <p class="role-text">
+                <span class="info-icon">ℹ️</span>
+                Votre compte est en attente d'activation. Contactez un administrateur pour obtenir des permissions.
+            </p>
+        </div>
+        {% endif %}
+    </div>
 {% endblock %}
 
 {% block body %}
-    <button id="Return" onclick="window.history.back()">Return</button><br>
-    
-    {% set pages = ['Beings', 'Characters', 'Dimensions', 'Ideas', 'User_profil'] %}
-    {% set current_letter = '' %}
-    
-    {% for page in pages %}
-        {% set first_letter = page|first|upper %}
-        {% if first_letter != current_letter %}
-            {% if current_letter != '' %}</ul>{% endif %}
-            <span class='firstLetter'>{{ first_letter }}</span>
-            <ul class='homepageLetterGroup'>
-            {% set current_letter = first_letter %}
-        {% endif %}
-        
-        <li class='homepageList'>
-            {% if page == 'Beings' %}
-                <a href='{{ path('beings_index') }}'>{{ page|replace({'_': ' '}) }}</a>
-            {% elseif page == 'Characters' %}
-                <a href='{{ path('characters_index') }}'>{{ page|replace({'_': ' '}) }}</a>
-            {% elseif page == 'User_profil' %}
-                <a href='#'>{{ page|replace({'_': ' '}) }}</a>
-            {% else %}
-                <a href='#'>{{ page|replace({'_': ' '}) }}</a>
+    <div class="homepage-main">
+        <div class="navigation-grid">
+            <div class="nav-section">
+                <h2 class="nav-section-title">🗺️ Explorer l'Univers</h2>
+                <div class="nav-cards">
+                    <a href="{{ path('beings_index') }}" class="nav-card beings-card">
+                        <div class="nav-card-icon">🧬</div>
+                        <div class="nav-card-content">
+                            <h3>Êtres Vivants</h3>
+                            <p>Découvrez les espèces et races qui peuplent cet univers</p>
+                            <div class="nav-card-stats">
+                                {{ stats.species_count ?? 0 }} espèces • {{ stats.races_count ?? 0 }} races
+                            </div>
+                        </div>
+                    </a>
+
+                    <a href="{{ path('characters_index') }}" class="nav-card characters-card">
+                        <div class="nav-card-icon">🎭</div>
+                        <div class="nav-card-content">
+                            <h3>Personnages</h3>
+                            <p>Explorez les héros, vilains et personnages de cette saga</p>
+                            <div class="nav-card-stats">
+                                {{ stats.characters_count ?? 0 }} personnages créés
+                            </div>
+                        </div>
+                    </a>
+
+                    <div class="nav-card disabled-card">
+                        <div class="nav-card-icon">🌌</div>
+                        <div class="nav-card-content">
+                            <h3>Dimensions</h3>
+                            <p>Naviguez dans les différents plans d'existence</p>
+                            <div class="nav-card-status">Bientôt disponible</div>
+                        </div>
+                    </div>
+
+                    <div class="nav-card disabled-card">
+                        <div class="nav-card-icon">💡</div>
+                        <div class="nav-card-content">
+                            <h3>Idées & Concepts</h3>
+                            <p>Explorez les idées et concepts en développement</p>
+                            <div class="nav-card-status">En préparation</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if app.user %}
+            <div class="nav-section">
+                <h2 class="nav-section-title">👤 Mon Espace</h2>
+                <div class="nav-cards">
+                    <a href="{{ path('profile') }}" class="nav-card profile-card">
+                        <div class="nav-card-icon">👤</div>
+                        <div class="nav-card-content">
+                            <h3>Mon Profil</h3>
+                            <p>Gérez vos informations personnelles et préférences</p>
+                            <div class="nav-card-stats">
+                                Connecté en tant que <strong>{{ app.user.username }}</strong>
+                            </div>
+                        </div>
+                    </a>
+
+                    {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_dashboard') }}" class="nav-card admin-card">
+                        <div class="nav-card-icon">⚙️</div>
+                        <div class="nav-card-content">
+                            <h3>Administration</h3>
+                            <p>Gérez les utilisateurs, espèces et contenu du site</p>
+                            <div class="nav-card-stats">
+                                Accès administrateur
+                            </div>
+                        </div>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
             {% endif %}
-        </li>
-    {% endfor %}
-    </ul>
-    
-    <!-- Statistics Section -->
-    <div class="stats-section">
-        <h3>Statistiques de l'Univers</h3>
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-number stat-species">{{ stats.species_count }}</div>
-                <div>Espèces</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number stat-races">{{ stats.races_count }}</div>
-                <div>Races</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number stat-characters">{{ stats.characters_count }}</div>
-                <div>Personnages</div>
-            </div>
         </div>
     </div>
-
-    {% if is_granted('ROLE_ADMIN') %}
-    <div class="margin-bottom-20">
-        <a href="{{ path('admin_dashboard') }}" class="btn-admin">Administration</a>
-    </div>
-    {% endif %}
-                    <div style="font-size: 0.9rem; color: #666;">Espèces</div>
-                </div>
-                <div style="text-align: center; padding: 0.5rem; background: #e8f5e8; border-radius: 4px;">
-                    <div style="font-size: 1.5rem; font-weight: bold; color: #388e3c;">{{ stats.races_count }}</div>
-                    <div style="font-size: 0.9rem; color: #666;">Races</div>
-                </div>
-                <div style="text-align: center; padding: 0.5rem; background: #fff3e0; border-radius: 4px;">
-                    <div style="font-size: 1.5rem; font-weight: bold; color: #f57c00;">{{ stats.characters_count }}</div>
-                    <div style="font-size: 0.9rem; color: #666;">Personnages</div>
-                </div>
-                <div style="text-align: center; padding: 0.5rem; background: #fce4ec; border-radius: 4px;">
-                    <div style="font-size: 1.5rem; font-weight: bold; color: #c2185b;">{{ stats.average_age }}</div>
-                    <div style="font-size: 0.9rem; color: #666;">Âge Moyen</div>
-                </div>
-            </div>
-        </div>
-
-        <h3>Navigation Rapide</h3>
-        
-        <div class="grid" style="grid-template-columns: 1fr; gap: 1rem;">
-            <div class="card">
-                <h4>🦄 Espèces et Races</h4>
-                <p>Explorez les différentes espèces et leurs races associées</p>
-                <a href="{{ path('beings_index') }}" class="btn">Voir les Espèces</a>
-            </div>
-
-            <div class="card">
-                <h4>👥 Personnages</h4>
-                <p>Découvrez les personnages organisés par race et espèce</p>
-                <a href="{{ path('characters_index') }}" class="btn">Voir les Personnages</a>
-            </div>
-
-            <div class="card">
-                <h4>🌍 Dimensions</h4>
-                <p>Explorez les différents plans d'existence de cet univers</p>
-                <a href="#" class="btn">Voir les Dimensions</a>
-            </div>
-
-            <div class="card">
-                <h4>🗺️ Carte</h4>
-                <p>Consultez la carte du monde des "Mondes Oubliés"</p>
-                <a href="#" class="btn">Voir la Carte</a>
-            </div>
-        </div>
-
-        {% if is_granted('ROLE_ADMIN') %}
-        <div style="margin-top: 2rem; padding: 1rem; background: #fff3cd; border-radius: 8px;">
-            <h4>Administration</h4>
-            <p>Accès administrateur détecté</p>
-            <a href="{{ path('admin_dashboard') }}" class="btn btn-admin">Panneau d'Administration</a>
-        </div>
-        {% endif %}
-
-        <!-- Recent Characters Section -->
-        {% if recent_characters is defined and recent_characters|length > 0 %}
-        <div style="margin-top: 2rem; background: white; border-radius: 8px; padding: 1rem;">
-            <h4>Personnages Récents</h4>
-            {% for character in recent_characters %}
-            <div style="display: flex; align-items: center; padding: 0.5rem; border-bottom: 1px solid #eee; margin-bottom: 0.5rem;">
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: #{{ character.species.name == 'Humains' ? '4CAF50' : (character.species.name == 'Elfes' ? '2196F3' : (character.species.name == 'Nains' ? '795548' : (character.species.name == 'Dragons' ? 'F44336' : 'E91E63'))) }}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 1rem;">
-                    {{ character.name|first }}
-                </div>
-                <div>
-                    <div style="font-weight: bold;">{{ character.name }}</div>
-                    <div style="font-size: 0.8rem; color: #666;">{{ character.fullSpeciesName }}</div>
-                </div>
-            </div>
-            {% endfor %}
-            <div style="text-align: center; margin-top: 1rem;">
-                <a href="{{ path('characters_index') }}" class="btn" style="font-size: 0.9rem;">Voir tous les personnages</a>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-</div>
-
-<div style="margin-top: 2rem; text-align: center; color: #666;">
-    <p><em>Système développé avec Symfony 7.3 - Version migrant du système PHP legacy</em></p>
-</div>
 {% endblock %}

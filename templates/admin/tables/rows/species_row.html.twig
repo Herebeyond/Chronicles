@@ -1,0 +1,72 @@
+<td class="id-cell">{{ species.id }}</td>
+<td class="icon-cell">
+    {% if species.icon %}
+        <img src="{{ asset('images/species/' ~ species.icon) }}" 
+             alt="{{ species.name }}"
+             class="table-icon"
+             onerror="this.style.display='none'">
+    {% else %}
+        <span class="no-icon">🧬</span>
+    {% endif %}
+</td>
+<td class="name-cell">
+    <a href="{{ path('admin_table_detail', {'table': 'species', 'id': species.id}) }}" 
+       class="name-link">
+        {{ species.name }}
+    </a>
+</td>
+<td class="description-cell">
+    {% if species.description %}
+        <span class="description-preview" title="{{ species.description }}">
+            {{ species.description|length > 50 ? (species.description|slice(0, 50) ~ '...') : species.description }}
+        </span>
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="count-cell">
+    {% if species.races|length > 0 %}
+        <a href="{{ path('admin_table_view', {'table': 'races'}) }}?species={{ species.id }}" 
+           class="count-link">
+            {{ species.races|length }}
+        </a>
+    {% else %}
+        <span class="zero-count">0</span>
+    {% endif %}
+</td>
+<td class="count-cell">
+    {% if species.characters|length > 0 %}
+        <a href="{{ path('admin_table_view', {'table': 'characters'}) }}?species={{ species.id }}" 
+           class="count-link">
+            {{ species.characters|length }}
+        </a>
+    {% else %}
+        <span class="zero-count">0</span>
+    {% endif %}
+</td>
+<td class="date-cell">
+    {{ species.createdAt|date('Y-m-d H:i') }}
+</td>
+<td class="date-cell">
+    {% if species.updatedAt %}
+        {{ species.updatedAt|date('Y-m-d H:i') }}
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="actions-cell">
+    <div class="action-buttons">
+        <a href="{{ path('admin_table_detail', {'table': 'species', 'id': species.id}) }}" 
+           class="btn btn-sm btn-outline" title="View Details">
+            👁️
+        </a>
+        <a href="{{ path('admin_species_edit', {'id': species.id}) }}" 
+           class="btn btn-sm btn-primary" title="Edit">
+            ✏️
+        </a>
+        <a href="{{ path('beings_species', {'speciesId': species.id}) }}" 
+           class="btn btn-sm btn-secondary" title="View Public Page">
+            🔗
+        </a>
+    </div>
+</td>

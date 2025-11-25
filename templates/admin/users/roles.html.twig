@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gérer les rôles - {{ user.username }}{% endblock %}
+
+{% block page_title %}Gestion des rôles de {{ user.username }}{% endblock %}
+
+{% block body %}
+<div style="max-width: 600px; margin: 30px auto; padding: 30px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    
+    <div style="background-color: #e8f4f8; padding: 20px; border-radius: 4px; margin-bottom: 25px; border-left: 4px solid #3498db;">
+        <h3 style="margin: 0 0 10px 0; color: #2c3e50;">Informations utilisateur</h3>
+        <p style="margin: 5px 0;"><strong>Nom d'utilisateur :</strong> {{ user.username }}</p>
+        <p style="margin: 5px 0;"><strong>Email :</strong> {{ user.email }}</p>
+        <p style="margin: 5px 0;"><strong>Nom complet :</strong> {{ user.fullName }}</p>
+        <p style="margin: 5px 0 0 0;">
+            <strong>Statut :</strong> 
+            {% if user.isActive %}
+                <span style="color: #27ae60;">✓ Actif</span>
+            {% else %}
+                <span style="color: #e74c3c;">✗ Inactif</span>
+            {% endif %}
+        </p>
+    </div>
+
+    {{ form_start(rolesForm) }}
+        
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 15px; font-weight: 500; color: #2c3e50; font-size: 18px;">
+                Rôles disponibles
+            </label>
+            
+            <div style="background-color: white; padding: 20px; border-radius: 4px; border: 1px solid #ddd;">
+                {{ form_widget(rolesForm.roles) }}
+                
+                {% if form_help(rolesForm.roles) %}
+                    <div style="background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin-top: 15px; font-size: 14px;">
+                        <strong>Information :</strong> {{ form_help(rolesForm.roles) }}
+                    </div>
+                {% endif %}
+                
+                {{ form_errors(rolesForm.roles) }}
+            </div>
+        </div>
+
+        <div style="background-color: #e8f6f3; padding: 15px; border-radius: 4px; margin-bottom: 25px; border-left: 4px solid #27ae60;">
+            <h4 style="margin: 0 0 10px 0; color: #2c3e50;">Hiérarchie des rôles</h4>
+            <ul style="margin: 0; padding-left: 20px; color: #666;">
+                <li><strong>Super Administrateur :</strong> Accès complet au système</li>
+                <li><strong>Administrateur :</strong> Gestion des utilisateurs et du contenu</li>
+                <li><strong>Modérateur :</strong> Modération du contenu</li>
+                <li><strong>Utilisateur :</strong> Accès de base aux fonctionnalités</li>
+            </ul>
+            <p style="margin: 10px 0 0 0; font-size: 14px; color: #666;">
+                <em>Note : Les rôles supérieurs incluent automatiquement les permissions des rôles inférieurs.</em>
+            </p>
+        </div>
+
+        {% if user.hasAnyRoles %}
+            <div style="background-color: #fff; padding: 15px; border-radius: 4px; margin-bottom: 25px; border: 1px solid #ddd;">
+                <h4 style="margin: 0 0 10px 0; color: #2c3e50;">Rôles actuels</h4>
+                <div>
+                    {% for roleLabel in user.roleLabels %}
+                        <span style="display: inline-block; background-color: #3498db; color: white; padding: 5px 12px; border-radius: 15px; margin: 3px; font-size: 14px;">
+                            {{ roleLabel }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 4px; margin-bottom: 25px; border: 1px solid #ffeaa7;">
+                <strong>Aucun rôle assigné</strong><br>
+                Cet utilisateur n'a actuellement aucun rôle spécifique.
+            </div>
+        {% endif %}
+
+        <div style="display: flex; gap: 15px;">
+            <button type="submit" style="flex: 1; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;">
+                Mettre à jour les rôles
+            </button>
+            <a href="{{ path('admin_users_index') }}" 
+               style="flex: 1; padding: 12px; background-color: #95a5a6; color: white; text-decoration: none; border-radius: 4px; font-size: 16px; text-align: center; display: block;">
+                Retour à la liste
+            </a>
+        </div>
+
+    {{ form_end(rolesForm) }}
+</div>
+
+{% endblock %}

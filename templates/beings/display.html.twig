@@ -1,144 +1,376 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails - Espèce {{ specie_name|default('Inconnue') }} - Chronicles{% endblock %}
+{% block title %}{{ page_title }} - {{ parent() }}{% endblock %}
 
-{% block page_title %}Détails de l'Espèce{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
 
 {% block body %}
-<div style="margin-bottom: 2rem;">
-    <a href="{{ path('beings_index') }}" class="btn">← Retour aux Espèces</a>
-</div>
-
-{% if specie_id %}
-    <!-- Species Information Section -->
-    <div style="background: #f8f9fa; padding: 2rem; border-radius: 8px; margin-bottom: 2rem;">
-        <div style="display: flex; align-items: center; gap: 2rem;">
-            <div style="width: 120px; height: 120px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                <!-- Species icon will be loaded here -->
-                <span style="font-size: 4rem;">🧬</span>
-            </div>
-            
-            <div style="flex: 1;">
-                <h2 style="margin: 0 0 1rem 0;">Nom de l'Espèce</h2>
-                <p style="color: #666; margin-bottom: 1rem;">
-                    <strong>Races associées :</strong> <span id="race-count">En cours de chargement...</span>
-                </p>
-                
-                {% if is_granted('ROLE_ADMIN') %}
-                <button onclick="editCurrentSpecies()" class="btn" style="background: #6c757d; margin-right: 0.5rem;">Modifier</button>
-                {% endif %}
-            </div>
-        </div>
-        
-        <div style="margin-top: 2rem;">
-            <h3>Description</h3>
-            <div id="species-description">
-                <p>Description de l'espèce en cours de chargement...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Race Details Section -->
-    {% if race_id %}
-        <div style="background: white; border: 2px solid #3498db; border-radius: 8px; padding: 2rem; margin-bottom: 2rem;">
-            <h3 style="color: #3498db; margin-top: 0;">Détails de la Race</h3>
-            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
-                <div style="width: 80px; height: 80px; background: #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                    <span style="font-size: 2.5rem;">🏃</span>
-                </div>
-                
-                <div>
-                    <h4 style="margin: 0 0 0.5rem 0;">Nom de la Race</h4>
-                    <p style="margin: 0; color: #666;">Caractéristiques et informations spécifiques à cette race</p>
-                </div>
-            </div>
-            
-            <div id="race-details">
-                <p>Détails de la race en cours de chargement...</p>
-            </div>
-
-            {% if is_granted('ROLE_ADMIN') %}
-            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
-                <button onclick="editCurrentRace()" class="btn" style="background: #6c757d;">Modifier la Race</button>
-            </div>
-            {% endif %}
-        </div>
-    {% endif %}
-
-    <!-- All Races for this Species -->
-    <div style="background: white; border-radius: 8px; padding: 2rem;">
-        <h3>Toutes les Races de cette Espèce</h3>
-        <div id="all-races" style="margin-top: 1rem;">
-            <div class="alert alert-info">
-                <p>Chargement des races en cours...</p>
-            </div>
-        </div>
-
-        {% if is_granted('ROLE_ADMIN') %}
-        <div style="margin-top: 2rem; text-align: center;">
-            <button onclick="addNewRace()" class="btn">Ajouter une Nouvelle Race</button>
-        </div>
+<div class="page-container">
+    <!-- Navigation breadcrumb -->
+    <div class="breadcrumb">
+        <a href="{{ path('beings_index') }}">Espèces et Créatures</a>
+        {% if race %}
+            <span class="breadcrumb-separator">→</span>
+            <a href="{{ path('beings_species', {'speciesId': species.id}) }}">{{ species.name }}</a>
+            <span class="breadcrumb-separator">→</span>
+            <span class="current">{{ race.name }}</span>
+        {% else %}
+            <span class="breadcrumb-separator">→</span>
+            <span class="current">{{ species.name }}</span>
         {% endif %}
     </div>
 
-{% else %}
-    <div class="alert alert-error">
-        <h3>Erreur</h3>
-        <p>Aucune espèce sélectionnée ou espèce introuvable.</p>
-        <a href="{{ path('beings_index') }}" class="btn">Retour à la liste des espèces</a>
+    <!-- Species Header -->
+    <div class="species-display-header">
+        <div class="species-display-image">
+            {% if species.icon %}
+                <img src="{{ asset('images/species/' ~ species.icon) }}" 
+                     alt="{{ species.name }}"
+                     class="species-display-img"
+                     onerror="this.src='{{ asset('images/icons/icon_default.png') }}'">
+            {% else %}
+                <img src="{{ asset('images/icons/icon_default.png') }}" 
+                     alt="{{ species.name }}"
+                     class="species-display-img">
+            {% endif %}
+        </div>
+        <div class="species-display-info">
+            <h1>{{ species.name }}</h1>
+            {% if race %}
+                <h2 class="race-subtitle">Race : {{ race.name }}</h2>
+            {% endif %}
+            {% if species.description %}
+                <div class="species-description">
+                    {{ species.description|nl2br }}
+                </div>
+            {% endif %}
+        </div>
     </div>
+
+    {% if race %}
+        <!-- Single Race Display -->
+        <div class="race-detailed-display">
+            <div class="race-detailed-header">
+                <div class="race-detailed-image">
+                    {% if race.icon %}
+                        <img src="{{ asset('images/races/' ~ race.icon) }}" 
+                             alt="{{ race.name }}"
+                             onerror="this.src='{{ asset('images/icons/icon_default.png') }}'">
+                    {% else %}
+                        <img src="{{ asset('images/icons/icon_default.png') }}" alt="{{ race.name }}">
+                    {% endif %}
+                </div>
+                <div class="race-detailed-info">
+                    <h2>{{ race.name }}</h2>
+                    {% if race.description %}
+                    <div class="race-description-full">
+                        {{ race.description|nl2br }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Characters of this Race -->
+            {% if characters is defined and characters is not empty %}
+            <div class="characters-of-race">
+                <h3>Personnages de cette race ({{ characters|length }})</h3>
+                <div class="characters-grid-detailed">
+                    {% for character in characters %}
+                    <div class="character-card-detailed clickable" onclick="window.location.href='{{ path('characters_show', {'characterId': character.id}) }}'">
+                        <div class="character-image-detailed">
+                            {% if character.avatar %}
+                                <img src="{{ asset('images/characters/' ~ character.avatar) }}" 
+                                     alt="{{ character.name }}"
+                                     onerror="this.src='{{ asset('images/icons/icon_default.png') }}'">
+                            {% else %}
+                                <img src="{{ asset('images/icons/icon_default.png') }}" alt="{{ character.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="character-info-detailed">
+                            <h4>{{ character.name }}</h4>
+                            {% if character.age %}
+                            <p class="character-age">Âge : {{ character.age }}</p>
+                            {% endif %}
+                            {% if character.gender %}
+                            <p class="character-gender">Genre : {{ character.gender }}</p>
+                            {% endif %}
+                            {% if character.occupation %}
+                            <p class="character-occupation">Profession : {{ character.occupation }}</p>
+                            {% endif %}
+                            {% if character.description %}
+                            <p class="character-description">
+                                {{ character.description|length > 150 ? (character.description|slice(0, 150) ~ '...') : character.description }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="no-characters">
+                <p>Aucun personnage de cette race n'est encore défini.</p>
+            </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- All Races of Species Display -->
+        {% if races is defined and races is not empty %}
+        <div class="races-of-species">
+            <h2>Races de cette espèce ({{ races|length }})</h2>
+            <div class="races-grid-detailed">
+                {% for raceItem in races %}
+                <div class="race-card-detailed clickable" id="race-{{ raceItem.name|lower|replace({' ': '-', "'": '', '"': '', 'à': 'a', 'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e', 'î': 'i', 'ï': 'i', 'ô': 'o', 'ö': 'o', 'ù': 'u', 'û': 'u', 'ü': 'u', 'ÿ': 'y', 'ç': 'c'}) }}" onclick="window.location.href='{{ path('beings_display', {'speciesId': species.id, 'raceId': raceItem.id}) }}'">
+                    <div class="race-image-detailed">
+                        {% if raceItem.icon %}
+                            <img src="{{ asset('images/races/' ~ raceItem.icon) }}" 
+                                 alt="{{ raceItem.name }}"
+                                 onerror="this.src='{{ asset('images/icons/icon_default.png') }}'">
+                        {% else %}
+                            <img src="{{ asset('images/icons/icon_default.png') }}" alt="{{ raceItem.name }}">
+                        {% endif %}
+                    </div>
+                    <div class="race-info-detailed">
+                        <h3>{{ raceItem.name }}</h3>
+                        <p class="race-character-count">{{ raceItem.characters|length }} personnage(s)</p>
+                        {% if raceItem.description %}
+                        <p class="race-description">
+                            {{ raceItem.description|length > 120 ? (raceItem.description|slice(0, 120) ~ '...') : raceItem.description }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="no-races">
+            <p>Aucune race définie pour cette espèce.</p>
+        </div>
+        {% endif %}
+
+        <!-- All Characters of Species (regardless of race) -->
+        {% if characters is defined and characters is not empty %}
+        <div class="characters-of-species">
+            <h2>Tous les personnages de cette espèce ({{ characters|length }})</h2>
+            <div class="characters-grid-detailed">
+                {% for character in characters %}
+                <div class="character-card-detailed clickable" onclick="window.location.href='{{ path('characters_show', {'characterId': character.id}) }}'">
+                    <div class="character-image-detailed">
+                        {% if character.avatar %}
+                            <img src="{{ asset('images/characters/' ~ character.avatar) }}" 
+                                 alt="{{ character.name }}"
+                                 onerror="this.src='{{ asset('images/icons/icon_default.png') }}'">
+                        {% else %}
+                            <img src="{{ asset('images/icons/icon_default.png') }}" alt="{{ character.name }}">
+                        {% endif %}
+                    </div>
+                    <div class="character-info-detailed">
+                        <h4>{{ character.name }}</h4>
+                        {% if character.race %}
+                        <p class="character-race">Race : {{ character.race.name }}</p>
+                        {% endif %}
+                        {% if character.age %}
+                        <p class="character-age">Âge : {{ character.age }}</p>
+                        {% endif %}
+                        {% if character.gender %}
+                        <p class="character-gender">Genre : {{ character.gender }}</p>
+                        {% endif %}
+                        {% if character.occupation %}
+                        <p class="character-occupation">Profession : {{ character.occupation }}</p>
+                        {% endif %}
+                        {% if character.description %}
+                        <p class="character-description">
+                            {{ character.description|length > 150 ? (character.description|slice(0, 150) ~ '...') : character.description }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+
+    <!-- Action buttons -->
+    <div class="display-actions">
+        <button class="btn-back" onclick="window.history.back()">← Retour</button>
+        {% if is_granted('ROLE_ADMIN') %}
+        <div class="admin-actions">
+            <button class="btn-edit" onclick="openEditModal('species', {{ species.id }})">
+                Modifier l'Espèce
+            </button>
+            {% if race %}
+            <button class="btn-edit" onclick="openEditModal('race', {{ race.id }})">
+                Modifier la Race
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Edit Modal -->
+{% if is_granted('ROLE_ADMIN') %}
+<div id="editModal" class="modal" style="display: none;" onclick="closeEditModal()">
+    <div class="modal-content modal-large" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="editModalTitle">✏️ Modifier</h2>
+            <button class="modal-close" onclick="closeEditModal()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <iframe id="editModalFrame" style="width: 100%; height: 70vh; border: none; background: transparent;"></iframe>
+        </div>
+    </div>
+</div>
 {% endif %}
 
-{% endblock %}
-
-{% block javascripts %}
-{{ parent() }}
 <script>
-// This will be populated with actual data later when entities are created
-const specieId = {{ specie_id|default(0) }};
-const raceId = {{ race_id|default(0) }};
-
-function loadSpeciesData() {
-    // TODO: Load species data via AJAX when backend is ready
-    console.log('Loading species data for ID:', specieId);
-    
-    // Placeholder data display
-    if (specieId) {
-        document.getElementById('race-count').textContent = 'Données en cours de chargement...';
-        document.getElementById('species-description').innerHTML = '<p><em>Les données seront chargées une fois les entités Doctrine créées.</em></p>';
-        document.getElementById('all-races').innerHTML = '<div class="alert alert-info"><p>Les races seront affichées ici une fois la base de données configurée.</p></div>';
-    }
-}
-
-function loadRaceData() {
-    // TODO: Load specific race data via AJAX when backend is ready
-    if (raceId) {
-        console.log('Loading race data for ID:', raceId);
-        document.getElementById('race-details').innerHTML = '<p><em>Les détails de la race seront chargés une fois les entités créées.</em></p>';
-    }
-}
-
-function editCurrentSpecies() {
-    alert('Redirection vers l\'édition de l\'espèce (ID: ' + specieId + ')');
-    // TODO: Redirect to species edit form
-}
-
-function editCurrentRace() {
-    alert('Redirection vers l\'édition de la race (ID: ' + raceId + ')');
-    // TODO: Redirect to race edit form
-}
-
-function addNewRace() {
-    alert('Redirection vers l\'ajout d\'une nouvelle race pour l\'espèce (ID: ' + specieId + ')');
-    // TODO: Redirect to race creation form
-}
-
-// Load data when page loads
+// Smooth scroll to race anchor if present in URL
 document.addEventListener('DOMContentLoaded', function() {
-    loadSpeciesData();
-    if (raceId) {
-        loadRaceData();
+    // Check if there's a hash in the URL (e.g., #race-blood-elf)
+    if (window.location.hash) {
+        const targetId = window.location.hash.substring(1); // Remove the # character
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+            // Wait a moment for the page to fully render
+            setTimeout(function() {
+                // Try multiple scrolling methods for better compatibility
+                try {
+                    // Method 1: Modern smooth scroll
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                } catch (e) {
+                    // Method 2: Fallback for older browsers
+                    try {
+                        targetElement.scrollIntoView(true);
+                        // Manual smooth scroll fallback
+                        const targetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - (window.innerHeight / 2);
+                        window.scrollTo({
+                            top: targetTop,
+                            behavior: 'smooth'
+                        });
+                    } catch (e2) {
+                        // Method 3: Basic scroll fallback
+                        targetElement.scrollIntoView();
+                    }
+                }
+                
+                // Add highlight effect
+                setTimeout(function() {
+                    targetElement.style.transition = 'box-shadow 0.3s ease';
+                    targetElement.style.boxShadow = '0 0 20px rgba(0, 123, 255, 0.5)';
+                    
+                    // Remove the highlight after 2 seconds
+                    setTimeout(function() {
+                        targetElement.style.boxShadow = '';
+                    }, 2000);
+                }, 100);
+                
+                console.log('Scrolled to element:', targetId);
+            }, 500); // Increased delay for better reliability
+        } else {
+            console.log('Element with ID "' + targetId + '" not found');
+        }
     }
 });
+
+{% if is_granted('ROLE_ADMIN') %}
+// Edit modal functions
+function openEditModal(type, id) {
+    const modal = document.getElementById('editModal');
+    const modalTitle = document.getElementById('editModalTitle');
+    const iframe = document.getElementById('editModalFrame');
+    
+    // Set title based on type
+    if (type === 'species') {
+        modalTitle.textContent = '✏️ Modifier l\'Espèce';
+        iframe.src = '/admin/species-management/species/' + id + '/edit';
+    } else if (type === 'race') {
+        modalTitle.textContent = '✏️ Modifier la Race';
+        iframe.src = '/admin/species-management/race/' + id + '/edit';
+    }
+    
+    modal.style.display = 'block';
+}
+
+function closeEditModal() {
+    const modal = document.getElementById('editModal');
+    const iframe = document.getElementById('editModalFrame');
+    modal.style.display = 'none';
+    iframe.src = ''; // Clear iframe
+    // Reload page to show changes
+    location.reload();
+}
+
+// Listen for messages from iframe (when form is saved)
+window.addEventListener('message', function(event) {
+    if (event.data === 'formSaved') {
+        closeEditModal();
+    }
+});
+{% endif %}
 </script>
+
+<style>
+.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.admin-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-edit {
+    background: #ffc107;
+    color: #212529;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-edit:hover {
+    background: #e0a800;
+    text-decoration: none;
+    color: #212529;
+}
+
+.btn-back {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-back:hover {
+    background: #545b62;
+}
+
+.display-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+}
+</style>
 {% endblock %}

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Repository\SpeciesRepository;
 use App\Repository\RaceRepository;
 use App\Repository\CharacterRepository;
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,11 +19,13 @@ class AdminController extends AbstractController
     public function dashboard(
         SpeciesRepository $speciesRepository,
         RaceRepository $raceRepository,
-        CharacterRepository $characterRepository
+        CharacterRepository $characterRepository,
+        UserRepository $userRepository
     ): Response {
         // Get statistics for admin dashboard
         $speciesStats = $speciesRepository->getStatistics();
         $characterStats = $characterRepository->getStatistics();
+        $userStats = $userRepository->getUserStats();
         $recentCharacters = $characterRepository->findRecent(5);
         $topSpecies = $speciesRepository->findSpeciesWithMostRaces(5);
 
@@ -32,11 +35,15 @@ class AdminController extends AbstractController
                 'species_count' => $speciesStats['speciesCount'],
                 'races_count' => $speciesStats['totalRaces'],
                 'characters_count' => $speciesStats['totalCharacters'],
+                'users_count' => $userStats['total'],
+                'users_with_roles' => $userStats['with_roles'],
+                'users_without_roles' => $userStats['without_roles'],
                 'average_age' => round($characterStats['averageAge'] ?? 0, 1),
                 'male_count' => $characterStats['maleCount'],
                 'female_count' => $characterStats['femaleCount'],
                 'other_count' => $characterStats['otherCount']
             ],
+            'user_role_stats' => $userStats['roles'],
             'recent_characters' => $recentCharacters,
             'top_species' => $topSpecies,
         ]);

@@ -129,4 +129,33 @@ class CharacterRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Find all characters with related data for table view
+     */
+    public function findAllWithRelatedData(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->leftJoin('c.species', 's')
+            ->leftJoin('c.race', 'r')
+            ->addSelect('s', 'r')
+            ->orderBy('c.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Find character with full details
+     */
+    public function findWithFullDetails(int $id): ?object
+    {
+        return $this->createQueryBuilder('c')
+            ->leftJoin('c.species', 's')
+            ->leftJoin('c.race', 'r')
+            ->addSelect('s', 'r')
+            ->where('c.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

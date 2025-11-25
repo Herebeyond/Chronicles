@@ -71,4 +71,123 @@ class SpeciesRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Find all species with related counts for table view
+     */
+    public function findAllWithRelatedCounts(): array
+    {
+        return $this->createQueryBuilder('s')
+            ->leftJoin('s.races', 'r')
+            ->leftJoin('s.characters', 'c')
+            ->addSelect('r', 'c')
+            ->orderBy('s.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Find species with full details
+     */
+    public function findWithFullDetails(int $id): ?object
+    {
+        return $this->createQueryBuilder('s')
+            ->leftJoin('s.races', 'r')
+            ->leftJoin('s.characters', 'c')
+            ->addSelect('r', 'c')
+            ->where('s.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * Find all species with race count and pagination
+     */
+    public function findAllWithRaceCountPaginated(int $page = 1, int $perPage = 12): array
+    {
+        $offset = ($page - 1) * $perPage;
+        
+        return $this->createQueryBuilder('s')
+            ->leftJoin('s.races', 'r')
+            ->groupBy('s.id')
+            ->addSelect('COUNT(r.id) as HIDDEN raceCount')
+            ->orderBy('s.name', 'ASC')
+            ->setFirstResult($offset)
+            ->setMaxResults($perPage)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Find species by search term and filter with pagination
+     */
+    public function findBySearchAndFilter(string $searchTerm = '', string $filterSpecie = '', int $page = 1, int $perPage = 12): array
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->leftJoin('s.races', 'r')
+            ->groupBy('s.id')
+            ->addSelect('COUNT(r.id) as HIDDEN raceCount');
+
+        // Add search conditions
+        if (!empty($searchTerm)) {
+            $qb->where('LOWER(s.name) LIKE LOWER(:searchTerm) OR LOWER(s.description) LIKE LOWER(:searchTerm)')
+               ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        if (!empty($filterSpecie)) {
+            if (!empty($searchTerm)) {
+                $qb->andWhere('s.name = :filterSpecie');
+            } else {
+                $qb->where('s.name = :filterSpecie');
+            }
+            $qb->setParameter('filterSpecie', $filterSpecie);
+        }
+
+        $offset = ($page - 1) * $perPage;
+        
+        return $qb->orderBy('s.name', 'ASC')
+                  ->setFirstResult($offset)
+                  ->setMaxResults($perPage)
+                  ->getQuery()
+                  ->getResult();
+    }
+
+    /**
+     * Count species by search term and filter
+     */
+    public function countBySearchAndFilter(string $searchTerm = '', string $filterSpecie = ''): int
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->select('COUNT(s.id)');
+
+        // Add search conditions
+        if (!empty($searchTerm)) {
+            $qb->where('LOWER(s.name) LIKE LOWER(:searchTerm) OR LOWER(s.description) LIKE LOWER(:searchTerm)')
+               ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        if (!empty($filterSpecie)) {
+            if (!empty($searchTerm)) {
+                $qb->andWhere('s.name = :filterSpecie');
+            } else {
+                $qb->where('s.name = :filterSpecie');
+            }
+            $qb->setParameter('filterSpecie', $filterSpecie);
+        }
+
+        return $qb->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * Get all species names for dropdown filter
+     */
+    public function findAllNames(): array
+    {
+        return $this->createQueryBuilder('s')
+            ->select('s.name')
+            ->orderBy('s.name', 'ASC')
+            ->getQuery()
+            ->getSingleColumnResult();
+    }
 }

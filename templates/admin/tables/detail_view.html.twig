@@ -1,0 +1,347 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ config.title }} - Administration{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="admin-header">
+        <div>
+            <h1>{{ config.title }}</h1>
+            <p>Detailed view of {{ config.entity_type }} record</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ path('admin_table_view', {'table': table}) }}" class="btn btn-secondary">
+                ← Back to {{ table|title }} Table
+            </a>
+            <a href="{{ path('admin_dashboard') }}" class="btn btn-outline">
+                Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="detail-view">
+        <div class="detail-card">
+            <h2>{{ config.entity_type|title }} Details</h2>
+            
+            <div class="detail-grid">
+                {% if table == 'species' %}
+                    <div class="detail-row">
+                        <label>ID:</label>
+                        <span>{{ entity.id }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Name:</label>
+                        <span>{{ entity.name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Icon:</label>
+                        <span>
+                            {% if entity.icon %}
+                                <img src="{{ asset('images/species/' ~ entity.icon) }}" 
+                                     alt="{{ entity.name }}" 
+                                     class="detail-icon">
+                                <br>{{ entity.icon }}
+                            {% else %}
+                                No icon
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="detail-row full-width">
+                        <label>Description:</label>
+                        <div class="detail-text">{{ entity.description|nl2br|default('No description') }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <label>Races:</label>
+                        <span>{{ entity.races|length }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Characters:</label>
+                        <span>{{ entity.characters|length }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Created:</label>
+                        <span>{{ entity.createdAt|date('Y-m-d H:i:s') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Updated:</label>
+                        <span>{{ entity.updatedAt ? entity.updatedAt|date('Y-m-d H:i:s') : 'Never' }}</span>
+                    </div>
+
+                {% elseif table == 'races' %}
+                    <div class="detail-row">
+                        <label>ID:</label>
+                        <span>{{ entity.id }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Name:</label>
+                        <span>{{ entity.name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Species:</label>
+                        <span>
+                            <a href="{{ path('admin_table_detail', {'table': 'species', 'id': entity.species.id}) }}">
+                                {{ entity.species.name }}
+                            </a>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Icon:</label>
+                        <span>
+                            {% if entity.icon %}
+                                <img src="{{ asset('images/races/' ~ entity.icon) }}" 
+                                     alt="{{ entity.name }}" 
+                                     class="detail-icon">
+                                <br>{{ entity.icon }}
+                            {% else %}
+                                No icon
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="detail-row full-width">
+                        <label>Description:</label>
+                        <div class="detail-text">{{ entity.description|nl2br|default('No description') }}</div>
+                    </div>
+                    <div class="detail-row">
+                        <label>Characters:</label>
+                        <span>{{ entity.characters|length }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Created:</label>
+                        <span>{{ entity.createdAt|date('Y-m-d H:i:s') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Updated:</label>
+                        <span>{{ entity.updatedAt ? entity.updatedAt|date('Y-m-d H:i:s') : 'Never' }}</span>
+                    </div>
+
+                {% elseif table == 'characters' %}
+                    <div class="detail-row">
+                        <label>ID:</label>
+                        <span>{{ entity.id }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Name:</label>
+                        <span>{{ entity.name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Species:</label>
+                        <span>
+                            <a href="{{ path('admin_table_detail', {'table': 'species', 'id': entity.species.id}) }}">
+                                {{ entity.species.name }}
+                            </a>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Race:</label>
+                        <span>
+                            {% if entity.race %}
+                                <a href="{{ path('admin_table_detail', {'table': 'races', 'id': entity.race.id}) }}">
+                                    {{ entity.race.name }}
+                                </a>
+                            {% else %}
+                                No race
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Avatar:</label>
+                        <span>
+                            {% if entity.avatar %}
+                                <img src="{{ asset('images/characters/' ~ entity.avatar) }}" 
+                                     alt="{{ entity.name }}" 
+                                     class="detail-icon">
+                                <br>{{ entity.avatar }}
+                            {% else %}
+                                No avatar
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Gender:</label>
+                        <span>{{ entity.gender|default('Not specified') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Age:</label>
+                        <span>{{ entity.age|default('Not specified') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Birthplace:</label>
+                        <span>{{ entity.birthplace|default('Not specified') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Occupation:</label>
+                        <span>{{ entity.occupation|default('Not specified') }}</span>
+                    </div>
+                    <div class="detail-row full-width">
+                        <label>Description:</label>
+                        <div class="detail-text">{{ entity.description|nl2br|default('No description') }}</div>
+                    </div>
+                    <div class="detail-row full-width">
+                        <label>Background:</label>
+                        <div class="detail-text">{{ entity.background|nl2br|default('No background') }}</div>
+                    </div>
+                    <div class="detail-row full-width">
+                        <label>Traits:</label>
+                        <div class="detail-text">
+                            {% if entity.traits %}
+                                {{ entity.traits|json_encode(constant('JSON_PRETTY_PRINT')) }}
+                            {% else %}
+                                No traits
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <label>Created:</label>
+                        <span>{{ entity.createdAt|date('Y-m-d H:i:s') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Updated:</label>
+                        <span>{{ entity.updatedAt ? entity.updatedAt|date('Y-m-d H:i:s') : 'Never' }}</span>
+                    </div>
+
+                {% elseif table == 'users' %}
+                    <div class="detail-row">
+                        <label>ID:</label>
+                        <span>{{ entity.id }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Username:</label>
+                        <span>{{ entity.username }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Email:</label>
+                        <span>{{ entity.email }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>First Name:</label>
+                        <span>{{ entity.firstName|default('Not specified') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Last Name:</label>
+                        <span>{{ entity.lastName|default('Not specified') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Roles:</label>
+                        <span>
+                            {% for role in entity.roles %}
+                                <span class="role-badge role-{{ role|lower|replace({'role_': ''}) }}">
+                                    {{ role|replace({'ROLE_': ''})|title }}
+                                </span>
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Status:</label>
+                        <span class="status-{{ entity.isActive ? 'active' : 'inactive' }}">
+                            {{ entity.isActive ? 'Active' : 'Inactive' }}
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Created:</label>
+                        <span>{{ entity.createdAt|date('Y-m-d H:i:s') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <label>Last Login:</label>
+                        <span>{{ entity.lastLoginAt ? entity.lastLoginAt|date('Y-m-d H:i:s') : 'Never' }}</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.detail-view {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.detail-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.detail-card h2 {
+    margin: 0 0 2rem 0;
+    color: #2c3e50;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 1rem;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    align-items: start;
+    gap: 1rem;
+}
+
+.detail-row.full-width {
+    grid-column: 1 / -1;
+    grid-template-columns: 150px 1fr;
+}
+
+.detail-row label {
+    font-weight: 600;
+    color: #34495e;
+    text-align: right;
+    padding-top: 0.25rem;
+}
+
+.detail-row span,
+.detail-text {
+    color: #2c3e50;
+    line-height: 1.5;
+}
+
+.detail-text {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    border-left: 4px solid #3498db;
+    white-space: pre-wrap;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.detail-icon {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-row a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.detail-row a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .detail-row,
+    .detail-row.full-width {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .detail-row label {
+        text-align: left;
+        padding-top: 0;
+    }
+}
+</style>
+{% endblock %}

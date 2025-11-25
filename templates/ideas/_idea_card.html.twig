@@ -1,0 +1,86 @@
+{% set hasChildren = idea.hasChildren %}
+{% set isParent = idea.parentIdea is null %}
+
+<div class="idea-card {% if isParent %}parent-idea-card{% else %}sub-idea-card{% endif %} {% if hasChildren %}has-children{% endif %}" 
+     data-idea-id="{{ idea.id }}">
+    
+    <div class="idea-title">
+        {% if hasChildren and isParent %}
+            📁 
+        {% elseif not isParent %}
+            ↳ 
+        {% else %}
+            📄 
+        {% endif %}
+        {{ idea.title }}
+    </div>
+    
+    <div class="idea-meta">
+        <div class="meta-item">
+            <span class="meta-label">Category</span>
+            <span class="idea-badge badge-category">{{ idea.category|replace({'_': ' '}) }}</span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-label">Certainty</span>
+            <span class="idea-badge badge-certainty-{{ idea.certaintyLevel|lower }}">
+                {{ idea.certaintyLevel|replace({'_': ' '}) }}
+            </span>
+        </div>
+        {% if idea.status %}
+            <div class="meta-item">
+                <span class="meta-label">Status</span>
+                <span class="idea-badge badge-status">{{ idea.status }}</span>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="idea-content">{{ idea.content|nl2br }}</div>
+    
+    {% if idea.inspirationSource %}
+        <div class="idea-inspiration">
+            <strong>💡 Inspiration Source:</strong> {{ idea.inspirationSource|nl2br }}
+        </div>
+    {% endif %}
+    
+    {% if idea.comments %}
+        <div class="idea-comments">
+            <strong>💬 Comments:</strong> {{ idea.comments|nl2br }}
+        </div>
+    {% endif %}
+    
+    {% if idea.tags %}
+        <div class="idea-tags">
+            {% for tag in idea.tags %}
+                <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <div class="idea-dates">
+        <span class="idea-date">📅 Created: {{ idea.createdAt|date('d/m/Y H:i') }}</span>
+        {% if idea.updatedAt and idea.updatedAt != idea.createdAt %}
+            <span class="idea-date">✏️ Modified: {{ idea.updatedAt|date('d/m/Y H:i') }}</span>
+        {% endif %}
+    </div>
+    
+    <div class="idea-actions">
+        <button class="btn-secondary btn-sm" onclick="openIdeaFormModal({{ idea.id }})">✏️ Edit</button>
+        
+        <form method="post" action="{{ path('ideas_duplicate', {'id': idea.id}) }}" style="display: inline;" onsubmit="return confirm('Duplicate this idea?')">
+            <button type="submit" class="btn-secondary btn-sm">📋 Duplicate</button>
+        </form>
+        
+        <form method="post" action="{{ path('ideas_delete', {'id': idea.id}) }}" style="display: inline;" onsubmit="return handleDelete(event, {{ idea.id }})">
+            <button type="submit" class="btn-danger btn-sm">🗑️ Delete</button>
+        </form>
+    </div>
+    
+    {% if idea.children is not empty %}
+        <div class="children-container">
+            <div class="children-header">Sub-Ideas ({{ idea.children|length }})</div>
+            {% for child in idea.children %}
+                {{ include('ideas/_idea_card.html.twig', {'idea': child}) }}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

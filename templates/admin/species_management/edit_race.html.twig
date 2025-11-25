@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Race - Administration{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="admin-header">
+        <div>
+            <h1>Edit Race: {{ race.name }}</h1>
+            <p>Modify the race information</p>
+        </div>
+        <a href="{{ path('admin_species_management') }}" class="btn btn-secondary">
+            ← Back to Management
+        </a>
+    </div>
+
+    <div class="form-card">
+        {{ form_start(form, {'attr': {'class': 'form-container', 'enctype': 'multipart/form-data'}}) }}
+        
+        <div class="form-group">
+            {{ form_label(form.species) }}
+            {{ form_widget(form.species) }}
+            {{ form_errors(form.species) }}
+            <small class="form-help">Select the species this race belongs to.</small>
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name) }}
+            {{ form_errors(form.name) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description) }}
+            {{ form_errors(form.description) }}
+            <small class="form-help">Description is optional but recommended for better understanding.</small>
+        </div>
+
+        {% if race.icon %}
+        <div class="current-image-preview">
+            <h4>Current Icon:</h4>
+            <img src="{{ asset('images/races/' ~ race.icon) }}" 
+                 alt="{{ race.name }}"
+                 onerror="this.style.display='none'">
+            <p>Current file: {{ race.icon }}</p>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            {{ form_label(form.iconFile) }}
+            {{ form_widget(form.iconFile) }}
+            {{ form_errors(form.iconFile) }}
+            <small class="form-help">Upload a new image file to replace the current icon (JPG, PNG, GIF, WebP). Maximum size: 2MB. Leave empty to keep current icon.</small>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                Update Race
+            </button>
+            <a href="{{ path('admin_species_management') }}" class="btn btn-secondary">
+                Cancel
+            </a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<script>
+// Notify parent window if we're in an iframe and form was saved
+if (window.location.search.includes('saved=1')) {
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage('formSaved', '*');
+    }
+}
+</script>
+{% endblock %}

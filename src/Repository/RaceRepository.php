@@ -72,4 +72,34 @@ class RaceRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Find all races with related data for table view
+     */
+    public function findAllWithRelatedData(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->leftJoin('r.species', 's')
+            ->leftJoin('r.characters', 'c')
+            ->addSelect('s', 'c')
+            ->orderBy('s.name', 'ASC')
+            ->addOrderBy('r.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Find race with full details
+     */
+    public function findWithFullDetails(int $id): ?object
+    {
+        return $this->createQueryBuilder('r')
+            ->leftJoin('r.species', 's')
+            ->leftJoin('r.characters', 'c')
+            ->addSelect('s', 'c')
+            ->where('r.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

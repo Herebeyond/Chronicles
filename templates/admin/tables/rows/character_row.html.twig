@@ -1,0 +1,83 @@
+<td class="id-cell">{{ character.id }}</td>
+<td class="icon-cell">
+    {% if character.avatar %}
+        <img src="{{ asset('images/characters/' ~ character.avatar) }}" 
+             alt="{{ character.name }}"
+             class="table-icon"
+             onerror="this.style.display='none'">
+    {% else %}
+        <span class="no-icon">⚔️</span>
+    {% endif %}
+</td>
+<td class="name-cell">
+    <a href="{{ path('admin_table_detail', {'table': 'characters', 'id': character.id}) }}" 
+       class="name-link">
+        {{ character.name }}
+    </a>
+</td>
+<td class="name-cell">
+    <a href="{{ path('admin_table_detail', {'table': 'species', 'id': character.species.id}) }}" 
+       class="name-link">
+        {{ character.species.name }}
+    </a>
+</td>
+<td class="name-cell">
+    {% if character.race %}
+        <a href="{{ path('admin_table_detail', {'table': 'races', 'id': character.race.id}) }}" 
+           class="name-link">
+            {{ character.race.name }}
+        </a>
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="text-center">
+    {% if character.gender %}
+        <span class="gender-{{ character.gender|lower }}">
+            {% if character.gender|lower == 'male' %}♂️
+            {% elseif character.gender|lower == 'female' %}♀️
+            {% else %}{{ character.gender }}
+            {% endif %}
+        </span>
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="text-center">
+    {% if character.age %}
+        {{ character.age }}
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="description-cell">
+    {% if character.occupation %}
+        <span title="{{ character.occupation }}">
+            {{ character.occupation|length > 30 ? (character.occupation|slice(0, 30) ~ '...') : character.occupation }}
+        </span>
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="date-cell">
+    {{ character.createdAt|date('Y-m-d H:i') }}
+</td>
+<td class="date-cell">
+    {% if character.updatedAt %}
+        {{ character.updatedAt|date('Y-m-d H:i') }}
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="actions-cell">
+    <div class="action-buttons">
+        <a href="{{ path('admin_table_detail', {'table': 'characters', 'id': character.id}) }}" 
+           class="btn btn-sm btn-outline" title="View Details">
+            👁️
+        </a>
+        <a href="{{ path('characters_show', {'characterId': character.id}) }}" 
+           class="btn btn-sm btn-secondary" title="View Public Page">
+            🔗
+        </a>
+    </div>
+</td>

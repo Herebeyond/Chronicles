@@ -1,0 +1,1 @@
+uncomment - /app/vendor in compose.override.yaml to make pages load a lot faster

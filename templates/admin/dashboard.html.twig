@@ -40,23 +40,24 @@
 <!-- Main Admin Actions -->
 <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
     
-    <!-- Species Management -->
+    <!-- Species & Race Management -->
     <div class="card">
         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
             <span style="font-size: 3rem;">🧬</span>
             <div>
-                <h3 style="margin: 0;">Gestion des Espèces</h3>
-                <p style="margin: 0.5rem 0 0 0; color: #666;">Créer, modifier et supprimer des espèces</p>
+                <h3 style="margin: 0;">Gestion Espèces & Races</h3>
+                <p style="margin: 0.5rem 0 0 0; color: #666;">Créer, modifier et organiser espèces et races</p>
             </div>
         </div>
         
         <div style="margin-bottom: 1rem;">
-            <p>Gérez les différentes espèces de votre univers, leurs caractéristiques et leurs descriptions.</p>
+            <p>Gérez les espèces de votre univers et leurs races associées avec un interface intégrée.</p>
         </div>
         
         <div style="display: flex; gap: 0.5rem;">
-            <a href="{{ path('admin_species') }}" class="btn" style="flex: 1;">Gérer les Espèces</a>
-            <button onclick="quickAddSpecies()" class="btn" style="background: #2ecc71;">+ Nouveau</button>
+            <a href="{{ path('admin_species_management') }}" class="btn" style="flex: 1;">Gérer Espèces & Races</a>
+            <a href="{{ path('admin_species_new') }}" class="btn" style="background: #2ecc71;">+ Espèce</a>
+            <a href="{{ path('admin_race_new') }}" class="btn" style="background: #3498db;">+ Race</a>
         </div>
     </div>
 
@@ -97,6 +98,28 @@
         <div style="display: flex; gap: 0.5rem;">
             <button onclick="exportData()" class="btn" style="background: #f39c12;">Exporter</button>
             <button onclick="importData()" class="btn" style="background: #9b59b6;">Importer</button>
+        </div>
+    </div>
+
+    <!-- Database Tables View -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <span style="font-size: 3rem;">📊</span>
+            <div>
+                <h3 style="margin: 0;">Tables de Données</h3>
+                <p style="margin: 0.5rem 0 0 0; color: #666;">Visualiser et naviguer dans les tables</p>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            <p>Accédez aux vues détaillées de chaque table avec liens relationnels.</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+            <a href="{{ path('admin_table_view', {'table': 'species'}) }}" class="btn" style="background: #3498db;">📋 Species</a>
+            <a href="{{ path('admin_table_view', {'table': 'races'}) }}" class="btn" style="background: #2ecc71;">📋 Races</a>
+            <a href="{{ path('admin_table_view', {'table': 'characters'}) }}" class="btn" style="background: #e74c3c;">📋 Characters</a>
+            <a href="{{ path('admin_table_view', {'table': 'users'}) }}" class="btn" style="background: #f39c12;">📋 Users</a>
         </div>
     </div>
 

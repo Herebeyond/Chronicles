@@ -4,8 +4,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}The Rift Chronicles - The Forgotten Worlds{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>👁️</text></svg>">
-        <link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ 'now'|date('U') }}">
+        <link rel="icon" href="{{ asset('images/icons/favicon.svg') }}">
+        <link rel="stylesheet" href="{{ asset('css/style.css') }}">
         {% block stylesheets %}{% endblock %}
     </head>
 
@@ -13,7 +13,7 @@
         <div id="global">
             <!-- Header -->
             <div id="header">
-                <img id="icon" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23654321' stroke='%23000' stroke-width='2'/><circle cx='50' cy='50' r='20' fill='%23000'/><circle cx='50' cy='50' r='8' fill='%23fff'/></svg>" alt="Eye Icon">
+                <img id="icon" src="{{ asset('images/icons/Eye.png') }}" alt="Eye Icon">
                 
                 <div id="divTitre">
                     <span class="Title">The Rift Chronicles</span>
@@ -25,7 +25,7 @@
                         <li class="menu-item">
                             <div class="divLi nav-trigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
                                 <a>Navigation</a>
-                                <img class="small-icon dropdown-arrow" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><polygon points='2,3 8,3 5,7' fill='white'/></svg>">
+                                <img class="small-icon dropdown-arrow" src="{{ asset('images/icons/dropdown-arrow.svg') }}">
                             </div>
                             <ul class="dropdown" role="menu" aria-label="Navigation menu">
                                 <li class="dropdownFirstLevel" role="none">
@@ -39,6 +39,11 @@
                                     </div>
                                 </li>
                                 <li class="dropdownFirstLevel" role="none">
+                                    <div class="liIntro" onclick="window.location.href='{{ path('ideas_index') }}'" role="menuitem" tabindex="-1">
+                                        <span>🌟 Ideas</span>
+                                    </div>
+                                </li>
+                                <li class="dropdownFirstLevel" role="none">
                                     <div class="liIntro disabled" role="menuitem" tabindex="-1" title="Coming soon">
                                         <span>🗺️ Map View</span>
                                     </div>
@@ -49,11 +54,74 @@
                                         <span>⚙️ Administration</span>
                                     </div>
                                 </li>
+                                <li class="dropdownFirstLevel" role="none">
+                                    <div class="liIntro" onclick="window.location.href='{{ path('admin_users_index') }}'" role="menuitem" tabindex="-1">
+                                        <span>👥 Gestion Utilisateurs</span>
+                                    </div>
+                                </li>
                                 {% endif %}
                             </ul>
                         </li>
                     </ul>
                 </nav>
+
+                <!-- Login System -->
+                <div id="login-section">
+                    {% if app.user %}
+                        <!-- Logged in user display -->
+                        <div id="login-connected">
+                            <div id="user-info">
+                                <img id="user-icon" src="{{ asset(app.user.avatarUrl) }}" alt="User Icon">
+                                <span class="welcome-text">
+                                    Bienvenue<br>
+                                    {{ app.user.fullName }}!
+                                    <a href="{{ path('profile') }}" title="Mon profil">
+                                        <img class="user-settings" src="{{ asset('images/icons/settings.png') }}" alt="Profil">
+                                    </a>
+                                </span>
+                                
+                                {# User dropdown menu button #}
+                                <div class="user-dropdown">
+                                    <div class="user-menu" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
+                                        <img class="small-icon dropdown-arrow" src="{{ asset('images/icons/dropdown-arrow.svg') }}">
+                                    </div>
+                                </div>
+                            </div>
+                            {# Dropdown menu positioned relative to login-connected for centering #}
+                            <ul class="user-dropdown-menu" role="menu">
+                                <li role="none">
+                                    <a href="{{ path('profile') }}" role="menuitem">Mon profil</a>
+                                </li>
+                                <li role="none">
+                                    <a href="{{ path('profile_edit') }}" role="menuitem">Modifier mon profil</a>
+                                </li>
+                                <li role="none">
+                                    <a href="{{ path('change_password') }}" role="menuitem">Changer le mot de passe</a>
+                                </li>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                <li class="menu-separator" role="none"></li>
+                                <li role="none">
+                                    <a href="{{ path('admin_dashboard') }}" role="menuitem">Administration</a>
+                                </li>
+                                <li role="none">
+                                    <a href="{{ path('admin_users_index') }}" role="menuitem">Gestion des utilisateurs</a>
+                                </li>
+                                {% endif %}
+                                <li class="menu-separator" role="none"></li>
+                                <li role="none">
+                                    <a href="{{ path('logout') }}" role="menuitem">Se déconnecter</a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <!-- Not logged in display -->
+                        <div id="login-disconnected">
+                            <a href="{{ path('login') }}" class="auth-link">Se connecter</a>
+                            <span class="auth-separator"> &nbsp;|&nbsp; </span>
+                            <a href="{{ path('register') }}" class="auth-link">S'inscrire</a>
+                        </div>
+                    {% endif %}
+                </div>
 
                 <div id="library-link">
                     <a href="{{ path('homepage') }}" class="great-library">The Great Library</a>
@@ -61,12 +129,12 @@
             </div>
 
             <!-- Main content -->
-            {% if block('leftContent') is defined %}
+            {% if app.request.get('_route') == 'homepage' and block('leftContent') is defined %}
             <div id="englobe">
                 <div class="leftText">
                     <div id="leftHeaderText">
                         {% for i in 0..3 %}
-                        <div><img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'><rect width='50' height='50' fill='%23444'/><text x='25' y='30' text-anchor='middle' fill='white' font-size='20'>🌟</text></svg>"></div>
+                        <div><img src="{{ asset('images/decorative/Icon.png') }}"></div>
                         {% endfor %}
                     </div>
                     {% block leftContent %}{% endblock %}
@@ -93,6 +161,8 @@
                 {% for message in app.flashes('error') %}
                     <div class="alert alert-error">{{ message }}</div>
                 {% endfor %}
+
+                {{ block('body') }}
             </div>
             {% endif %}
         </div>
@@ -104,6 +174,26 @@
                 const navTrigger = document.querySelector('.nav-trigger');
                 const dropdown = document.querySelector('.dropdown');
                 const menuItems = document.querySelectorAll('.liIntro:not(.disabled)');
+                
+                // User dropdown functionality
+                const userMenu = document.querySelector('.user-menu');
+                const userDropdown = document.querySelector('.user-dropdown-menu');
+                
+                if (userMenu && userDropdown) {
+                    userMenu.addEventListener('click', function() {
+                        const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                        this.setAttribute('aria-expanded', !isExpanded);
+                        userDropdown.style.display = !isExpanded ? 'block' : 'none';
+                    });
+                    
+                    // Close user dropdown when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (!userMenu.contains(e.target) && !userDropdown.contains(e.target)) {
+                            userMenu.setAttribute('aria-expanded', 'false');
+                            userDropdown.style.display = 'none';
+                        }
+                    });
+                }
                 
                 // Keyboard navigation
                 navTrigger.addEventListener('keydown', function(e) {

@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% if isEdit %}Edit Idea{% else %}Create New Idea{% endif %}{% endblock %}
+
+{% block body %}
+<div class="form-container">
+    <h1>{% if isEdit %}✏️ Edit Idea{% else %}➕ Create New Idea{% endif %}</h1>
+    
+    {{ form_start(form, {'attr': {'class': 'idea-form'}}) }}
+        
+        <div class="form-section">
+            <h2>Basic Information</h2>
+            
+            <div class="form-group">
+                {{ form_label(form.title) }}
+                {{ form_widget(form.title) }}
+                {{ form_errors(form.title) }}
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.category) }}
+                    {{ form_widget(form.category) }}
+                    {{ form_errors(form.category) }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(form.certaintyLevel) }}
+                    {{ form_widget(form.certaintyLevel) }}
+                    {{ form_errors(form.certaintyLevel) }}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                {{ form_label(form.status) }}
+                {{ form_widget(form.status) }}
+                {{ form_errors(form.status) }}
+            </div>
+            
+            <div class="form-group">
+                {{ form_label(form.content) }}
+                {{ form_widget(form.content) }}
+                {{ form_errors(form.content) }}
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h2>Additional Information</h2>
+            
+            <div class="form-group">
+                {{ form_label(form.tagsString) }}
+                {{ form_widget(form.tagsString) }}
+                {{ form_errors(form.tagsString) }}
+                {{ form_help(form.tagsString) }}
+            </div>
+            
+            <div class="form-group">
+                {{ form_label(form.parentIdea) }}
+                {{ form_widget(form.parentIdea) }}
+                {{ form_errors(form.parentIdea) }}
+                {{ form_help(form.parentIdea) }}
+            </div>
+            
+            <div class="form-group">
+                {{ form_label(form.inspirationSource) }}
+                {{ form_widget(form.inspirationSource) }}
+                {{ form_errors(form.inspirationSource) }}
+            </div>
+            
+            <div class="form-group">
+                {{ form_label(form.comments) }}
+                {{ form_widget(form.comments) }}
+                {{ form_errors(form.comments) }}
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <a href="{{ path('ideas_index') }}" class="btn-secondary">Cancel</a>
+            <button type="submit" class="btn-primary">
+                {% if isEdit %}💾 Update Idea{% else %}✨ Create Idea{% endif %}
+            </button>
+        </div>
+        
+    {{ form_end(form) }}
+</div>
+{% endblock %}

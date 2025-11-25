@@ -1,0 +1,521 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Species & Race Management - Administration{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="admin-header">
+        <div>
+            <h1>Species & Race Management</h1>
+            <p>Manage species and races in your fictional universe</p>
+        </div>
+        <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{{ path('admin_species_new') }}" class="btn btn-primary">
+            ➕ Create New Species
+        </a>
+        <a href="{{ path('admin_race_new') }}" class="btn btn-primary">
+            ➕ Create New Race
+        </a>
+    </div>
+
+    <!-- Management Tabs -->
+    <div class="management-tabs">
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="species">
+                🧬 Species ({{ species|length }})
+            </button>
+            <button class="tab-button" data-tab="races">
+                🎭 Races ({{ races|length }})
+            </button>
+            <button class="tab-button" data-tab="stats">
+                📊 Statistics
+            </button>
+        </div>
+
+        <!-- Species Tab -->
+        <div class="tab-content active" id="species-tab">
+            <div class="section-header">
+                <h2>Species Management</h2>
+                <div class="section-actions">
+                    <a href="{{ path('admin_species_new') }}" class="btn btn-sm btn-primary">
+                        ➕ Add Species
+                    </a>
+                </div>
+            </div>
+
+            {% if species|length > 0 %}
+                <div class="entity-grid">
+                    {% for speciesItem in species %}
+                        <div class="entity-card">
+                            <div class="entity-header">
+                                {% if speciesItem.icon %}
+                                    <img src="{{ asset('images/species/' ~ speciesItem.icon) }}" 
+                                         alt="{{ speciesItem.name }}"
+                                         class="entity-icon"
+                                         onerror="this.style.display='none'">
+                                {% else %}
+                                    <div class="entity-icon-placeholder">🧬</div>
+                                {% endif %}
+                                <div class="entity-info">
+                                    <h3>{{ speciesItem.name }}</h3>
+                                    <p class="entity-meta">
+                                        {{ speciesItem.races|length }} race(s) associated
+                                    </p>
+                                </div>
+                            </div>
+
+                            {% if speciesItem.description %}
+                                <div class="entity-description">
+                                    {{ speciesItem.description|slice(0, 150) }}{% if speciesItem.description|length > 150 %}...{% endif %}
+                                </div>
+                            {% endif %}
+
+                            <div class="entity-actions">
+                                <a href="{{ path('admin_species_edit', {'id': speciesItem.id}) }}" 
+                                   class="btn btn-sm btn-outline">
+                                    ✏️ Edit
+                                </a>
+                                <button class="btn btn-sm btn-danger" 
+                                        onclick="confirmDelete('species', '{{ speciesItem.name }}', {{ speciesItem.id }})">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">🧬</div>
+                    <h3>No Species Found</h3>
+                    <p>Start by creating your first species to organize your fictional universe.</p>
+                    <a href="{{ path('admin_species_new') }}" class="btn btn-primary">
+                        ➕ Create First Species
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Races Tab -->
+        <div class="tab-content" id="races-tab">
+            <div class="section-header">
+                <h2>Race Management</h2>
+                <div class="section-actions">
+                    <a href="{{ path('admin_race_new') }}" class="btn btn-sm btn-primary">
+                        ➕ Add Race
+                    </a>
+                </div>
+            </div>
+
+            {% if races|length > 0 %}
+                <div class="entity-grid">
+                    {% for race in races %}
+                        <div class="entity-card">
+                            <div class="entity-header">
+                                {% if race.icon %}
+                                    <img src="{{ asset('images/races/' ~ race.icon) }}" 
+                                         alt="{{ race.name }}"
+                                         class="entity-icon"
+                                         onerror="this.style.display='none'">
+                                {% else %}
+                                    <div class="entity-icon-placeholder">🎭</div>
+                                {% endif %}
+                                <div class="entity-info">
+                                    <h3>{{ race.name }}</h3>
+                                    <p class="entity-meta">
+                                        Species: {{ race.species.name }}
+                                        <br>
+                                        {{ race.characters|length }} character(s)
+                                    </p>
+                                </div>
+                            </div>
+
+                            {% if race.description %}
+                                <div class="entity-description">
+                                    {{ race.description|slice(0, 150) }}{% if race.description|length > 150 %}...{% endif %}
+                                </div>
+                            {% endif %}
+
+                            <div class="entity-actions">
+                                <a href="{{ path('admin_race_edit', {'id': race.id}) }}" 
+                                   class="btn btn-sm btn-outline">
+                                    ✏️ Edit
+                                </a>
+                                <button class="btn btn-sm btn-danger" 
+                                        onclick="confirmDelete('race', '{{ race.name }}', {{ race.id }})">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">🎭</div>
+                    <h3>No Races Found</h3>
+                    <p>Create races to add subcategories within your species.</p>
+                    <a href="{{ path('admin_race_new') }}" class="btn btn-primary">
+                        ➕ Create First Race
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Statistics Tab -->
+        <div class="tab-content" id="stats-tab">
+            <div class="section-header">
+                <h2>Statistics Overview</h2>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🧬</div>
+                    <div class="stat-content">
+                        <h3>{{ species|length }}</h3>
+                        <p>Total Species</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🎭</div>
+                    <div class="stat-content">
+                        <h3>{{ races|length }}</h3>
+                        <p>Total Races</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">⚔️</div>
+                    <div class="stat-content">
+                        <h3>{{ races|reduce((carry, race) => carry + race.characters|length, 0) }}</h3>
+                        <p>Total Characters</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <h3>{{ races|length > 0 ? (races|reduce((carry, race) => carry + race.characters|length, 0) / races|length)|round(1) : 0 }}</h3>
+                        <p>Avg Characters/Race</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if species|length > 0 %}
+                <div class="detailed-stats">
+                    <h3>Species Breakdown</h3>
+                    <div class="species-stats">
+                        {% for speciesItem in species %}
+                            <div class="species-stat-row">
+                                <div class="species-stat-info">
+                                    <strong>{{ speciesItem.name }}</strong>
+                                    <span class="species-stat-meta">
+                                        {{ speciesItem.races|length }} race(s), 
+                                        {{ speciesItem.characters|length }} character(s)
+                                    </span>
+                                </div>
+                                <div class="species-stat-bar">
+                                    <div class="progress-bar" 
+                                         style="width: {{ speciesItem.characters|length > 0 ? (speciesItem.characters|length / races|reduce((carry, race) => carry + race.characters|length, 0) * 100)|round : 0 }}%">
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Confirm Deletion</h3>
+        <p id="deleteMessage"></p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab switching functionality
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const tabName = button.dataset.tab;
+            
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            button.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        });
+    });
+
+    // Delete confirmation functionality
+    function confirmDelete(type, name, id) {
+        const modal = document.getElementById('deleteModal');
+        const message = document.getElementById('deleteMessage');
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        
+        message.textContent = `Are you sure you want to delete the ${type} "${name}"? This action cannot be undone.`;
+        
+        confirmBtn.onclick = function() {
+            // Here you would typically make an AJAX request to delete the entity
+            // For now, we'll redirect to a delete route
+            window.location.href = `/admin/species-management/${type}/${id}/delete`;
+        };
+        
+        modal.style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('deleteModal').addEventListener('click', (e) => {
+        if (e.target.id === 'deleteModal') {
+            closeDeleteModal();
+        }
+    });
+</script>
+
+<style>
+    /* Management-specific styles */
+    .management-tabs {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .tab-buttons {
+        display: flex;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .tab-button {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent;
+    }
+
+    .tab-button:hover {
+        background: #e9ecef;
+    }
+
+    .tab-button.active {
+        background: white;
+        border-bottom-color: #007bff;
+        color: #007bff;
+    }
+
+    .tab-content {
+        display: none;
+        padding: 2rem;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .entity-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .entity-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .entity-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .entity-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .entity-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .entity-icon-placeholder {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 8px;
+        font-size: 1.5rem;
+    }
+
+    .entity-info h3 {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.25rem;
+        color: #2c3e50;
+    }
+
+    .entity-meta {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .entity-description {
+        color: #666;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .entity-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 50%;
+    }
+
+    .stat-content h3 {
+        margin: 0;
+        font-size: 2rem;
+        color: #2c3e50;
+    }
+
+    .stat-content p {
+        margin: 0;
+        color: #6c757d;
+    }
+
+    .detailed-stats {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .species-stat-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .species-stat-row:last-child {
+        border-bottom: none;
+    }
+
+    .species-stat-info {
+        flex: 1;
+    }
+
+    .species-stat-meta {
+        display: block;
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    .species-stat-bar {
+        width: 100px;
+        height: 8px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        transition: width 0.3s ease;
+    }
+
+    /* Modal styles */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,599 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ config.title }} - Administration{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="admin-header">
+        <div>
+            <h1>{{ config.icon }} {{ config.title }}</h1>
+            <p>{{ config.description }}</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+                ← Back to Dashboard
+            </a>
+            {% if table == 'species' %}
+                <a href="{{ path('admin_species_management') }}" class="btn btn-primary">
+                    🧬 Manage Species
+                </a>
+            {% elseif table == 'users' %}
+                <a href="{{ path('admin_users_index') }}" class="btn btn-primary">
+                    👥 Manage Users
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Table Navigation -->
+    <div class="table-navigation">
+        <a href="{{ path('admin_table_view', {'table': 'species'}) }}" 
+           class="nav-tab {{ table == 'species' ? 'active' : '' }}">
+            🧬 Species ({{ all_counts.species }})
+        </a>
+        <a href="{{ path('admin_table_view', {'table': 'races'}) }}" 
+           class="nav-tab {{ table == 'races' ? 'active' : '' }}">
+            🎭 Races ({{ all_counts.races }})
+        </a>
+        <a href="{{ path('admin_table_view', {'table': 'characters'}) }}" 
+           class="nav-tab {{ table == 'characters' ? 'active' : '' }}">
+            ⚔️ Characters ({{ all_counts.characters }})
+        </a>
+        <a href="{{ path('admin_table_view', {'table': 'users'}) }}" 
+           class="nav-tab {{ table == 'users' ? 'active' : '' }}">
+            👥 Users ({{ all_counts.users }})
+        </a>
+    </div>
+
+    <!-- Filters -->
+    {% if table in ['races', 'characters'] %}
+    <div class="table-filters">
+        <form method="GET" class="filter-form">
+            {% if table == 'races' and filters.species %}
+                <div class="filter-item">
+                    <label>Filtered by Species ID:</label>
+                    <span class="filter-value">{{ filters.species }}</span>
+                    <a href="{{ path('admin_table_view', {'table': 'races'}) }}" class="clear-filter">✕</a>
+                </div>
+            {% elseif table == 'characters' %}
+                {% if filters.species %}
+                    <div class="filter-item">
+                        <label>Filtered by Species ID:</label>
+                        <span class="filter-value">{{ filters.species }}</span>
+                        <a href="{{ path('admin_table_view', {'table': 'characters'}) }}" class="clear-filter">✕</a>
+                    </div>
+                {% endif %}
+                {% if filters.race %}
+                    <div class="filter-item">
+                        <label>Filtered by Race ID:</label>
+                        <span class="filter-value">{{ filters.race }}</span>
+                        <a href="{{ path('admin_table_view', {'table': 'characters'}) }}" class="clear-filter">✕</a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Table Stats -->
+    <div class="table-stats">
+        <div class="stat-item">
+            <span class="stat-number">{{ total_count }}</span>
+            <span class="stat-label">Total {{ config.title|replace({'Table': 'Records'}) }}</span>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="data-table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    {% for column in config.columns %}
+                        <th>{{ column|replace({'_': ' '})|title }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    {% if table == 'species' %}
+                        {% include 'admin/tables/rows/species_row.html.twig' with {'species': item} %}
+                    {% elseif table == 'races' %}
+                        {% include 'admin/tables/rows/race_row.html.twig' with {'race': item} %}
+                    {% elseif table == 'characters' %}
+                        {% include 'admin/tables/rows/character_row.html.twig' with {'character': item} %}
+                    {% elseif table == 'users' %}
+                        {% include 'admin/tables/rows/user_row.html.twig' with {'user': item} %}
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="{{ config.columns|length }}" class="empty-table">
+                        <div class="empty-state">
+                            <span class="empty-icon">{{ config.icon }}</span>
+                            <p>No {{ table }} found in the database.</p>
+                            {% if table == 'species' %}
+                                <a href="{{ path('admin_species_new') }}" class="btn btn-primary">
+                                    Create First Species
+                                </a>
+                            {% elseif table == 'races' %}
+                                <a href="{{ path('admin_race_new') }}" class="btn btn-primary">
+                                    Create First Race
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Related Content Section -->
+    {% if table == 'species' and data|length > 0 %}
+    <div class="related-content">
+        <h3>Related Races & Characters</h3>
+        <div class="related-grid">
+            {% for species in data %}
+                {% if species.races|length > 0 or species.characters|length > 0 %}
+                <div class="related-species-card">
+                    <h4>{{ species.name }} (ID: {{ species.id }})</h4>
+                    
+                    {% if species.races|length > 0 %}
+                    <div class="related-section">
+                        <h5>🎭 Races ({{ species.races|length }})</h5>
+                        <div class="related-items">
+                            {% for race in species.races %}
+                            <a href="{{ path('admin_table_view', {'table': 'races'}) }}?species={{ species.id }}" 
+                               class="related-item">
+                                {{ race.name }} ({{ race.characters|length }} chars)
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if species.characters|length > 0 %}
+                    <div class="related-section">
+                        <h5>⚔️ Characters ({{ species.characters|length }})</h5>
+                        <div class="related-items">
+                            {% for character in species.characters %}
+                            <a href="{{ path('admin_table_view', {'table': 'characters'}) }}?species={{ species.id }}" 
+                               class="related-item">
+                                {{ character.name }}
+                                {% if character.race %} ({{ character.race.name }}){% endif %}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if table == 'races' and data|length > 0 %}
+    <div class="related-content">
+        <h3>Related Characters</h3>
+        <div class="related-grid">
+            {% for race in data %}
+                {% if race.characters|length > 0 %}
+                <div class="related-race-card">
+                    <h4>{{ race.name }} ({{ race.species.name }}) - ID: {{ race.id }}</h4>
+                    
+                    <div class="related-section">
+                        <h5>⚔️ Characters ({{ race.characters|length }})</h5>
+                        <div class="related-items">
+                            {% for character in race.characters %}
+                            <a href="{{ path('admin_table_detail', {'table': 'characters', 'id': character.id}) }}" 
+                               class="related-item">
+                                {{ character.name }}
+                                {% if character.age %} ({{ character.age }} ans){% endif %}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+/* Table Navigation */
+.table-navigation {
+    display: flex;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-bottom: 1.5rem;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-tab {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    color: #6c757d;
+    background: transparent;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.nav-tab:hover {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.nav-tab.active {
+    background: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+
+/* Table Filters */
+.table-filters {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #e3f2fd;
+    border-radius: 20px;
+    border: 1px solid #bbdefb;
+}
+
+.filter-item label {
+    font-size: 0.9rem;
+    color: #1565c0;
+    margin: 0;
+}
+
+.filter-value {
+    font-weight: 600;
+    color: #0d47a1;
+}
+
+.clear-filter {
+    color: #f44336;
+    text-decoration: none;
+    font-weight: bold;
+    margin-left: 0.5rem;
+}
+
+.clear-filter:hover {
+    color: #d32f2f;
+}
+
+/* Data Table Styles */
+.table-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.data-table-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.data-table thead {
+    background: #2c3e50;
+    color: white;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.data-table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Common cell styles */
+.id-cell {
+    width: 60px;
+    font-family: monospace;
+    color: #6c757d;
+    text-align: center;
+}
+
+.icon-cell {
+    width: 60px;
+    text-align: center;
+}
+
+.table-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.no-icon {
+    font-size: 1.5rem;
+    opacity: 0.5;
+}
+
+.name-cell {
+    min-width: 150px;
+}
+
+.name-link {
+    color: #2c3e50;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.name-link:hover {
+    color: #3498db;
+    text-decoration: underline;
+}
+
+.description-cell {
+    max-width: 200px;
+}
+
+.description-preview {
+    display: block;
+    line-height: 1.4;
+    color: #666;
+}
+
+.count-cell {
+    width: 80px;
+    text-align: center;
+}
+
+.count-link {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.count-link:hover {
+    background: rgba(52, 152, 219, 0.2);
+}
+
+.zero-count {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+.date-cell {
+    width: 130px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.actions-cell {
+    width: 120px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+}
+
+.no-data {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+.empty-table {
+    text-align: center;
+    padding: 3rem;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    opacity: 0.5;
+}
+
+/* Role badges */
+.role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    margin: 0.1rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.role-admin {
+    background: #dc3545;
+    color: white;
+}
+
+.role-moderator {
+    background: #fd7e14;
+    color: white;
+}
+
+.role-user {
+    background: #28a745;
+    color: white;
+}
+
+.status-active {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.status-inactive {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* Related Content Styles */
+.related-content {
+    margin-top: 3rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.related-content h3 {
+    margin: 0 0 1.5rem 0;
+    color: #2c3e50;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 0.5rem;
+}
+
+.related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.related-species-card,
+.related-race-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.related-species-card:hover,
+.related-race-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.related-species-card h4,
+.related-race-card h4 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 0.5rem;
+}
+
+.related-section {
+    margin-bottom: 1rem;
+}
+
+.related-section:last-child {
+    margin-bottom: 0;
+}
+
+.related-section h5 {
+    margin: 0 0 0.5rem 0;
+    color: #495057;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.related-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.related-item {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.related-item:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
+.more-items {
+    padding: 0.25rem 0.75rem;
+    background: #6c757d;
+    color: white;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+</style>
+{% endblock %}

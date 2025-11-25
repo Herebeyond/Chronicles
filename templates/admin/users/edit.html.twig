@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Éditer {{ user.username }}{% endblock %}
+
+{% block page_title %}Éditer l'utilisateur {{ user.username }}{% endblock %}
+
+{% block body %}
+<div style="max-width: 600px; margin: 30px auto; padding: 30px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    
+    <div style="background-color: #e8f4f8; padding: 15px; border-radius: 4px; margin-bottom: 25px; border-left: 4px solid #3498db;">
+        <strong>Information :</strong> Vous modifiez les informations de base de l'utilisateur. 
+        Pour gérer les rôles, utilisez le bouton "Gestion des rôles" ci-dessous.
+    </div>
+
+    {{ form_start(userForm) }}
+        
+        <div style="margin-bottom: 20px;">
+            {{ form_label(userForm.username, null, {'label_attr': {'style': 'display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;'}}) }}
+            {{ form_widget(userForm.username, {'attr': {
+                'style': 'width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;'
+            }}) }}
+            {{ form_errors(userForm.username) }}
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            {{ form_label(userForm.email, null, {'label_attr': {'style': 'display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;'}}) }}
+            {{ form_widget(userForm.email, {'attr': {
+                'style': 'width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;'
+            }}) }}
+            {{ form_errors(userForm.email) }}
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div>
+                {{ form_label(userForm.firstName, null, {'label_attr': {'style': 'display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;'}}) }}
+                {{ form_widget(userForm.firstName, {'attr': {
+                    'style': 'width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;'
+                }}) }}
+                {{ form_errors(userForm.firstName) }}
+            </div>
+            <div>
+                {{ form_label(userForm.lastName, null, {'label_attr': {'style': 'display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;'}}) }}
+                {{ form_widget(userForm.lastName, {'attr': {
+                    'style': 'width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;'
+                }}) }}
+                {{ form_errors(userForm.lastName) }}
+            </div>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 10px; font-weight: 500; color: #2c3e50;">
+                {{ form_label(userForm.roles) }}
+            </label>
+            <div style="background-color: white; padding: 15px; border-radius: 4px; border: 1px solid #ddd;">
+                {{ form_widget(userForm.roles) }}
+                {% if form_help(userForm.roles) %}
+                    <small style="color: #666; display: block; margin-top: 10px;">{{ form_help(userForm.roles) }}</small>
+                {% endif %}
+            </div>
+            {{ form_errors(userForm.roles) }}
+        </div>
+
+        <div style="margin-bottom: 25px; padding: 15px; background-color: white; border-radius: 4px; border: 1px solid #ddd;">
+            {{ form_widget(userForm.isActive, {'attr': {'style': 'margin-right: 10px;'}}) }}
+            {{ form_label(userForm.isActive, null, {'label_attr': {'style': 'font-weight: 500; color: #2c3e50;'}}) }}
+            {% if form_help(userForm.isActive) %}
+                <small style="color: #666; display: block; margin-top: 5px;">{{ form_help(userForm.isActive) }}</small>
+            {% endif %}
+            {{ form_errors(userForm.isActive) }}
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button type="submit" style="flex: 1; padding: 12px; background-color: #f39c12; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;">
+                Mettre à jour
+            </button>
+            <a href="{{ path('admin_users_roles', {id: user.id}) }}" 
+               style="flex: 1; padding: 12px; background-color: #9b59b6; color: white; text-decoration: none; border-radius: 4px; font-size: 16px; text-align: center; display: block;">
+                Gestion des rôles
+            </a>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="{{ path('admin_users_index') }}" 
+               style="padding: 10px 20px; background-color: #95a5a6; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">
+                Retour à la liste
+            </a>
+        </div>
+
+    {{ form_end(userForm) }}
+</div>
+
+{% endblock %}

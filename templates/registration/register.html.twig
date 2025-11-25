@@ -1,0 +1,403 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un compte{% endblock %}
+
+{% block page_title %}Créer un compte Chronicles{% endblock %}
+
+{% block body %}
+<div style="max-width: 500px; margin: 30px auto; padding: 30px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    {{ form_start(registrationForm) }}
+        
+        <div style="margin-bottom: 20px; text-align: center; color: #666;">
+            <p>Rejoignez la communauté Chronicles et explorez l'univers des personnages fantastiques.</p>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            {{ form_label(registrationForm.username, null, {'label_attr': {'style': 'display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;'}}) }}
+            {{ form_widget(registrationForm.username, {'attr': {
+                'style': 'width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;'
+            }}) }}
+            {{ form_errors(registrationForm.username) }}
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            {{ form_label(registrationForm.email, null, {'label_attr': {'style': 'display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;'}}) }}
+            {{ form_widget(registrationForm.email, {'attr': {
+                'style': 'width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;'
+            }}) }}
+            {{ form_errors(registrationForm.email) }}
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div>
+                {{ form_label(registrationForm.firstName, null, {'label_attr': {'style': 'display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;'}}) }}
+                {{ form_widget(registrationForm.firstName, {'attr': {
+                    'style': 'width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;'
+                }}) }}
+                {{ form_errors(registrationForm.firstName) }}
+            </div>
+            <div>
+                {{ form_label(registrationForm.lastName, null, {'label_attr': {'style': 'display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;'}}) }}
+                {{ form_widget(registrationForm.lastName, {'attr': {
+                    'style': 'width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;'
+                }}) }}
+                {{ form_errors(registrationForm.lastName) }}
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            {{ form_label(registrationForm.plainPassword.first, null, {'label_attr': {'style': 'display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;'}}) }}
+            <div style="position: relative;">
+                {{ form_widget(registrationForm.plainPassword.first, {'attr': {
+                    'style': 'width: 100%; padding: 12px 40px 12px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;',
+                    'class': 'password-input',
+                    'data-toggle-target': 'password-main',
+                    'oninput': 'checkPasswordStrength(this.value)'
+                }}) }}
+                <button type="button" class="password-toggle-btn" data-target="password-main" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; color: #666; padding: 0;" onclick="togglePasswordVisibility(this)">
+                    👁️
+                </button>
+            </div>
+            
+            <!-- Password Strength Indicator -->
+            <div id="password-strength" style="margin-top: 8px; display: none;">
+                <div style="display: flex; gap: 2px; margin-bottom: 5px;">
+                    <div id="strength-bar-1" class="strength-bar"></div>
+                    <div id="strength-bar-2" class="strength-bar"></div>
+                    <div id="strength-bar-3" class="strength-bar"></div>
+                    <div id="strength-bar-4" class="strength-bar"></div>
+                </div>
+                <div id="strength-text" style="font-size: 12px; font-weight: bold;"></div>
+            </div>
+            
+            <!-- Password Requirements -->
+            <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                <div style="margin-bottom: 8px; font-weight: bold; color: #2c3e50;">Exigences du mot de passe :</div>
+                <div id="req-length" class="password-requirement">
+                    <span class="req-icon">❌</span>
+                    <span class="req-text">Au moins 8 caractères</span>
+                </div>
+                <div id="req-uppercase" class="password-requirement">
+                    <span class="req-icon">❌</span>
+                    <span class="req-text">Une lettre majuscule</span>
+                </div>
+                <div id="req-lowercase" class="password-requirement">
+                    <span class="req-icon">❌</span>
+                    <span class="req-text">Une lettre minuscule</span>
+                </div>
+                <div id="req-number" class="password-requirement">
+                    <span class="req-icon">❌</span>
+                    <span class="req-text">Un chiffre</span>
+                </div>
+                <div id="req-special" class="password-requirement">
+                    <span class="req-icon">❌</span>
+                    <span class="req-text">Un caractère spécial (!@#$%^&*...)</span>
+                </div>
+            </div>
+            
+            {{ form_errors(registrationForm.plainPassword.first) }}
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            {{ form_label(registrationForm.plainPassword.second, null, {'label_attr': {'style': 'display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;'}}) }}
+            <div style="position: relative;">
+                {{ form_widget(registrationForm.plainPassword.second, {'attr': {
+                    'style': 'width: 100%; padding: 12px 40px 12px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;',
+                    'class': 'password-input',
+                    'data-toggle-target': 'password-confirm',
+                    'oninput': 'checkPasswordMatch()'
+                }}) }}
+                <button type="button" class="password-toggle-btn" data-target="password-confirm" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 18px; color: #666; padding: 0;" onclick="togglePasswordVisibility(this)">
+                    👁️
+                </button>
+            </div>
+            <div id="password-match" style="margin-top: 5px; font-size: 12px; display: none;"></div>
+            {{ form_errors(registrationForm.plainPassword.second) }}
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            {{ form_widget(registrationForm.agreeTerms, {'attr': {'style': 'margin-right: 8px;'}}) }}
+            {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'style': 'font-size: 14px; color: #666; cursor: pointer;'}}) }}
+            {{ form_errors(registrationForm.agreeTerms) }}
+        </div>
+
+        <button type="submit" style="width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-bottom: 15px;">
+            Créer mon compte
+        </button>
+
+        <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 4px; margin-bottom: 20px; font-size: 14px;">
+            <strong>Note :</strong> Votre compte sera créé sans rôles spécifiques. Un administrateur pourra vous assigner des rôles par la suite selon vos besoins.
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{ path('login') }}" style="color: #2c3e50; text-decoration: none; font-size: 14px;">
+                Déjà un compte ? Se connecter
+            </a>
+        </div>
+
+    {{ form_end(registrationForm) }}
+</div>
+
+<style>
+.strength-bar {
+    height: 6px;
+    flex: 1;
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.strength-bar.weak { background-color: #e74c3c; }
+.strength-bar.fair { background-color: #f39c12; }
+.strength-bar.good { background-color: #f1c40f; }
+.strength-bar.strong { background-color: #27ae60; }
+
+.password-requirement {
+    margin: 4px 0;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.req-icon {
+    font-size: 14px;
+    min-width: 16px;
+    transition: all 0.3s ease;
+}
+
+.req-text {
+    transition: color 0.3s ease;
+}
+
+.password-requirement.valid .req-icon {
+    transform: scale(1.1);
+}
+
+.password-requirement.valid .req-text {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.password-requirement.invalid .req-text {
+    color: #666;
+}
+
+.password-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+    padding: 0;
+    transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: #2c3e50;
+}
+
+.password-toggle:focus {
+    outline: none;
+    color: #3498db;
+}
+</style>
+
+<script>
+function togglePasswordVisibility(button) {
+    // Find the password input field in the same container
+    const container = button.parentElement;
+    const field = container.querySelector('input[type="password"], input[type="text"]');
+    
+    if (!field || !button) {
+        console.error('Field or button not found in container');
+        return;
+    }
+    
+    const currentType = field.getAttribute('type') || field.type;
+    
+    if (currentType === 'password') {
+        field.setAttribute('type', 'text');
+        button.innerHTML = '🙈';
+        button.title = 'Masquer le mot de passe';
+    } else {
+        field.setAttribute('type', 'password');
+        button.innerHTML = '👁️';
+        button.title = 'Afficher le mot de passe';
+    }
+}
+
+function checkPasswordStrength(password) {
+    const strengthIndicator = document.getElementById('password-strength');
+    const strengthText = document.getElementById('strength-text');
+    const bars = [
+        document.getElementById('strength-bar-1'),
+        document.getElementById('strength-bar-2'),
+        document.getElementById('strength-bar-3'),
+        document.getElementById('strength-bar-4')
+    ];
+
+    // Requirements
+    const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /\d/.test(password),
+        special: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
+    };
+
+    // Update requirement indicators with checkmarks
+    updateRequirement('req-length', requirements.length);
+    updateRequirement('req-uppercase', requirements.uppercase);
+    updateRequirement('req-lowercase', requirements.lowercase);
+    updateRequirement('req-number', requirements.number);
+    updateRequirement('req-special', requirements.special);
+
+    // Calculate strength
+    const validRequirements = Object.values(requirements).filter(Boolean).length;
+    let strength = 0;
+    let strengthLabel = '';
+    let strengthClass = '';
+
+    if (password.length === 0) {
+        strengthIndicator.style.display = 'none';
+        return;
+    }
+
+    strengthIndicator.style.display = 'block';
+
+    if (validRequirements <= 2) {
+        strength = 1;
+        strengthLabel = 'Très faible';
+        strengthClass = 'weak';
+    } else if (validRequirements === 3) {
+        strength = 2;
+        strengthLabel = 'Faible';
+        strengthClass = 'fair';
+    } else if (validRequirements === 4) {
+        strength = 3;
+        strengthLabel = 'Moyen';
+        strengthClass = 'good';
+    } else if (validRequirements === 5) {
+        strength = 4;
+        strengthLabel = 'Fort';
+        strengthClass = 'strong';
+    }
+
+    // Update strength bars
+    bars.forEach((bar, index) => {
+        bar.className = 'strength-bar';
+        if (index < strength) {
+            bar.classList.add(strengthClass);
+        }
+    });
+
+    // Update strength text
+    strengthText.textContent = strengthLabel;
+    strengthText.style.color = getStrengthColor(strengthClass);
+
+    // Check for common issues
+    checkCommonIssues(password);
+}
+
+function updateRequirement(elementId, isValid) {
+    const element = document.getElementById(elementId);
+    const icon = element.querySelector('.req-icon');
+    
+    element.className = 'password-requirement ' + (isValid ? 'valid' : 'invalid');
+    
+    if (isValid) {
+        icon.textContent = '✅';
+    } else {
+        icon.textContent = '❌';
+    }
+}
+
+function getStrengthColor(strengthClass) {
+    const colors = {
+        'weak': '#e74c3c',
+        'fair': '#f39c12',
+        'good': '#f1c40f',
+        'strong': '#27ae60'
+    };
+    return colors[strengthClass] || '#666';
+}
+
+function checkCommonIssues(password) {
+    const commonPasswords = [
+        'password', 'password123', '123456', '123456789', 'qwerty',
+        'abc123', 'password1', 'admin', 'letmein', 'welcome'
+    ];
+    
+    const strengthText = document.getElementById('strength-text');
+    
+    if (commonPasswords.includes(password.toLowerCase())) {
+        strengthText.textContent = 'Mot de passe trop commun';
+        strengthText.style.color = '#e74c3c';
+    }
+    
+    // Check for sequential patterns
+    if (/123|abc|qwe/i.test(password)) {
+        strengthText.textContent += ' (évitez les séquences)';
+        strengthText.style.color = '#f39c12';
+    }
+}
+
+function checkPasswordMatch() {
+    const passwordFields = document.querySelectorAll('.password-input');
+    if (passwordFields.length < 2) return;
+    
+    const password = passwordFields[0].value;
+    const confirmPassword = passwordFields[1].value;
+    const matchIndicator = document.getElementById('password-match');
+
+    if (confirmPassword.length === 0) {
+        matchIndicator.style.display = 'none';
+        return;
+    }
+
+    matchIndicator.style.display = 'block';
+
+    if (password === confirmPassword) {
+        matchIndicator.innerHTML = '<span style="color: #27ae60;">✅ Les mots de passe correspondent</span>';
+    } else {
+        matchIndicator.innerHTML = '<span style="color: #e74c3c;">❌ Les mots de passe ne correspondent pas</span>';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordFields = document.querySelectorAll('.password-input');
+    const toggleButtons = document.querySelectorAll('.password-toggle-btn');
+    
+    // Ensure password fields have correct type attribute
+    passwordFields.forEach(field => {
+        field.setAttribute('type', 'password');
+    });
+    
+    // Set initial tooltips for toggle buttons
+    toggleButtons.forEach(button => {
+        button.title = 'Afficher le mot de passe';
+    });
+    
+    // Add event listeners
+    if (passwordFields.length > 0) {
+        passwordFields[0].addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+            if (passwordFields[1] && passwordFields[1].value) {
+                checkPasswordMatch();
+            }
+        });
+    }
+    
+    if (passwordFields.length > 1) {
+        passwordFields[1].addEventListener('input', checkPasswordMatch);
+    }
+    
+    // Debug: Log field elements
+    console.log('Password fields found:', passwordFields.length);
+    console.log('Toggle buttons found:', toggleButtons.length);
+});
+</script>
+
+{% endblock %}

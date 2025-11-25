@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Species - Administration{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="admin-header">
+        <div>
+            <h1>Create New Species</h1>
+            <p>Add a new species to your universe</p>
+        </div>
+        <a href="{{ path('admin_species_management') }}" class="btn btn-secondary">
+            ← Back to Management
+        </a>
+    </div>
+
+    <div class="form-card">
+        {{ form_start(form, {'attr': {'class': 'form-container', 'enctype': 'multipart/form-data'}}) }}
+        
+        <div class="form-group">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name) }}
+            {{ form_errors(form.name) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description) }}
+            {{ form_errors(form.description) }}
+            <small class="form-help">Description is optional but recommended for better understanding.</small>
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.iconFile) }}
+            {{ form_widget(form.iconFile) }}
+            {{ form_errors(form.iconFile) }}
+            <small class="form-help">Upload an image file for the species icon (JPG, PNG, GIF, WebP). Maximum size: 2MB.</small>
+        </div>
+
+        {% if species.icon %}
+        <div class="current-image-preview">
+            <img src="{{ asset('images/species/' ~ species.icon) }}" 
+                 alt="{{ species.name }}"
+                 onerror="this.style.display='none'">
+            <p>Current icon: {{ species.icon }}</p>
+        </div>
+        {% endif %}
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">
+                Create Species
+            </button>
+            <a href="{{ path('admin_species_management') }}" class="btn btn-secondary">
+                Cancel
+            </a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

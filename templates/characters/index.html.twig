@@ -79,7 +79,7 @@
                         {% for race_id, race_data in races_with_characters %}
                             <li class="race-item" data-race-id="{{ race_id }}">
                                 <span class="race-name" id="race-{{ race_id }}">{{ race_data.name }}</span>
-                                <img class="small-icon-list" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><polygon points='2,3 8,3 5,7' fill='white'/></svg>">
+                                <img class="small-icon-list" src="{{ asset('images/icons/dropdown-arrow.svg') }}">
                                 
                                 <ul class="characters-list" id="characters-{{ race_id }}" style="display: none;">
                                     {% for character in race_data.characters %}

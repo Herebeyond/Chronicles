@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Race - Administration{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="admin-header">
+        <div>
+            <h1>Create New Race</h1>
+            <p>Add a new race to a species</p>
+        </div>
+        <a href="{{ path('admin_species_management') }}" class="btn btn-secondary">
+            ← Back to Management
+        </a>
+    </div>
+
+    <div class="form-card">
+        {{ form_start(form, {'attr': {'class': 'form-container', 'enctype': 'multipart/form-data'}}) }}
+        
+        <div class="form-group">
+            {{ form_label(form.species) }}
+            {{ form_widget(form.species) }}
+            {{ form_errors(form.species) }}
+            <small class="form-help">Select the species this race belongs to.</small>
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name) }}
+            {{ form_errors(form.name) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description) }}
+            {{ form_errors(form.description) }}
+            <small class="form-help">Description is optional but recommended for better understanding.</small>
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.iconFile) }}
+            {{ form_widget(form.iconFile) }}
+            {{ form_errors(form.iconFile) }}
+            <small class="form-help">Upload an image file for the race icon (JPG, PNG, GIF, WebP). Maximum size: 2MB.</small>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">
+                Create Race
+            </button>
+            <a href="{{ path('admin_species_management') }}" class="btn btn-secondary">
+                Cancel
+            </a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

@@ -9,4 +9,9 @@
 /public/bundles/
 /var/
 /vendor/
+/chronicles_database.dbml
+/DATABASE_DIAGRAM.md
+/database_schema.sql
+/generate_db_diagram.bat
+/generate_db_diagram.ps1
 ###< symfony/framework-bundle ###

@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil{% endblock %}
+
+{% block page_title %}Modifier mon profil{% endblock %}
+
+{% block body %}
+<div class="profile-edit-container">
+    
+    {# Flash messages #}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-error">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {{ form_start(profileForm, {'attr': {'enctype': 'multipart/form-data'}}) }}
+        
+        {# Current avatar display #}
+        <div class="form-group">
+            <label class="form-label">Photo de profil actuelle</label>
+            <div class="current-avatar">
+                <img src="{{ asset(user.avatarUrl) }}" alt="Photo de profil" class="profile-avatar-preview">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            {{ form_label(profileForm.username, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(profileForm.username, {'attr': {
+                'class': 'form-input'
+            }}) }}
+            {{ form_errors(profileForm.username) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(profileForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(profileForm.email, {'attr': {
+                'class': 'form-input'
+            }}) }}
+            {{ form_errors(profileForm.email) }}
+        </div>
+
+        <div class="form-group-row">
+            <div>
+                {{ form_label(profileForm.firstName, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(profileForm.firstName, {'attr': {
+                    'class': 'form-input'
+                }}) }}
+                {{ form_errors(profileForm.firstName) }}
+            </div>
+            <div>
+                {{ form_label(profileForm.lastName, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(profileForm.lastName, {'attr': {
+                    'class': 'form-input'
+                }}) }}
+                {{ form_errors(profileForm.lastName) }}
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form_label(profileForm.avatarFile, null, {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(profileForm.avatarFile, {'attr': {
+                'class': 'form-input file-input'
+            }}) }}
+            {{ form_help(profileForm.avatarFile) }}
+            {{ form_errors(profileForm.avatarFile) }}
+        </div>
+
+        <div class="form-buttons">
+            <button type="submit" class="form-button primary">
+                Enregistrer les modifications
+            </button>
+            <a href="{{ path('change_password') }}" class="form-button secondary">
+                Changer le mot de passe
+            </a>
+        </div>
+
+        <div class="form-center">
+            <a href="{{ path('profile') }}" class="form-button cancel">
+                Annuler
+            </a>
+        </div>
+
+    {{ form_end(profileForm) }}
+</div>
+
+{% endblock %}

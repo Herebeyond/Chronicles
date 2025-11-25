@@ -1,0 +1,614 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Universe Ideas Management{% endblock %}
+
+{% block body %}
+<div class="ideas-container">
+    <div class="ideas-header">
+        <h1>🌟 Universe Ideas Management</h1>
+        <p>Centralized hub for all your fantasy universe concepts, lore, and creative ideas</p>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h3>{{ stats.total }}</h3>
+                <p>Total Ideas</p>
+            </div>
+            <div class="stat-item">
+                <h3>{{ stats.canon }}</h3>
+                <p>Canon Ideas</p>
+            </div>
+            <div class="stat-item">
+                <h3>{{ stats.developing }}</h3>
+                <p>In Development</p>
+            </div>
+            <div class="stat-item">
+                <h3>{{ stats.categories }}</h3>
+                <p>Categories</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls Section -->
+    <div class="ideas-controls">
+        <form method="get" action="{{ path('ideas_index') }}" id="filtersForm">
+            <div class="control-group">
+                <label for="searchInput">Search Ideas</label>
+                <input type="text" id="searchInput" name="search" value="{{ filters.search }}" 
+                       placeholder="Search titles, content, tags...">
+            </div>
+            
+            <div class="control-group">
+                <label for="categoryFilter">Category</label>
+                <select id="categoryFilter" name="category">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.name }}" {% if filters.category == category.name %}selected{% endif %}>
+                            {{ category.name|replace({'_': ' '}) }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="certaintyFilter">Certainty Level</label>
+                <select id="certaintyFilter" name="certainty">
+                    <option value="">All Levels</option>
+                    <option value="Idea" {% if filters.certainty == 'Idea' %}selected{% endif %}>Idea</option>
+                    <option value="Not_Sure" {% if filters.certainty == 'Not_Sure' %}selected{% endif %}>Not Sure</option>
+                    <option value="Developing" {% if filters.certainty == 'Developing' %}selected{% endif %}>Developing</option>
+                    <option value="Established" {% if filters.certainty == 'Established' %}selected{% endif %}>Established</option>
+                    <option value="Canon" {% if filters.certainty == 'Canon' %}selected{% endif %}>Canon</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="statusFilter">Status</label>
+                <select id="statusFilter" name="status">
+                    <option value="">All Status</option>
+                    <option value="Draft" {% if filters.status == 'Draft' %}selected{% endif %}>Draft</option>
+                    <option value="Need_Correction" {% if filters.status == 'Need_Correction' %}selected{% endif %}>Need Correction</option>
+                    <option value="In_Progress" {% if filters.status == 'In_Progress' %}selected{% endif %}>In Progress</option>
+                    <option value="Review" {% if filters.status == 'Review' %}selected{% endif %}>Review</option>
+                    <option value="Finalized" {% if filters.status == 'Finalized' %}selected{% endif %}>Finalized</option>
+                    <option value="Archived" {% if filters.status == 'Archived' %}selected{% endif %}>Archived</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn-primary">🔍 Filter</button>
+            </div>
+        </form>
+
+        <div class="control-actions">
+            <button class="btn-primary" onclick="openIdeaFormModal()">➕ Add New Idea</button>
+            <button class="btn-primary" onclick="openQuickAddModal()">✨ Quick Add</button>
+            <button class="btn-primary" onclick="openBulkImportModal()">📥 Bulk Import</button>
+            <a href="{{ path('ideas_export') }}" class="btn-secondary">📤 Export Ideas</a>
+            <button class="btn-info" onclick="openCategoryManagerModal()">🏷️ Manage Categories</button>
+        </div>
+    </div>
+
+    <!-- Ideas Grid -->
+    <div class="ideas-grid">
+        {% if ideas is empty %}
+            <div class="no-ideas">
+                <p>No ideas found. Start adding your creative concepts!</p>
+                <a href="{{ path('ideas_create') }}" class="btn-primary">Create Your First Idea</a>
+            </div>
+        {% else %}
+            {% for idea in ideas %}
+                {{ include('ideas/_idea_card.html.twig', {'idea': idea}) }}
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if totalPages > 1 %}
+        <div class="pagination-container">
+            <div class="pagination-controls">
+                {% if currentPage > 1 %}
+                    <a href="{{ path('ideas_index', filters|merge({'page': 1})) }}" class="btn-secondary">⟪ First</a>
+                    <a href="{{ path('ideas_index', filters|merge({'page': currentPage - 1})) }}" class="btn-secondary">⟨ Previous</a>
+                {% endif %}
+
+                <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('ideas_index', filters|merge({'page': currentPage + 1})) }}" class="btn-secondary">Next ⟩</a>
+                    <a href="{{ path('ideas_index', filters|merge({'page': totalPages})) }}" class="btn-secondary">Last ⟫</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Quick Add Modal -->
+<div id="quickAddModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeQuickAddModal()">&times;</span>
+        <h2>✨ Quick Add Idea</h2>
+        
+        <form id="quickAddForm" onsubmit="submitQuickAdd(event)">
+            <div class="form-group">
+                <label for="quickTitle">Title *</label>
+                <input type="text" id="quickTitle" name="title" required class="form-input">
+            </div>
+            
+            <div class="form-group">
+                <label for="quickContent">Content *</label>
+                <textarea id="quickContent" name="content" required class="form-input" rows="5"></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="quickCategory">Category</label>
+                    <select id="quickCategory" name="category" class="form-input">
+                        <option value="Other">Other</option>
+                        {% for category in categories %}
+                            <option value="{{ category.name }}">{{ category.name|replace({'_': ' '}) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quickCertainty">Certainty</label>
+                    <select id="quickCertainty" name="certainty" class="form-input">
+                        <option value="Idea">Idea</option>
+                        <option value="Not_Sure">Not Sure</option>
+                        <option value="Developing">Developing</option>
+                        <option value="Established">Established</option>
+                        <option value="Canon">Canon</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="quickTags">Tags (comma separated)</label>
+                <input type="text" id="quickTags" name="tags" placeholder="tag1, tag2, tag3" class="form-input">
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeQuickAddModal()">Cancel</button>
+                <button type="submit" class="btn-primary">✨ Add Idea</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Create/Edit Idea Modal -->
+<div id="ideaFormModal" class="modal" style="display: none;">
+    <div class="modal-content modal-large">
+        <span class="close" onclick="closeIdeaFormModal()">&times;</span>
+        <h2 id="ideaFormModalTitle">➕ Create New Idea</h2>
+        <div id="ideaFormContent">
+            <!-- Form content will be loaded here via AJAX -->
+            <div style="text-align: center; padding: 40px;">
+                <p>Loading form...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Import Modal -->
+<div id="bulkImportModal" class="modal" style="display: none;">
+    <div class="modal-content modal-large">
+        <span class="close" onclick="closeBulkImportModal()">&times;</span>
+        <h2>📥 Bulk Import Ideas</h2>
+        
+        <div class="import-instructions">
+            <h3>Import Format Instructions:</h3>
+            <p>Enter your ideas in the text format below. Each idea should be separated by "---" on its own line.</p>
+            <div class="example-format">
+                <pre>Title: Magic Origin - Sleeping Demon
+Content: La magie viendrait du démon endormi qui, en rêvant, projette volontairement ou non ses rêves dans le monde réel.
+Tags: magic, demons, mana
+
+---
+
+Title: Dragon Evolution
+Content: When some dragons started to live in forests, their wings became useless and disappeared.
+Tags: dragons, evolution</pre>
+            </div>
+        </div>
+        
+        <form id="bulkImportForm" onsubmit="submitBulkImport(event)">
+            <div class="form-group">
+                <label for="ideasText">Ideas Text (use format above) *</label>
+                <textarea id="ideasText" name="ideasText" required class="form-input" rows="12"></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="defaultCategory">Default Category</label>
+                    <select id="defaultCategory" name="defaultCategory" class="form-input">
+                        <option value="Other">Other</option>
+                        {% for category in categories %}
+                            <option value="{{ category.name }}">{{ category.name|replace({'_': ' '}) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="defaultCertainty">Default Certainty</label>
+                    <select id="defaultCertainty" name="defaultCertainty" class="form-input">
+                        <option value="Idea">Idea</option>
+                        <option value="Not_Sure">Not Sure</option>
+                        <option value="Developing">Developing</option>
+                        <option value="Established">Established</option>
+                        <option value="Canon">Canon</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="importResults" style="display: none;"></div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeBulkImportModal()">Cancel</button>
+                <button type="submit" class="btn-primary">🚀 Import Ideas</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Category Manager Modal -->
+<div id="categoryManagerModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeCategoryManagerModal()">&times;</span>
+        <h2>🏷️ Category Management</h2>
+        
+        <div class="category-manager">
+            <div class="form-group">
+                <label>Add New Category:</label>
+                <div class="category-input-row">
+                    <input type="text" id="newCategoryInput" placeholder="Enter new category name..." class="form-input">
+                    <button class="btn-primary" onclick="addNewCategory()">Add</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Existing Categories:</label>
+                <div id="categoryList" class="category-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Create/Edit Idea Form Modal Functions
+async function openIdeaFormModal(ideaId = null) {
+    const modal = document.getElementById('ideaFormModal');
+    const modalTitle = document.getElementById('ideaFormModalTitle');
+    const formContent = document.getElementById('ideaFormContent');
+    
+    // Update modal title
+    modalTitle.textContent = ideaId ? '✏️ Edit Idea' : '➕ Create New Idea';
+    
+    // Show loading state
+    formContent.innerHTML = '<div style="text-align: center; padding: 40px;"><p>Loading form...</p></div>';
+    modal.style.display = 'block';
+    
+    // Load form via AJAX
+    try {
+        const url = ideaId ? `/ideas/${ideaId}/edit?ajax=1` : '/ideas/create?ajax=1';
+        const response = await fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to load form (Status: ' + response.status + ')');
+        }
+        
+        const html = await response.text();
+        console.log('Form loaded, HTML length:', html.length, 'First 200 chars:', html.substring(0, 200));
+        formContent.innerHTML = html;
+        
+        // Attach form submit handler to the actual form element inside the content
+        const formElement = formContent.querySelector('form');
+        if (formElement) {
+            formElement.onsubmit = (e) => submitIdeaForm(e, ideaId);
+        } else {
+            console.error('No form element found in loaded HTML!');
+        }
+    } catch (error) {
+        console.error('Error loading form:', error);
+        formContent.innerHTML = '<div class="error">Failed to load form: ' + error.message + '</div>';
+    }
+}
+
+function closeIdeaFormModal() {
+    document.getElementById('ideaFormModal').style.display = 'none';
+}
+
+async function submitIdeaForm(event, ideaId = null) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    // Get the URL from form's action attribute and add ajax parameter
+    let url = form.action || (ideaId ? `/ideas/${ideaId}/edit` : '/ideas/create');
+    // Add ajax parameter if not already present
+    url += (url.includes('?') ? '&' : '?') + 'ajax=1';
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        });
+        
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            // If not JSON, it's probably HTML with form validation errors
+            const html = await response.text();
+            console.log('Received non-JSON response. First 500 chars:', html.substring(0, 500));
+            
+            // Replace the form content with the error response
+            document.getElementById('ideaFormContent').innerHTML = html;
+            // Reattach the submit handler to the actual form element
+            const formElement = document.getElementById('ideaFormContent').querySelector('form');
+            if (formElement) {
+                formElement.onsubmit = (e) => submitIdeaForm(e, ideaId);
+            }
+            return;
+        }
+        
+        const data = await response.json();
+        console.log('Received JSON response:', data);
+        
+        if (data.success) {
+            alert('✅ ' + data.message);
+            closeIdeaFormModal();
+            // Reload the page to show updated ideas
+            location.reload();
+        } else {
+            // Handle validation errors
+            let errorMsg = '❌ Error: ' + (data.message || 'Unknown error');
+            if (data.errors && data.errors.length > 0) {
+                errorMsg += '\n\nValidation errors:\n' + data.errors.join('\n');
+            }
+            alert(errorMsg);
+        }
+    } catch (error) {
+        console.error('Form submission error:', error);
+        alert('❌ Failed to save idea: ' + error.message);
+    }
+}
+
+// Quick Add Modal Functions
+function openQuickAddModal() {
+    document.getElementById('quickAddModal').style.display = 'block';
+}
+
+function closeQuickAddModal() {
+    document.getElementById('quickAddModal').style.display = 'none';
+    document.getElementById('quickAddForm').reset();
+}
+
+async function submitQuickAdd(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch('{{ path('ideas_quick_add') }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✅ Idea added successfully!');
+            closeQuickAddModal();
+            location.reload();
+        } else {
+            alert('❌ Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('❌ Failed to add idea: ' + error.message);
+    }
+}
+
+// Bulk Import Modal Functions
+function openBulkImportModal() {
+    document.getElementById('bulkImportModal').style.display = 'block';
+}
+
+function closeBulkImportModal() {
+    document.getElementById('bulkImportModal').style.display = 'none';
+    document.getElementById('bulkImportForm').reset();
+    document.getElementById('importResults').style.display = 'none';
+}
+
+async function submitBulkImport(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch('{{ path('ideas_bulk_import') }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        const resultsDiv = document.getElementById('importResults');
+        
+        if (data.success) {
+            let html = `<div class="success">✅ Successfully imported ${data.imported_count} ideas!</div>`;
+            if (data.errors && data.errors.length > 0) {
+                html += `<div class="warning">Errors: ${data.errors.join('<br>')}</div>`;
+            }
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                if (data.errors.length === 0) {
+                    closeBulkImportModal();
+                    location.reload();
+                }
+            }, 2000);
+        } else {
+            resultsDiv.innerHTML = `<div class="error">❌ Import failed: ${data.message}</div>`;
+            resultsDiv.style.display = 'block';
+        }
+    } catch (error) {
+        document.getElementById('importResults').innerHTML = 
+            `<div class="error">❌ Import failed: ${error.message}</div>`;
+        document.getElementById('importResults').style.display = 'block';
+    }
+}
+
+// Delete handler with confirmation
+async function handleDelete(event, ideaId) {
+    event.preventDefault();
+    
+    if (!confirm('Are you sure you want to delete this idea? This action cannot be undone.')) {
+        return false;
+    }
+    
+    const form = event.target;
+    
+    try {
+        await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        
+        alert('✅ Idea deleted successfully!');
+        location.reload();
+    } catch (error) {
+        alert('❌ Failed to delete idea: ' + error.message);
+    }
+    
+    return false;
+}
+
+// Category Manager Modal Functions
+function openCategoryManagerModal() {
+    document.getElementById('categoryManagerModal').style.display = 'block';
+    loadCategories();
+}
+
+function closeCategoryManagerModal() {
+    document.getElementById('categoryManagerModal').style.display = 'none';
+}
+
+async function loadCategories() {
+    try {
+        const response = await fetch('{{ path('ideas_categories') }}');
+        const data = await response.json();
+        
+        const categoryList = document.getElementById('categoryList');
+        categoryList.innerHTML = '';
+        
+        data.categories.forEach(category => {
+            const div = document.createElement('div');
+            div.className = 'category-item';
+            div.innerHTML = `
+                <span>${category.name.replace(/_/g, ' ')}${category.isDefault ? ' (Default)' : ''}</span>
+                ${!category.isDefault ? 
+                    `<button class="btn-danger btn-sm" onclick="deleteCategory(${category.id})">Delete</button>` : 
+                    '<span class="badge">Default</span>'}
+            `;
+            categoryList.appendChild(div);
+        });
+    } catch (error) {
+        console.error('Failed to load categories:', error);
+    }
+}
+
+async function addNewCategory() {
+    const input = document.getElementById('newCategoryInput');
+    const name = input.value.trim();
+    
+    if (!name) {
+        alert('Please enter a category name');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('name', name);
+    
+    try {
+        const response = await fetch('{{ path('ideas_category_add') }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✅ Category added successfully!');
+            input.value = '';
+            loadCategories();
+        } else {
+            alert('❌ Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('❌ Failed to add category: ' + error.message);
+    }
+}
+
+async function deleteCategory(id) {
+    if (!confirm('Are you sure you want to delete this category?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/ideas/categories/${id}/delete`, {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✅ Category deleted successfully!');
+            loadCategories();
+        } else {
+            alert('❌ Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('❌ Failed to delete category: ' + error.message);
+    }
+}
+
+// Auto-submit filters on change
+document.addEventListener('DOMContentLoaded', function() {
+    const filters = ['searchInput', 'categoryFilter', 'certaintyFilter', 'statusFilter'];
+    filters.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            if (element.tagName === 'INPUT') {
+                let timeout;
+                element.addEventListener('input', () => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => document.getElementById('filtersForm').submit(), 500);
+                });
+            } else {
+                element.addEventListener('change', () => document.getElementById('filtersForm').submit());
+            }
+        }
+    });
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+});
+</script>
+{% endblock %}

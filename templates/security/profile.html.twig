@@ -1,0 +1,148 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block page_title %}Profil utilisateur{% endblock %}
+
+{% block body %}
+
+<div class="profile-container">
+    <div class="profile-header">
+        <img src="{{ asset(user.avatarUrl) }}" alt="Avatar" class="profile-avatar">
+        <div class="profile-name">{{ user.fullName }}</div>
+        <div class="profile-role-badge">
+            {% if user.hasRole('ROLE_SUPER_ADMIN') %}
+                🔥 Super Administrateur
+            {% elseif user.hasRole('ROLE_ADMIN') %}
+                ⚡ Administrateur
+            {% elseif user.hasRole('ROLE_MODERATOR') %}
+                🛡️ Modérateur
+            {% elseif user.hasRole('ROLE_USER') %}
+                👤 Utilisateur
+            {% else %}
+                🆕 Nouveau membre
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="profile-content">
+        <!-- Informations personnelles -->
+        <div class="profile-section">
+            <h3 class="section-title">
+                <span>👤</span>
+                Informations personnelles
+            </h3>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Nom d'utilisateur</div>
+                    <div class="info-value">{{ user.username ?? 'Non défini' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Adresse email</div>
+                    <div class="info-value">{{ user.email }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Prénom</div>
+                    <div class="info-value">{{ user.firstName ?? 'Non défini' }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Nom de famille</div>
+                    <div class="info-value">{{ user.lastName ?? 'Non défini' }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Rôles et permissions -->
+        <div class="profile-section">
+            <h3 class="section-title">
+                <span>🔐</span>
+                Rôles et permissions
+            </h3>
+            
+            {% if user.hasAnyRoles %}
+                <div class="role-list">
+                    {% for role in user.roles %}
+                        <span class="role-tag {% if role == 'ROLE_SUPER_ADMIN' or role == 'ROLE_ADMIN' %}admin{% elseif role == 'ROLE_MODERATOR' %}moderator{% else %}user{% endif %}">
+                            {% if role == 'ROLE_SUPER_ADMIN' %}
+                                🔥 Super Administrateur
+                            {% elseif role == 'ROLE_ADMIN' %}
+                                ⚡ Administrateur
+                            {% elseif role == 'ROLE_MODERATOR' %}
+                                🛡️ Modérateur
+                            {% elseif role == 'ROLE_USER' %}
+                                👤 Utilisateur
+                            {% else %}
+                                {{ role }}
+                            {% endif %}
+                        </span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: #7f8c8d; font-style: italic;">Aucun rôle assigné</p>
+            {% endif %}
+        </div>
+        
+        <!-- Informations du compte -->
+        <div class="profile-section">
+            <h3 class="section-title">
+                <span>📊</span>
+                Informations du compte
+            </h3>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ user.isActive ? '✅' : '❌' }}</div>
+                    <div class="stat-label">Statut du compte</div>
+                    <div style="margin-top: 5px; color: {{ user.isActive ? '#27ae60' : '#e74c3c' }}; font-weight: bold;">
+                        {{ user.isActive ? 'Actif' : 'Inactif' }}
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">📅</div>
+                    <div class="stat-label">Membre depuis</div>
+                    <div style="margin-top: 5px; font-size: 14px; color: #2c3e50;">
+                        {{ user.createdAt ? user.createdAt|date('d/m/Y') : 'Date inconnue' }}
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">🕒</div>
+                    <div class="stat-label">Dernière connexion</div>
+                    <div style="margin-top: 5px; font-size: 14px; color: #2c3e50;">
+                        {{ user.lastLoginAt ? user.lastLoginAt|date('d/m/Y H:i') : 'Jamais connecté' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="profile-section">
+            <h3 class="section-title">
+                <span>⚙️</span>
+                Actions du compte
+            </h3>
+            
+            <div class="action-buttons">
+                <a href="{{ path('profile_edit') }}" class="btn-profile">
+                    <span>✏️</span>
+                    Modifier mon profil
+                </a>
+                <a href="{{ path('change_password') }}" class="btn-profile secondary">
+                    <span>🔒</span>
+                    Changer mot de passe
+                </a>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_dashboard') }}" class="btn-profile">
+                        <span>⚙️</span>
+                        Administration
+                    </a>
+                {% endif %}
+                <a href="{{ path('homepage') }}" class="btn-profile secondary">
+                    <span>🏠</span>
+                    Retour à l'accueil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

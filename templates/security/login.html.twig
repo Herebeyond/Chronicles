@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block page_title %}Connexion à Chronicles{% endblock %}
+
+{% block body %}
+<div style="max-width: 400px; margin: 50px auto; padding: 30px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+    <form method="post">
+        {% if error %}
+            <div style="background-color: #f8d7da; color: #721c24; padding: 12px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+                <strong>Erreur :</strong> {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+        {% endif %}
+
+        {% if app.user %}
+            <div style="background-color: #d1ecf1; color: #0c5460; padding: 12px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #bee5eb;">
+                Vous êtes connecté en tant que <strong>{{ app.user.useridentifier }}</strong>
+                <br>
+                <a href="{{ path('logout') }}" style="color: #0c5460;">Se déconnecter</a> |
+                <a href="{{ path('profile') }}" style="color: #0c5460;">Mon profil</a>
+            </div>
+        {% endif %}
+
+        <div style="margin-bottom: 20px;">
+            <label for="inputEmail" style="display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;">Email ou nom d'utilisateur</label>
+            <input type="text" value="{{ last_username }}" name="_username" id="inputEmail" 
+                   style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;"
+                   autocomplete="email" required autofocus>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label for="inputPassword" style="display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50;">Mot de passe</label>
+            <input type="password" name="_password" id="inputPassword" 
+                   style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;"
+                   autocomplete="current-password" required>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; font-size: 14px; color: #666;">
+                <input type="checkbox" name="_remember_me" style="margin-right: 8px;">
+                Se souvenir de moi
+            </label>
+        </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <button type="submit" style="width: 100%; padding: 12px; background-color: #2c3e50; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-bottom: 15px;">
+            Se connecter
+        </button>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{ path('register') }}" style="color: #2c3e50; text-decoration: none; font-size: 14px;">
+                Pas encore de compte ? S'inscrire
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

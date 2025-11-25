@@ -1,0 +1,68 @@
+<td class="id-cell">{{ race.id }}</td>
+<td class="icon-cell">
+    {% if race.icon %}
+        <img src="{{ asset('images/races/' ~ race.icon) }}" 
+             alt="{{ race.name }}"
+             class="table-icon"
+             onerror="this.style.display='none'">
+    {% else %}
+        <span class="no-icon">🎭</span>
+    {% endif %}
+</td>
+<td class="name-cell">
+    <a href="{{ path('admin_table_detail', {'table': 'races', 'id': race.id}) }}" 
+       class="name-link">
+        {{ race.name }}
+    </a>
+</td>
+<td class="name-cell">
+    <a href="{{ path('admin_table_detail', {'table': 'species', 'id': race.species.id}) }}" 
+       class="name-link">
+        {{ race.species.name }}
+    </a>
+</td>
+<td class="description-cell">
+    {% if race.description %}
+        <span class="description-preview" title="{{ race.description }}">
+            {{ race.description|length > 50 ? (race.description|slice(0, 50) ~ '...') : race.description }}
+        </span>
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="count-cell">
+    {% if race.characters|length > 0 %}
+        <a href="{{ path('admin_table_view', {'table': 'characters'}) }}?race={{ race.id }}" 
+           class="count-link">
+            {{ race.characters|length }}
+        </a>
+    {% else %}
+        <span class="zero-count">0</span>
+    {% endif %}
+</td>
+<td class="date-cell">
+    {{ race.createdAt|date('Y-m-d H:i') }}
+</td>
+<td class="date-cell">
+    {% if race.updatedAt %}
+        {{ race.updatedAt|date('Y-m-d H:i') }}
+    {% else %}
+        <span class="no-data">—</span>
+    {% endif %}
+</td>
+<td class="actions-cell">
+    <div class="action-buttons">
+        <a href="{{ path('admin_table_detail', {'table': 'races', 'id': race.id}) }}" 
+           class="btn btn-sm btn-outline" title="View Details">
+            👁️
+        </a>
+        <a href="{{ path('admin_race_edit', {'id': race.id}) }}" 
+           class="btn btn-sm btn-primary" title="Edit">
+            ✏️
+        </a>
+        <a href="{{ path('beings_display', {'speciesId': race.species.id, 'raceId': race.id}) }}" 
+           class="btn btn-sm btn-secondary" title="View Public Page">
+            🔗
+        </a>
+    </div>
+</td>
