@@ -9,6 +9,10 @@
         {% block stylesheets %}{% endblock %}
     </head>
 
+    {# TODO: add a button to scroll to the top of the page, appearing when the page isn't at the top, do the same with a down button #}
+    {# TODO: check every templates and make sure every scripts are not in the templates but in public/js/ then add it to the copilot-instructions.md #}
+    {# TODO: check every templates and make sure every styles are not in the templates but in public/css/ then add it to the copilot-instructions.md if necessary #}
+
     <body>
         <div id="global">
             <!-- Header -->
@@ -41,6 +45,11 @@
                                 <li class="dropdownFirstLevel" role="none">
                                     <div class="liIntro" onclick="window.location.href='{{ path('ideas_index') }}'" role="menuitem" tabindex="-1">
                                         <span>🌟 Ideas</span>
+                                    </div>
+                                </li>
+                                <li class="dropdownFirstLevel" role="none">
+                                    <div class="liIntro" onclick="window.location.href='{{ path('world_events_index') }}'" role="menuitem" tabindex="-1">
+                                        <span>📅 Événements Mondiaux</span>
                                     </div>
                                 </li>
                                 <li class="dropdownFirstLevel" role="none">

@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Événements Mondiaux{% endblock %}
+
+{% block body %}
+<div class="world-events-container">
+    <h1>Chronologie des Événements Mondiaux</h1>
+    
+    {% if events is empty %}
+        <p class="no-events">Aucun événement enregistré pour le moment.</p>
+    {% else %}
+        {# Timeline Visualization #}
+        {# TODO: make the calendar being displayed as if a real calendar, with months and days in a grid #}
+        {# TODO: where the events bars are being displayed on the timeline, make a grid starting from the start of the earliest event and ending at the end of the latest event, then display the events bars accordingly. I recommend adding a new folder in world_events then adding a tile for that tiles #}
+        {# TODO: adding the concept of tiles in copilot-instructions.md #}
+        <div class="timeline-section">
+            <h2>Ligne Temporelle</h2>
+            <div class="timeline-container">
+                <div class="timeline-header">
+                    <span class="timeline-year-start">Année {{ dateRange.minYear }}</span>
+                    <span class="timeline-year-end">{% if dateRange.maxYear == dateRange.minYear %}Présent{% else %}Année {{ dateRange.maxYear }}{% endif %}</span>
+                </div>
+                <div class="timeline-bars">
+                    {% for item in timelineData %}
+                        <div class="timeline-bar-container" title="{{ item.event.title }}">
+                            <div class="timeline-bar {% if item.isOngoing %}ongoing{% endif %}" 
+                                 style="left: {{ item.startOffset }}%; width: {{ item.width }}%; background-color: {{ item.event.color }};">
+                                <span class="timeline-bar-label">{{ item.event.title }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# Events List #}
+        <div class="events-list-section">
+            <h2>Liste Chronologique</h2>
+            <div class="events-list">
+                {% for event in events %}
+                    <div class="event-card" style="border-left-color: {{ event.color }};">
+                        <div class="event-header">
+                            <h3 class="event-title">{{ event.title }}</h3>
+                            <span class="event-color-badge" style="background-color: {{ event.color }};"></span>
+                        </div>
+                        <div class="event-date">
+                            <strong>Début :</strong> {{ event.startDay }}/{{ event.startMonth }}/{{ event.startYear }}
+                            {% if not event.isOngoing %}
+                                | <strong>Fin :</strong> {{ event.endDay }}/{{ event.endMonth }}/{{ event.endYear }}
+                            {% else %}
+                                | <span class="ongoing-badge">En cours</span>
+                            {% endif %}
+                        </div>
+                        {% if event.description %}
+                            <div class="event-description">
+                                {{ event.description|nl2br }}
+                            </div>
+                        {% endif %}
+                        {% if event.significance %}
+                            <div class="event-significance">
+                                <strong>Importance :</strong> {{ event.significance|nl2br }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    {# Calendar Display #}
+    <div class="calendar-section">
+        <h2>Calendrier du Monde</h2>
+        <div class="calendar-info">
+            <p>Ce monde suit un calendrier personnalisé avec {{ months|length }} mois.</p>
+        </div>
+        <div class="calendar-months">
+            {% for month in months %}
+                <div class="calendar-month-card">
+                    <div class="month-number">{{ month.monthNumber }}</div>
+                    <div class="month-details">
+                        <h3 class="month-name">{{ month.name }}</h3>
+                        <p class="month-days">{{ month.daysCount }} jours</p>
+                        {% if month.description %}
+                            <p class="month-description">{{ month.description }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="calendar-summary">
+            <p><strong>Année complète :</strong> 
+                {% set totalDays = 0 %}
+                {% for month in months %}
+                    {% set totalDays = totalDays + month.daysCount %}
+                {% endfor %}
+                {{ totalDays }} jours
+            </p>
+        </div>
+    </div>
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <div class="admin-actions">
+            <a href="{{ path('admin_world_events_index') }}" class="btn-admin">Gérer les événements</a>
+            <a href="{{ path('admin_calendar_index') }}" class="btn-admin">Gérer le calendrier</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

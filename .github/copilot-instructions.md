@@ -11,6 +11,7 @@
    - ❌ NEVER run `doctrine:migrations:migrate` without reviewing the migration file first
    - ❌ NEVER run rollback commands (`doctrine:migrations:migrate prev`) without user consent
    - ❌ NEVER suggest dropping tables or truncating data
+   - unless explicit user permission is given, if a command would drop a database, before write a full file containing the full code to save and later restore the data.
 
 2. **ALWAYS review generated migrations before execution:**
    - When running `make:migration`, ALWAYS read the generated file in `migrations/`
@@ -52,123 +53,39 @@ Chronicles is a Symfony 7.3 web application for managing fictional characters, s
   - For example, replace raw SQL queries with Doctrine ORM methods, and convert PHP templates to Twig.
 - When modifying/adding/deleting features, always update this instruction file to document the changes for future reference.
 - When modifying/adding/deleting features, always finish by running the command `docker compose exec php php bin/console cache:clear` to ensure the cache is up to date.
+- if a change is expected for a later date, add a TODO comment to find it again later
 
-## Database Schema (Chronicles MySQL Database)
+## Database Schema
 
-**Important:** The database has final authority. Always check this schema before making assumptions about available fields.
+**📄 See [docs/DATABASE_SCHEMA.md](../docs/DATABASE_SCHEMA.md) for complete database structure.**
 
-### Current Database Structure
+The database schema document contains:
+- All table structures with field types and constraints
+- Entity relationships and foreign keys
+- Key database rules and conventions
+- Enumeration values for status fields
+- Migration history
 
-**`species` table:**
-- `id` (int, AUTO_INCREMENT, PRIMARY KEY)
-- `name` (varchar(255), NOT NULL)
-- `description` (longtext, nullable)
-- `icon` (varchar(255), nullable)
-- `created_at` (datetime, NOT NULL, immutable)
-- `updated_at` (datetime, nullable, immutable)
+**Quick Reference:**
+- Hierarchical model: Species → Races → Characters
+- All entities use `DateTimeImmutable` for timestamps
+- User roles via many-to-many relationship (no JSON column)
+- World events use custom calendar (year/month/day integers)
 
-**`races` table:**
-- `id` (int, AUTO_INCREMENT, PRIMARY KEY)  
-- `species_id` (int, NOT NULL, FOREIGN KEY to species.id)
-- `name` (varchar(255), NOT NULL)
-- `description` (longtext, nullable)
-- `icon` (varchar(255), nullable)
-- `created_at` (datetime, NOT NULL, immutable)
-- `updated_at` (datetime, nullable, immutable)
+## Architecture & Entity Conventions
 
-**`characters` table:**
-- `id` (int, AUTO_INCREMENT, PRIMARY KEY)
-- `species_id` (int, NOT NULL, FOREIGN KEY to species.id)
-- `race_id` (int, nullable, FOREIGN KEY to races.id)
-- `name` (varchar(255), NOT NULL)
-- `description` (longtext, nullable)
-- `avatar` (varchar(255), nullable)
-- `gender` (varchar(100), nullable)
-- `age` (int, nullable)
-- `birthplace` (varchar(255), nullable)
-- `occupation` (varchar(255), nullable)
-- `traits` (json, nullable)
-- `background` (longtext, nullable)
-- `created_at` (datetime, NOT NULL, immutable)
-- `updated_at` (datetime, nullable, immutable)
-
-**`users` table:**
-- `id` (int, AUTO_INCREMENT, PRIMARY KEY)
-- `email` (varchar(180), NOT NULL, UNIQUE)
-- `username` (varchar(100), NOT NULL, UNIQUE)
-- `first_name` (varchar(100), nullable)
-- `last_name` (varchar(100), nullable)
-- `roles` (json, NOT NULL)
-- `password` (varchar(255), NOT NULL)
-- `is_active` (tinyint(1), NOT NULL)
-- `created_at` (datetime, NOT NULL, immutable)
-- `last_login_at` (datetime, nullable, immutable)
-
-**`ideas` table:**
-- `id_idea` (int, AUTO_INCREMENT, PRIMARY KEY)
-- `parent_idea_id` (int, nullable, FOREIGN KEY to ideas.id_idea, ON DELETE SET NULL)
-- `title` (varchar(255), NOT NULL)
-- `content` (longtext, NOT NULL)
-- `category` (varchar(100), NOT NULL)
-- `certainty_level` (varchar(50), NOT NULL) - Values: Idea, Not_Sure, Developing, Established, Canon
-- `status` (varchar(50), nullable) - Values: Draft, Need_Correction, In_Progress, Review, Finalized, Archived
-- `tags` (json, nullable)
-- `comments` (longtext, nullable)
-- `inspiration_source` (varchar(255), nullable)
-- `priority` (int, nullable)
-- `created_at` (datetime, NOT NULL, immutable)
-- `updated_at` (datetime, nullable, immutable)
-
-**`idea_categories` table:**
-- `id` (int, AUTO_INCREMENT, PRIMARY KEY)
-- `name` (varchar(100), NOT NULL, UNIQUE)
-- `is_default` (tinyint(1), NOT NULL)
-- `created_at` (datetime, NOT NULL, immutable)
-
-### Entity Relationships
-- **Species** (1:Many) **→** **Races** (Many:1) **Species**
-- **Species** (1:Many) **→** **Characters** (Many:1) **Species** 
-- **Race** (1:Many) **→** **Characters** (Many:1) **Race** (nullable)
-- **Character** belongs to **Species** (required) and optionally to **Race**
-- **Idea** (Self-referential) **→** **Parent Idea** (Many:1) - Ideas can have parent-child relationships for hierarchical organization
-
-### Key Database Rules
-1. **Characters must belong to a Species** (species_id NOT NULL)
-2. **Characters can optionally belong to a Race** (race_id nullable)
-3. **Races must belong to a Species** (species_id NOT NULL)
-4. **All entities use DateTimeImmutable** for timestamps
-5. **No lifespan, homeworld, or other extended race properties exist** - templates should not reference these
-
-## Architecture & Data Model
-
-### Core Entities (src/Entity/)
-- **Species** (1:Many Characters, 1:Many Races) - Top-level categorization (e.g., "Humains", "Elfes", "Dragons")
-- **Race** (Many:1 Species, 1:Many Characters) - Subcategorization within species (e.g., "Wyvern", "Blood Elf", "Mountain Dwarf")
-- **Character** (Many:1 Species, Many:1 Race) - Individual characters with rich attributes
-
-**Key Relationships:**
-```php
-// Character -> Species (required)
-#[ORM\ManyToOne(inversedBy: 'characters')]
-#[ORM\JoinColumn(nullable: false)]
-private ?Species $species = null;
-
-// Character -> Race (optional)
-#[ORM\ManyToOne(inversedBy: 'characters')]
-private ?Race $race = null;
-```
-
-### Entity Conventions
 - All entities use `DateTimeImmutable` for timestamps with auto-initialization in constructors
-- JSON fields for complex data (e.g., Character `$traits`)
-- Nullable fields are extensively used for optional character attributes
+- JSON fields for complex data (e.g., Character `$traits`, Idea `$tags`)
+- Nullable fields extensively used for optional attributes
 - Repository classes follow naming: `EntityRepository` (e.g., `CharacterRepository`)
+- Hierarchical model: Species → Races → Characters (see [DATABASE_SCHEMA.md](../docs/DATABASE_SCHEMA.md))
 
 ## Development Environment
 
 ### Docker Setup
 - **Main service:** `php` (FrankenPHP with Caddy)
 - **Database:** MySQL 8.0 on port 3307 (externally)
+- **Database Management:** phpMyAdmin on port 8081 (http://localhost:8081)
 - **Default credentials:** `chronicles_user` / `ChroniquesSecurePass2024!`
 - **Database:** `chronicles`
 
@@ -179,89 +96,49 @@ docker compose build --pull --no-cache
 docker compose up --wait
 
 # Access via https://localhost:9443 or http://localhost:9080
+# phpMyAdmin available at http://localhost:8081
 ```
+
+### Default Admin User
+**IMPORTANT:** A default admin user is automatically created by migrations:
+- **Username:** `Nox`
+- **Email:** `baillard.bjm2@orange.fr`
+- **Role:** `ROLE_SUPER_ADMIN`, `ROLE_ADMIN`, `ROLE_USER`
+
+This user is created in migration `Version20250919113508` to ensure there's always an admin account available after database initialization or reset. **This is your personal admin account - keep the credentials secure.**
 
 ### Symfony Console
 - Located at `bin/console` 
 - Custom command: `app:populate-data` - seeds database with sample Species, Races, and Characters
 - Standard Symfony commands available for migrations, cache, etc.
 
-## Template System & Twig Guidelines
+## Controller & Template Patterns
 
-**⚠️ CRITICAL**: See `docs/TWIG_TEMPLATING_GUIDE.md` for detailed templating patterns and common pitfalls.
+### Controllers
+- Repository injection via constructor or method parameters
+- Consistent search/filtering logic using repository methods
+- Standard route patterns: `#[Route('/entity', name: 'entity_index')]`
 
-### Common Twig Errors to Avoid
-- **Duplicate Block Definitions**: Never define the same block multiple times, even in conditional branches
-  - ❌ Wrong: `{% block body %}...{% endblock %}` in both IF and ELSE branches
-  - ✅ Correct: Define once with `{% block body %}...{% endblock %}`, reuse with `{{ block('body') }}`
-- **Template Cache Issues**: Always run `php bin/console cache:clear` after template changes
-
-### Base Template Structure
-- **Two-layout system**: Homepage (two-column with sidebar) vs. other pages (single-column)
-- **Available blocks**: `title`, `stylesheets`, `leftContent` (homepage only), `body`, `javascripts`
-- **Block inheritance**: `leftContent` triggers homepage layout, all other templates use standard layout
-
-## Controller Patterns
-
-### Repository Injection
-Controllers consistently inject repositories as constructor or method parameters:
-```php
-public function index(
-    CharacterRepository $characterRepository, 
-    SpeciesRepository $speciesRepository,
-    Request $request
-): Response
-```
-
-### Search & Filtering Logic
-- **CharactersController** implements search by name and species filtering
-- Uses repository methods like `findByNameSearch()`, `findBySpecies()`, `findGroupedBySpecies()`
-- Results are grouped/organized for display (e.g., characters grouped by race within species)
-
-### Route Patterns
-```php
-#[Route('/characters', name: 'characters_index')]
-#[Route('/characters/species/{speciesId}', name: 'characters_by_species', requirements: ['speciesId' => '\d+'])]
-#[Route('/characters/{characterId}', name: 'characters_show', requirements: ['characterId' => '\d+'])]
-```
-
-## Template Structure
-
-### Base Template (`templates/base.html.twig`)
-- French language (`lang="fr"`)
-- Built-in CSS styling (no external framework)
-- Navigation structure with responsive design
-- Color scheme: #2c3e50 (primary), #34495e (secondary)
-
-### Template Inheritance
-- Extends `base.html.twig` consistently
-- Uses blocks: `title`, `page_title`, `body`
-- Admin functionality controlled with `is_granted('ROLE_ADMIN')` checks
-
-### Content Organization
-- Templates mirror controller structure: `characters/`, `admin/`, `beings/`, `home/`
-- Heavy use of inline styling for component-specific CSS
-- Form elements follow consistent styling patterns
+### Templates
+- **Base**: French language, `templates/base.html.twig`, color scheme #2c3e50 / #34495e
+- **Two layouts**: Homepage (two-column with sidebar via `leftContent` block) vs. single-column
+- **Blocks**: `title`, `stylesheets`, `leftContent`, `body`, `javascripts`
+- **CSS**: Centralized in `public/css/style.css` - no inline styles or `<style>` tags in templates
+- **Security**: `is_granted('ROLE_ADMIN')` for admin features
 
 ## Data Population
 
-### PopulateDataCommand
-Critical for development - creates realistic sample data:
+### PopulateDataCommand (`php bin/console app:populate-data`)
+Seeds database with realistic sample data:
 - Clears existing data (Characters → Races → Species)
-- Creates hierarchical data: Species with associated Races and Characters
-- Characters have rich French-language descriptions and varied attributes
-- Fantasy theme with species like "Humains", "Elfes", "Nains", "Orcs"
+- Creates hierarchical fantasy data: "Humains", "Elfes", "Nains", "Orcs" with associated Races and Characters
+- Rich French-language descriptions and varied attributes
 
 ## Database Considerations
 
-### Migrations
-- Located in `migrations/` directory
-- Uses Doctrine migrations with proper foreign key relationships
-- Schema designed with `utf8mb4` charset for full Unicode support
-
-### Connection
-- Configured via `DATABASE_URL` environment variable
-- MySQL-specific settings: `serverVersion=8.0&charset=utf8mb4`
+- **Migrations**: Located in `migrations/`, uses Doctrine with proper foreign key relationships
+- **Connection**: Configured via `DATABASE_URL` environment variable
+- **Charset**: `utf8mb4` for full Unicode support, MySQL 8.0 specific settings
 
 ## Project-Specific Conventions
 
@@ -275,9 +152,10 @@ Critical for development - creates realistic sample data:
 
 - `src/Entity/Character.php` - Main domain model with all relationships
 - `src/Controller/CharactersController.php` - Primary business logic patterns
-- `src/Command/PopulateDataCommand.php` - Sample data structure and relationships
-- `compose.yaml` - Docker configuration and environment variables
-- `templates/base.html.twig` - UI framework and styling approach
+- `src/Command/PopulateDataCommand.php` - Sample data structure
+- `compose.yaml` - Docker configuration
+- `templates/base.html.twig` - UI framework
+- `public/css/style.css` - Centralized styling
 
 ## Development Guidelines
 
@@ -320,189 +198,91 @@ Critical for development - creates realistic sample data:
   - Changes in architecture or patterns
   - Important commands or workflows
 
-#### Common Issues & Solutions
-- **Missing Symfony Asset Component**: If templates using `asset()` function fail with "Unknown function 'asset'" error, install with `composer require symfony/asset` and clear cache
-- **Duplicate Twig Blocks**: Template inheritance errors like "block already defined" require removing duplicate block definitions while preserving functionality. **See `docs/TWIG_TEMPLATING_GUIDE.md` for detailed solutions and patterns**
-- **JSON_LENGTH Function Error**: DQL error "Expected known function, got 'JSON_LENGTH'" occurs when using MySQL JSON functions in Doctrine queries. Solution: Replace with standard comparisons like `u.roles != '[]'` instead of `JSON_LENGTH(u.roles) > 0`
-- **JSON_CONTAINS Function Error**: DQL error "Expected known function, got 'JSON_CONTAINS'" occurs with MySQL JSON functions in Doctrine. Solution: Use LIKE queries like `u.roles LIKE '%ROLE_ADMIN%'` instead of `JSON_CONTAINS(u.roles, 'ROLE_ADMIN')`
-- **Docker Container Issues**: Ensure containers are running with `docker compose ps` and restart with `docker compose up --wait` if needed
-- **Template Changes Not Visible**: Browser caching is the most common cause. Solutions: 
-- cd "c:\Users\baill\Docker\Chronicles"; docker compose exec php php bin/console cache:clear
-- Hard refresh (`Ctrl + F5`)
-- clear browser cache
-- use Developer Tools with "Disable cache" checked during development.
-- **commands taking a long time**: some commands, especially those involving database migrations or data population, may take longer than expected. do not interrupt them prematurely and allow them to complete by waiting or manipulating files that should be changed later in the process during the wait. that way the terminal will be undisturbed and can complete the command.
-- **Performance Issues & ERR_EMPTY_RESPONSE**: 
-  - **Cause**: Cache-busting timestamp in CSS asset (`?v={{ 'now'|date('U') }}`) prevents browser caching and slows down every page load
-  - **Solution**: Remove timestamp from `base.html.twig` CSS link to enable proper browser caching
-  - **Doctrine Cache Issues**: APCu cache driver may not be available in PHP container - stick to default Doctrine configuration for development
-  - **Container Crashes**: Invalid cache configurations can cause PHP container to fail startup with "Unknown cache type" errors
-- **CSS and Styling**: 
-  - **Centralized CSS**: All styling is consolidated in `public/css/style.css` - no templates should contain `<style>` tags or extensive inline styles
-  - **CSS Classes**: Templates use semantic CSS classes like `.profile-container`, `.form-group`, `.alert`, `.btn-profile`, etc.
-  - **Form Styling**: Consistent form classes (`.form-input`, `.form-label`, `.form-button`) are used across all forms
-  - **Template Maintenance**: When adding new templates, use existing CSS classes or add new styles to the main CSS file, never inline styles
-  - **Responsive Design**: Ensure new templates and components are responsive and maintain the overall look and feel of the application
-  - **Duplicate Styles**: Avoid duplicating styles in multiple templates; always refer to the main CSS file for consistency
-- **Entity Property Errors**: Templates trying to access non-existent entity properties (e.g., `race.lifespan`, `race.homeworld`) will cause runtime errors
-  - **Cause**: Templates created before database schema finalization or copied from older versions
-  - **Solution**: Always check entity classes and database schema before accessing properties in templates
-  - **Fixed**: `beings/index.html.twig` and `beings/display.html.twig` - removed references to non-existent Race properties (`lifespan`, `homeworld`, `country`, `habitat`)
-  - **Prevention**: Use `php bin/console debug:container --parameters` and examine entity classes before template development
-- **Beings Page Layout Issues**: Expandable sections (races/characters) displaying incorrectly with overflow and fixed heights
-  - **Original Cause**: Missing initial `display: none` on expandable sections, fixed container heights, and poor CSS grid handling
-  - **Initial Solution**: Added `style="display: none;"` to sections and improved CSS
-  - **Improved Solution (Dropdown Overlay)**: Changed from expanding containers to dropdown overlays
-    - **Races/Characters as Overlays**: Changed from inline expansion to absolute positioned dropdowns with high z-index (1000+)
-    - **Better UX**: Content below no longer gets pushed down when sections are opened
-    - **Auto-close Behavior**: Only one dropdown can be open at a time, automatically closes when clicking outside
-    - **CSS Implementation**: `position: absolute`, dark backgrounds with shadows, proper z-index stacking
-    - **JavaScript Enhancement**: Enhanced toggle logic with outside-click detection and mutual exclusion
-  - **Fixed**: `beings/index.html.twig` template and corresponding CSS classes now use dropdown overlay pattern
-  - **Prevention**: Always consider overlay patterns for expandable content to avoid layout displacement
+## Common Issues & Solutions
+
+**⚠️ See `docs/TWIG_TEMPLATING_GUIDE.md` for template-specific issues and patterns**
+
+### Critical Issues
+- **Duplicate Twig Blocks**: Never define same block multiple times - see TWIG_TEMPLATING_GUIDE.md
+- **Template Cache**: Run `docker compose exec php php bin/console cache:clear` after changes
+- **Browser Cache**: Use `Ctrl + F5` or disable cache in DevTools during development
+
+### Database & Doctrine
+- **JSON Functions**: DQL doesn't support MySQL JSON functions - use LIKE queries instead
+  - `u.roles LIKE '%ROLE_ADMIN%'` instead of `JSON_CONTAINS(u.roles, 'ROLE_ADMIN')`
+- **Entity Properties**: Always verify entity fields exist before using in templates
+- **Docker Containers**: Check with `docker compose ps`, restart with `docker compose up --wait`
+
+### Performance
+- **Cache-busting timestamps**: Remove `?v={{ 'now'|date('U') }}` from assets to enable browser caching
+- **APCu Cache**: Stick to default Doctrine configuration for development
 
 ## User Management System
 
-### User Entity & Authentication
-- **User Entity** (`src/Entity/User.php`) - Implements Symfony UserInterface with:
-  - Multiple roles support via JSON array storage
-  - Email-based authentication
-  - Optional first/last names
-  - Account status (active/inactive) management
-  - Created/last login timestamps
-  - Avatar/profile picture support via `avatarFilename` field
-  - `getAvatarUrl()` method returns user's avatar or default icon
-- **Roles Hierarchy**: `ROLE_USER` → `ROLE_MODERATOR` → `ROLE_ADMIN` → `ROLE_SUPER_ADMIN`
-- **Registration**: Public users can create accounts (role-less by default)
-- **Authentication**: Login/logout via email or username
+### Core Components
+- **User Entity**: Many-to-many with Role via `user_roles` junction table, email/username auth, avatar support
+- **Role Entity**: ROLE_USER → ROLE_MODERATOR → ROLE_ADMIN → ROLE_SUPER_ADMIN (created by migrations)
+- **Admin Panel** (`/admin/users`): Full CRUD, role management, requires ROLE_ADMIN
+- **User Profile** (`/profile`): View/edit info, avatar upload, password change
+- **Avatar System**: `public/images/user_icon/`, JPG/PNG/GIF/WebP (max 2MB)
 
-### Admin User Management
-- **Admin Panel** (`/admin/users`) - Complete user management interface:
-  - User creation with role assignment
-  - Profile editing and role management
-  - Account activation/deactivation
-  - User search and filtering
-  - Statistics dashboard
-- **Security**: Admin functions require `ROLE_ADMIN`, user deletion requires `ROLE_SUPER_ADMIN`
-
-### User Profile Management
-- **Profile Pages** (`/profile`) - Users can:
-  - View their role assignments and permissions
-  - Edit personal information
-  - Upload and change avatar/profile pictures
-  - Change passwords with current password verification
-  - See account creation and last login dates
-- **Avatar System**: 
-  - Files stored in `public/images/user_icon/` directory
-  - Supports JPG, PNG, GIF, WebP formats (max 2MB)
-  - Automatic filename generation and old file cleanup
-  - Falls back to default icon if no avatar set
-
-### Key Commands
-- `php bin/console app:create-admin` - Create admin users
-- `php bin/console doctrine:migrations:migrate` - Apply user table migrations
-
-### Security Configuration
-- Form-based authentication with remember-me functionality
-- Role-based access control throughout application
-- User switching for super admins (`_su` parameter)
-- Proper password hashing and validation
-
-### Templates & Navigation
-- Base template includes user dropdown menu
-- Role-based navigation (admin links only visible to admins)
-- Responsive user interface with proper authentication flows
-- Flash messaging for user feedback
+### Key Routes
+- `/register` - Public registration (role-less by default)
+- `/login` - Email or username authentication
+- `/admin/users` - Admin user management (ROLE_ADMIN)
+- `/profile` - User profile and settings
 
 ## Ideas Management System
 
-### Overview
-Complete universe ideas management system for tracking creative concepts, lore, and world-building elements. Supports hierarchical organization, categorization, and bulk operations.
+World-building idea tracker with hierarchical organization, categorization, and bulk operations.
 
 ### Key Features
-- **CRUD Operations**: Full create, read, update, delete functionality for ideas
-- **Hierarchical Organization**: Parent-child relationships between ideas for structured world-building
-- **Advanced Filtering**: Search by title/content/tags, filter by category/certainty level/status
-- **Bulk Import**: Import multiple ideas from formatted text (Word/text files)
-- **Quick Add**: Simplified modal for rapid idea capture
-- **Category Management**: Dynamic categories with default set (Magic_Systems, Creatures, Gods_Demons, etc.)
-- **Tags System**: JSON-based tagging for flexible categorization
-- **Export**: Export all ideas to text file with full metadata
-- **Statistics Dashboard**: Real-time counts of total ideas, canon ideas, developing ideas, and categories
+- CRUD operations, parent-child hierarchies, advanced filtering, bulk import/export
+- **Certainty Levels**: Idea → Not_Sure → Developing → Established → Canon
+- **Status Values**: Draft → Need_Correction → In_Progress → Review → Finalized → Archived
+- Dynamic categories (Magic_Systems, Creatures, Gods_Demons, etc.) + JSON tags
 
-### Entities & Structure
-- **Idea Entity** (`src/Entity/Idea.php`):
-  - Self-referential relationship for parent-child hierarchies
-  - JSON tags field for flexible tagging
-  - Five certainty levels: Idea, Not_Sure, Developing, Established, Canon
-  - Six status values: Draft, Need_Correction, In_Progress, Review, Finalized, Archived
-  - Optional fields: inspiration_source, comments, priority
-  - Automatic timestamp management (created_at, updated_at)
-  
-- **IdeaCategory Entity** (`src/Entity/IdeaCategory.php`):
-  - Dynamic category management with default categories
-  - Default categories include: Other, Magic_Systems, Creatures, Gods_Demons, Dimensions_Realms, Physics_Reality, Races_Beings, Items_Artifacts, Lore_History, Geography, Politics, Technology, Culture
-
-### Routes & Endpoints
-- `GET /ideas` - Main ideas index with filtering and pagination
-- `GET /ideas/create` - Create new idea form
-- `POST /ideas/create` - Save new idea
-- `GET /ideas/{id}/edit` - Edit idea form
-- `POST /ideas/{id}/edit` - Update idea
-- `POST /ideas/{id}/delete` - Delete idea
-- `POST /ideas/{id}/duplicate` - Duplicate idea with "(Copy)" suffix
-- `POST /ideas/quick-add` - AJAX endpoint for quick add modal
-- `POST /ideas/bulk-import` - AJAX endpoint for bulk import
-- `GET /ideas/export` - Export all ideas to text file
-- `GET /ideas/categories` - Get all categories (JSON)
-- `POST /ideas/categories/add` - Add new category (JSON)
-- `POST /ideas/categories/{id}/delete` - Delete category (JSON)
-- `GET /ideas/tags` - Get all existing tags (JSON)
-
-### Repository Methods
-- `findWithFilters()` - Search and filter ideas with pagination
-- `countWithFilters()` - Count filtered results
-- `getStatistics()` - Get dashboard statistics
-- `getAllTags()` - Extract all unique tags from ideas
-- `findAllForExport()` - Get all ideas for export
-- `findParentOptions()` - Get potential parent ideas for dropdown
-
-### Templates
-- `templates/ideas/index.html.twig` - Main ideas page with filters, modals, and grid display
-- `templates/ideas/form.html.twig` - Create/edit form with all fields
-- `templates/ideas/_idea_card.html.twig` - Reusable idea card component with hierarchical display
-
-### Console Commands
+### Main Routes & Commands
+- `/ideas` - Main index with filtering, quick-add modal, bulk import
+- `/ideas/create`, `/ideas/{id}/edit` - CRUD operations
+- `/ideas/export` - Export all ideas to text file
 - `php bin/console app:init-ideas` - Initialize default categories
-- `php bin/console app:init-ideas --with-samples` - Initialize with sample ideas
+- `php bin/console app:init-ideas --with-samples` - With sample data
 
 ### Bulk Import Format
 ```
 Title: Idea Title Here
-Content: Your idea content goes here...
-Tags: tag1, tag2, tag3
+Content: Your idea content...
+Tags: tag1, tag2
 
 ---
 
 Title: Another Idea
 Content: More content...
-Tags: other, tags
 ```
 
-### CSS Styling
-All ideas-specific styles are in `public/css/style.css` under "IDEAS MANAGEMENT STYLES" section:
-- Responsive grid layout for idea cards
-- Color-coded badges for certainty levels and categories
-- Parent/child visual hierarchy with indentation and borders
-- Modal overlays for quick actions
-- Statistics dashboard with gradient backgrounds
+## World Events & Timeline System
+
+Chronological event tracker with horizontal Gantt-style timeline and custom 360-day calendar (12 months × 30 days).
+
+### Key Features
+- **Custom Calendar**: Primis through Duodecimus (12 months, 30 days each)
+- **Timeline Visualization**: Colored bars showing event duration, animated gradient for ongoing events (NULL end date)
+- **Admin Management** (`/admin/events`): Full CRUD, color customization per event
+- **Chronological Sorting**: Auto-sorted by start_year/month/day, then by id
+
+### Main Routes
+**Public**: `/events` - Timeline visualization
+**Admin**: `/admin/events`, `/admin/calendar` - Event and month management
+
+### Timeline Calculation
+- **Year Span**: `latestYear - earliestYear + 1`
+- **Start Offset**: `((startYear - earliestYear) * 12 + startMonth) / (yearSpan * 12) * 100%`
+- **Width**: Ongoing events use `100% - startOffset`, completed events calculated from duration
 
 ### Best Practices
-1. **Always initialize categories** before first use: `app:init-ideas`
-2. **Use hierarchical organization** for related ideas (parent-child relationships)
-3. **Tags are flexible** - no predefined list, creates organically
-4. **Certainty levels** guide maturity: Idea → Not_Sure → Developing → Established → Canon
-5. **Status tracking** for workflow: Draft → In_Progress → Review → Finalized
-6. **Bulk import** efficient for transferring existing notes/docs
+- **Ongoing events**: Use NULL end dates, not far-future dates
+- **Start dates**: Must be before end dates (validation enforced)
+- **Color coding**: Use distinct hex colors for different event types
 
 When working with this codebase, prioritize maintaining the hierarchical Species→Race→Character model and the rich French-language fantasy theme throughout all additions.

@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier le mois{% endblock %}
+
+{% block body %}
+<div class="admin-container">
+    <h1>Modifier le Mois : {{ month.name }}</h1>
+    
+    <form method="post" class="form-container">
+        <div class="form-group">
+            <label for="name" class="form-label">Nom du mois *</label>
+            <input type="text" id="name" name="name" class="form-input" required value="{{ month.name }}">
+        </div>
+
+        <div class="form-group">
+            <label for="days_count" class="form-label">Nombre de jours *</label>
+            <input type="number" id="days_count" name="days_count" class="form-input" required min="1" value="{{ month.daysCount }}">
+        </div>
+
+        <div class="form-group">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" name="description" class="form-input" rows="3">{{ month.description ?? '' }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="form-button">Modifier</button>
+            <a href="{{ path('admin_calendar_index') }}" class="btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

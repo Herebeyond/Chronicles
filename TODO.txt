@@ -1,0 +1,5 @@
+- remove/update/move all the docs
+- rework the copilot-instructions.md
+- check if all the scripts are needed or could be replaced into controllers and/or entities and/or forms
+- move all the scripts into js files and store them correctly
+- check all the files to decide wich one should go into gitignore or not
