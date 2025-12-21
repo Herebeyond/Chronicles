@@ -3,3 +3,4 @@
 - check if all the scripts are needed or could be replaced into controllers and/or entities and/or forms
 - move all the scripts into js files and store them correctly
 - check all the files to decide wich one should go into gitignore or not
+- upgrade the backup to only create a new backup if its different from the last one (make 2 different checks, if the images are the same but the BDD is different, do not add an image backup but make a new BDD backup)

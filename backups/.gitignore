@@ -1,5 +1,6 @@
 # Ignore all backup files (they can be large)
 *.sql
+*.zip
 
 # But keep this directory in git
 !.gitignore
