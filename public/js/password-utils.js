@@ -1,0 +1,195 @@
+// Chronicles - Password Utilities for Registration
+// Handles password visibility toggle and strength checking
+
+function togglePasswordVisibility(button) {
+    // Find the password input field in the same container
+    const container = button.parentElement;
+    const field = container.querySelector('input[type="password"], input[type="text"]');
+    
+    if (!field || !button) {
+        console.error('Field or button not found in container');
+        return;
+    }
+    
+    const currentType = field.getAttribute('type') || field.type;
+    
+    if (currentType === 'password') {
+        field.setAttribute('type', 'text');
+        button.innerHTML = '🙈';
+        button.title = 'Masquer le mot de passe';
+    } else {
+        field.setAttribute('type', 'password');
+        button.innerHTML = '👁️';
+        button.title = 'Afficher le mot de passe';
+    }
+}
+
+function checkPasswordStrength(password) {
+    const strengthIndicator = document.getElementById('password-strength');
+    const strengthText = document.getElementById('strength-text');
+    const bars = [
+        document.getElementById('strength-bar-1'),
+        document.getElementById('strength-bar-2'),
+        document.getElementById('strength-bar-3'),
+        document.getElementById('strength-bar-4')
+    ];
+
+    // Requirements
+    const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /\d/.test(password),
+        special: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
+    };
+
+    // Update requirement indicators with checkmarks
+    updateRequirement('req-length', requirements.length);
+    updateRequirement('req-uppercase', requirements.uppercase);
+    updateRequirement('req-lowercase', requirements.lowercase);
+    updateRequirement('req-number', requirements.number);
+    updateRequirement('req-special', requirements.special);
+
+    // Calculate strength
+    const validRequirements = Object.values(requirements).filter(Boolean).length;
+    let strength = 0;
+    let strengthLabel = '';
+    let strengthClass = '';
+
+    if (password.length === 0) {
+        strengthIndicator.style.display = 'none';
+        return;
+    }
+
+    strengthIndicator.style.display = 'block';
+
+    if (validRequirements <= 2) {
+        strength = 1;
+        strengthLabel = 'Très faible';
+        strengthClass = 'weak';
+    } else if (validRequirements === 3) {
+        strength = 2;
+        strengthLabel = 'Faible';
+        strengthClass = 'fair';
+    } else if (validRequirements === 4) {
+        strength = 3;
+        strengthLabel = 'Moyen';
+        strengthClass = 'good';
+    } else if (validRequirements === 5) {
+        strength = 4;
+        strengthLabel = 'Fort';
+        strengthClass = 'strong';
+    }
+
+    // Update strength bars
+    bars.forEach((bar, index) => {
+        bar.className = 'strength-bar';
+        if (index < strength) {
+            bar.classList.add(strengthClass);
+        }
+    });
+
+    // Update strength text
+    strengthText.textContent = strengthLabel;
+    strengthText.style.color = getStrengthColor(strengthClass);
+
+    // Check for common issues
+    checkCommonIssues(password);
+}
+
+function updateRequirement(elementId, isValid) {
+    const element = document.getElementById(elementId);
+    const icon = element.querySelector('.req-icon');
+    
+    element.className = 'password-requirement ' + (isValid ? 'valid' : 'invalid');
+    
+    if (isValid) {
+        icon.textContent = '✅';
+    } else {
+        icon.textContent = '❌';
+    }
+}
+
+function getStrengthColor(strengthClass) {
+    const colors = {
+        'weak': '#e74c3c',
+        'fair': '#f39c12',
+        'good': '#f1c40f',
+        'strong': '#27ae60'
+    };
+    return colors[strengthClass] || '#666';
+}
+
+function checkCommonIssues(password) {
+    const commonPasswords = [
+        'password', 'password123', '123456', '123456789', 'qwerty',
+        'abc123', 'password1', 'admin', 'letmein', 'welcome'
+    ];
+    
+    const strengthText = document.getElementById('strength-text');
+    
+    if (commonPasswords.includes(password.toLowerCase())) {
+        strengthText.textContent = 'Mot de passe trop commun';
+        strengthText.style.color = '#e74c3c';
+    }
+    
+    // Check for sequential patterns
+    if (/123|abc|qwe/i.test(password)) {
+        strengthText.textContent += ' (évitez les séquences)';
+        strengthText.style.color = '#f39c12';
+    }
+}
+
+function checkPasswordMatch() {
+    const passwordFields = document.querySelectorAll('.password-input');
+    if (passwordFields.length < 2) return;
+    
+    const password = passwordFields[0].value;
+    const confirmPassword = passwordFields[1].value;
+    const matchIndicator = document.getElementById('password-match');
+
+    if (confirmPassword.length === 0) {
+        matchIndicator.style.display = 'none';
+        return;
+    }
+
+    matchIndicator.style.display = 'block';
+
+    if (password === confirmPassword) {
+        matchIndicator.innerHTML = '<span style="color: #27ae60;">✅ Les mots de passe correspondent</span>';
+    } else {
+        matchIndicator.innerHTML = '<span style="color: #e74c3c;">❌ Les mots de passe ne correspondent pas</span>';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordFields = document.querySelectorAll('.password-input');
+    const toggleButtons = document.querySelectorAll('.password-toggle-btn');
+    
+    // Ensure password fields have correct type attribute
+    passwordFields.forEach(field => {
+        field.setAttribute('type', 'password');
+    });
+    
+    // Set initial tooltips for toggle buttons
+    toggleButtons.forEach(button => {
+        button.title = 'Afficher le mot de passe';
+    });
+    
+    // Add event listeners
+    if (passwordFields.length > 0) {
+        passwordFields[0].addEventListener('input', function() {
+            checkPasswordStrength(this.value);
+            if (passwordFields[1] && passwordFields[1].value) {
+                checkPasswordMatch();
+            }
+        });
+    }
+    
+    if (passwordFields.length > 1) {
+        passwordFields[1].addEventListener('input', checkPasswordMatch);
+    }
+    
+    console.log('Password utilities loaded');
+});

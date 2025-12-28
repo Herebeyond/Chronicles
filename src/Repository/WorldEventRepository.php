@@ -48,21 +48,39 @@ class WorldEventRepository extends ServiceEntityRepository
         $minDate = $qb->select('MIN(e.startYear) as minYear')
             ->getQuery()
             ->getSingleScalarResult();
-            
-        $maxYear = $qb->select('MAX(e.endYear) as maxYear')
+        
+        // Get max end year from completed events
+        $maxEndYear = $qb->select('MAX(e.endYear) as maxYear')
             ->getQuery()
             ->getSingleScalarResult();
-            
-        // If no end year, use the latest start year
-        if ($maxYear === null) {
-            $maxYear = $qb->select('MAX(e.startYear) as maxYear')
-                ->getQuery()
-                ->getSingleScalarResult();
+        
+        // Get max start year (for ongoing events)
+        $maxStartYear = $qb->select('MAX(e.startYear) as maxYear')
+            ->getQuery()
+            ->getSingleScalarResult();
+        
+        // Use the greater of the two
+        $maxYear = max($maxEndYear ?? 0, $maxStartYear ?? 0);
+        
+        // Check if custom "present date" is set
+        $configFile = dirname(__DIR__, 2) . '/config/timeline_settings.json';
+        if (file_exists($configFile)) {
+            $config = json_decode(file_get_contents($configFile), true);
+            if (isset($config['present_year'])) {
+                // Use the defined present date as the timeline end
+                $maxYear = max($maxYear, $config['present_year']);
+            } else {
+                // Fallback: add 200 years for ongoing events
+                $maxYear += 200;
+            }
+        } else {
+            // Default: add 200 years for ongoing events
+            $maxYear += 200;
         }
         
         return [
             'minYear' => $minDate ?? 0,
-            'maxYear' => $maxYear ?? 0
+            'maxYear' => $maxYear
         ];
     }
 }

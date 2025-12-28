@@ -1,6 +1,63 @@
-- remove/update/move all the docs
+✅ COMPLETED:
 - rework the copilot-instructions.md
-- check if all the scripts are needed or could be replaced into controllers and/or entities and/or forms
-- move all the scripts into js files and store them correctly
+- docs/DATABASE_SCHEMA.md created and separated
+
+🚧 IN PROGRESS - JavaScript Migration to External Files:
+=====================================================
+
+CREATED EXTERNAL JS FILES:
+--------------------------
+✅ public/js/navigation.js - Base navigation dropdown and keyboard functionality
+✅ public/js/password-utils.js - Password visibility toggle and strength checker
+
+REMAINING SCRIPTS TO MIGRATE:
+------------------------------
+
+HIGH PRIORITY (Functional & Used):
+1. templates/ideas/index.html.twig → public/js/ideas-management.js
+   - Modal functionality for create/edit forms
+   - AJAX form submission
+   - Bulk import/export
+   
+2. templates/beings/index.html.twig → public/js/beings-display.js
+   - Toggle dropdowns for races/characters
+   - Close on outside click
+   
+3. templates/admin/species_management/index.html.twig → public/js/species-management.js
+   - Tab switching
+   - Delete confirmation modals
+   
+4. templates/admin/world_events/index.html.twig → public/js/world-events-inline-edit.js
+   - Inline editing for event fields
+   - Calendar configuration
+   
+5. templates/admin/species.html.twig → public/js/admin-species.js
+   - Tab management
+   - AJAX loading for species/races/stats
+
+TO REMOVE (Placeholder TODO alerts):
+6. templates/admin/dashboard.html.twig - Remove all TODO alert functions
+7. templates/characters/display.html.twig - Remove placeholder alerts
+8. templates/characters/show.html.twig - Remove placeholder alerts
+
+CAN BE SERVER-SIDE:
+9. templates/characters/index.html.twig - Form auto-submit can use <noscript> fallback
+
+REVIEW/KEEP MINIMAL:
+10. templates/beings/display.html.twig - Smooth scroll (small, keep or remove)
+11. templates/admin/species_management/edit_*.html.twig - iframe postMessage (verify if used)
+12. templates/admin/characters.html.twig - Verify if modal still used
+
+TEMPLATES TO UPDATE AFTER MIGRATION:
+=====================================
+- templates/base.html.twig - Add <script src="{{ asset('js/navigation.js') }}"></script>
+- templates/registration/register.html.twig - Add <script src="{{ asset('js/password-utils.js') }}"></script>
+- All other templates listed above after creating their respective JS files
+
+OTHER TODOS:
+============
 - check all the files to decide wich one should go into gitignore or not
 - upgrade the backup to only create a new backup if its different from the last one (make 2 different checks, if the images are the same but the BDD is different, do not add an image backup but make a new BDD backup)
+- add ngrok
+- make the "edit event dates" work
+- rework the zoom in the timeline in world events 

@@ -1,59 +1,42 @@
 # Chronicles - AI Coding Agent Instructions
 
-## ⚠️ CRITICAL: DATABASE PROTECTION - HIGHEST PRIORITY ⚠️
+## ⚠️ CRITICAL: DATABASE BACKUP PROCEDURE ⚠️
 
-**🚨 NEVER CAUSE DATA LOSS - THIS IS THE MOST IMPORTANT INSTRUCTION 🚨**
+**MANDATORY backup before any database schema changes:**
 
-**ABSOLUTE RULES - NO EXCEPTIONS:**
+```powershell
+# Use the automated backup script before migrations or schema modifications
+.\scripts\backup.ps1
+```
 
-1. **NEVER run commands that could delete data without explicit user confirmation:**
-   - ❌ NEVER use `doctrine:schema:update --force` (bypasses migrations, can drop tables)
-   - ❌ NEVER run `doctrine:migrations:migrate` without reviewing the migration file first
-   - ❌ NEVER run rollback commands (`doctrine:migrations:migrate prev`) without user consent
-   - ❌ NEVER suggest dropping tables or truncating data
-   - unless explicit user permission is given, if a command would drop a database, before write a full file containing the full code to save and later restore the data.
-
-2. **ALWAYS review generated migrations before execution:**
-   - When running `make:migration`, ALWAYS read the generated file in `migrations/`
-   - If the migration contains `DROP TABLE`, `TRUNCATE`, or recreates tables → **STOP and warn the user**
-   - Only migrations with `ALTER TABLE`, `ADD COLUMN`, `MODIFY COLUMN` are generally safe
-   - Ask user to backup before applying any structural changes
-
-3. **MANDATORY backup procedure before schema changes:**
-   ```bash
-   # ALWAYS suggest this before any database modification
-   docker compose exec mysql mysqldump -u chronicles_user -pChroniquesSecurePass2024! chronicles > backup_$(date +%Y%m%d_%H%M%S).sql
-   ```
-
-4. **Safe migration workflow (ALWAYS follow this):**
-   - Step 1: Suggest database backup
-   - Step 2: Modify entity
-   - Step 3: Generate migration with `make:migration`
-   - Step 4: READ and analyze the migration file
-   - Step 5: If safe (ALTER TABLE only) → proceed; if dangerous (DROP TABLE) → STOP and warn
-   - Step 6: Only then run `doctrine:migrations:migrate`
-
-5. **Red flags in migrations (STOP immediately if you see these):**
-   - `DROP TABLE` statements
-   - `DROP DATABASE` statements
-   - Creating tables that already exist (means tracking is out of sync)
-   - Any SQL that removes columns without explicit user permission
-
-**If in doubt about data safety: STOP, EXPLAIN THE RISK, and ASK THE USER.**
+The backup script creates timestamped backups in `backups/database/` and maintains a backup history.
 
 ## Project Overview
 
-Chronicles is a Symfony 7.3 web application for managing fictional characters, species, and races in a fantasy universe. Built with Docker, FrankenPHP, and MySQL, it follows a hierarchical data model where Characters belong to Species, and optionally to Races within those Species.
+Chronicles is a Symfony web application for managing fictional characters, species, and races in a fantasy universe. Built with Docker, FrankenPHP, and MySQL.
+
+**Core Conventions:**
+- French language UI and content
+- Fantasy/medieval theme with rich character lore
+- Hierarchical data model: Species → Races → Characters
+- Nullable-first approach for optional attributes
 
 **Important:** 
-- This project (`Chronicles/`) is a complete Symfony rebuild of an older manually-built project located in the sibling `Docker/` folder. 
-- The old project serves as a reference and **should not be modified**. 
 - All development work should be done in the Chronicles Symfony project and using symfony best practices.
-- When copying code or patterns from the old project, ensure it is adapted to Symfony conventions and the new architecture.
-  - For example, replace raw SQL queries with Doctrine ORM methods, and convert PHP templates to Twig.
 - When modifying/adding/deleting features, always update this instruction file to document the changes for future reference.
 - When modifying/adding/deleting features, always finish by running the command `docker compose exec php php bin/console cache:clear` to ensure the cache is up to date.
-- if a change is expected for a later date, add a TODO comment to find it again later
+- if a change is expected for a later date, add a TODO comment to find it again later, or if it doesn't fit in a specific file, add it in the file TODO.txt in the project root.
+
+**🚨 CRITICAL: JavaScript & Template Rules 🚨**
+
+1. **NO inline scripts in templates** - Never add `<script>` tags in Twig templates
+2. **Server-side first** - If functionality can be achieved by modifying routes, controllers, entities, or forms → DO THAT instead of JavaScript
+3. **Minimize client-side calls** - Goal is to reduce HTTP requests and keep logic server-side
+4. **External JS files only** - If JavaScript is absolutely necessary with no server-side alternative:
+   - Create separate `.js` files in `public/js/` directory
+   - Organize by feature/module (e.g., `public/js/ideas-quick-add.js`)
+   - Include via `<script src="{{ asset('js/filename.js') }}">` in template
+5. **Prefer Symfony solutions**: Use forms, validation, Doctrine events, custom commands, etc. before resorting to client-side scripts
 
 ## Database Schema
 
@@ -120,11 +103,12 @@ This user is created in migration `Version20250919113508` to ensure there's alwa
 - Standard route patterns: `#[Route('/entity', name: 'entity_index')]`
 
 ### Templates
-- **Base**: French language, `templates/base.html.twig`, color scheme #2c3e50 / #34495e
-- **Two layouts**: Homepage (two-column with sidebar via `leftContent` block) vs. single-column
-- **Blocks**: `title`, `stylesheets`, `leftContent`, `body`, `javascripts`
-- **CSS**: Centralized in `public/css/style.css` - no inline styles or `<style>` tags in templates
+- **Base**: French language, `templates/base.html.twig`, color scheme #2c3e50/#34495e
+- **Two layouts**: Homepage (sidebar) vs. single-column via `leftContent` block
+- **CSS**: Centralized in `public/css/style.css` - no inline styles
+- **JavaScript**: External files only in `public/js/` - see JavaScript & Template Rules
 - **Security**: `is_granted('ROLE_ADMIN')` for admin features
+- **Details**: See `docs/TWIG_TEMPLATING_GUIDE.md` for template patterns
 
 ## Data Population
 
@@ -133,20 +117,6 @@ Seeds database with realistic sample data:
 - Clears existing data (Characters → Races → Species)
 - Creates hierarchical fantasy data: "Humains", "Elfes", "Nains", "Orcs" with associated Races and Characters
 - Rich French-language descriptions and varied attributes
-
-## Database Considerations
-
-- **Migrations**: Located in `migrations/`, uses Doctrine with proper foreign key relationships
-- **Connection**: Configured via `DATABASE_URL` environment variable
-- **Charset**: `utf8mb4` for full Unicode support, MySQL 8.0 specific settings
-
-## Project-Specific Conventions
-
-1. **French Language:** All UI text, descriptions, and sample data in French
-2. **Fantasy Theme:** Medieval/fantasy character attributes (occupation, birthplace, background)
-3. **Nullable-First:** Most character attributes are optional with extensive null handling
-4. **Hierarchical Display:** Characters always shown in Species → Race → Character groupings
-5. **Rich Metadata:** Characters include detailed backgrounds, traits (JSON), and descriptions
 
 ## Key Files for Context
 
