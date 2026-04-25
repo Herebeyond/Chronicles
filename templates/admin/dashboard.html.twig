@@ -4,246 +4,231 @@
 
 {% block page_title %}Panneau d'Administration{% endblock %}
 
-{% block body %}
-<div style="margin-bottom: 2rem;">
-    <h2>Tableau de Bord Administrateur</h2>
-    <p>Gérez votre univers fictif : espèces, races, personnages et plus encore.</p>
-</div>
-
-<!-- Quick Stats -->
-<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-bottom: 3rem;">
-    <div class="card" style="background: #3498db; color: white; text-align: center;">
-        <h3 style="margin: 0 0 0.5rem 0;">Espèces</h3>
-        <div style="font-size: 2.5rem; font-weight: bold;">0</div>
-        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Total des espèces</p>
-    </div>
-    
-    <div class="card" style="background: #2ecc71; color: white; text-align: center;">
-        <h3 style="margin: 0 0 0.5rem 0;">Races</h3>
-        <div style="font-size: 2.5rem; font-weight: bold;">0</div>
-        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Total des races</p>
-    </div>
-    
-    <div class="card" style="background: #e74c3c; color: white; text-align: center;">
-        <h3 style="margin: 0 0 0.5rem 0;">Personnages</h3>
-        <div style="font-size: 2.5rem; font-weight: bold;">0</div>
-        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Total des personnages</p>
-    </div>
-    
-    <div class="card" style="background: #f39c12; color: white; text-align: center;">
-        <h3 style="margin: 0 0 0.5rem 0;">Utilisateurs</h3>
-        <div style="font-size: 2.5rem; font-weight: bold;">1</div>
-        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Utilisateurs actifs</p>
-    </div>
-</div>
-
-<!-- Main Admin Actions -->
-<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));">
-    
-    <!-- Species & Race Management -->
-    <div class="card">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <span style="font-size: 3rem;">🧬</span>
-            <div>
-                <h3 style="margin: 0;">Gestion Espèces & Races</h3>
-                <p style="margin: 0.5rem 0 0 0; color: #666;">Créer, modifier et organiser espèces et races</p>
-            </div>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-            <p>Gérez les espèces de votre univers et leurs races associées avec un interface intégrée.</p>
-        </div>
-        
-        <div style="display: flex; gap: 0.5rem;">
-            <a href="{{ path('admin_species_management') }}" class="btn" style="flex: 1;">Gérer Espèces & Races</a>
-            <a href="{{ path('admin_species_new') }}" class="btn" style="background: #2ecc71;">+ Espèce</a>
-            <a href="{{ path('admin_race_new') }}" class="btn" style="background: #3498db;">+ Race</a>
-        </div>
-    </div>
-
-    <!-- Character Management -->
-    <div class="card">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <span style="font-size: 3rem;">👥</span>
-            <div>
-                <h3 style="margin: 0;">Gestion des Personnages</h3>
-                <p style="margin: 0.5rem 0 0 0; color: #666;">Créer, modifier et supprimer des personnages</p>
-            </div>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-            <p>Ajoutez des personnages à vos races et espèces, gérez leurs informations et caractéristiques.</p>
-        </div>
-        
-        <div style="display: flex; gap: 0.5rem;">
-            <a href="{{ path('admin_characters') }}" class="btn" style="flex: 1;">Gérer les Personnages</a>
-            <button onclick="quickAddCharacter()" class="btn" style="background: #2ecc71;">+ Nouveau</button>
-        </div>
-    </div>
-
-    <!-- Database Management -->
-    <div class="card">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <span style="font-size: 3rem;">🗄️</span>
-            <div>
-                <h3 style="margin: 0;">Base de Données</h3>
-                <p style="margin: 0.5rem 0 0 0; color: #666;">Opérations sur la base de données</p>
-            </div>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-            <p>Exportez, importez et gérez les données de votre univers fictif.</p>
-        </div>
-        
-        <div style="display: flex; gap: 0.5rem;">
-            <button onclick="exportData()" class="btn" style="background: #f39c12;">Exporter</button>
-            <button onclick="importData()" class="btn" style="background: #9b59b6;">Importer</button>
-        </div>
-    </div>
-
-    <!-- Database Tables View -->
-    <div class="card">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <span style="font-size: 3rem;">📊</span>
-            <div>
-                <h3 style="margin: 0;">Tables de Données</h3>
-                <p style="margin: 0.5rem 0 0 0; color: #666;">Visualiser et naviguer dans les tables</p>
-            </div>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-            <p>Accédez aux vues détaillées de chaque table avec liens relationnels.</p>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-            <a href="{{ path('admin_table_view', {'table': 'species'}) }}" class="btn" style="background: #3498db;">📋 Species</a>
-            <a href="{{ path('admin_table_view', {'table': 'races'}) }}" class="btn" style="background: #2ecc71;">📋 Races</a>
-            <a href="{{ path('admin_table_view', {'table': 'characters'}) }}" class="btn" style="background: #e74c3c;">📋 Characters</a>
-            <a href="{{ path('admin_table_view', {'table': 'users'}) }}" class="btn" style="background: #f39c12;">📋 Users</a>
-        </div>
-    </div>
-
-    <!-- User Management -->
-    <div class="card">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <span style="font-size: 3rem;">👤</span>
-            <div>
-                <h3 style="margin: 0;">Gestion des Utilisateurs</h3>
-                <p style="margin: 0.5rem 0 0 0; color: #666;">Gérer les comptes utilisateurs</p>
-            </div>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-            <p>Administrez les comptes utilisateurs, leurs permissions et leur accès.</p>
-        </div>
-        
-        <div style="display: flex; gap: 0.5rem;">
-            <button onclick="manageUsers()" class="btn" style="flex: 1;">Gérer les Utilisateurs</button>
-        </div>
-    </div>
-
-    <!-- Dimensions Management -->
-    <div class="card">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <span style="font-size: 3rem;">🌍</span>
-            <div>
-                <h3 style="margin: 0;">Dimensions & Lieux</h3>
-                <p style="margin: 0.5rem 0 0 0; color: #666;">Gérer les dimensions et les lieux</p>
-            </div>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-            <p>Créez et gérez les différentes dimensions, mondes et lieux de votre univers.</p>
-        </div>
-        
-        <div style="display: flex; gap: 0.5rem;">
-            <button onclick="manageDimensions()" class="btn" style="flex: 1;">Gérer les Dimensions</button>
-        </div>
-    </div>
-
-    <!-- Ideas Management -->
-    <div class="card">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-            <span style="font-size: 3rem;">💡</span>
-            <div>
-                <h3 style="margin: 0;">Idées & Suggestions</h3>
-                <p style="margin: 0.5rem 0 0 0; color: #666;">Gérer les idées d'amélioration</p>
-            </div>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-            <p>Consultez et gérez les idées et suggestions pour l'amélioration de l'univers.</p>
-        </div>
-        
-        <div style="display: flex; gap: 0.5rem;">
-            <button onclick="manageIdeas()" class="btn" style="flex: 1;">Gérer les Idées</button>
-        </div>
-    </div>
-
-</div>
-
-<!-- Recent Activity -->
-<div style="margin-top: 3rem;">
-    <div class="card">
-        <h3>Activité Récente</h3>
-        <div id="recent-activity">
-            <div style="text-align: center; padding: 2rem; color: #666;">
-                <span style="font-size: 3rem; opacity: 0.5;">📊</span>
-                <p>Les logs d'activité seront affichés ici une fois le système complet</p>
-            </div>
-        </div>
-    </div>
-</div>
-
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 {% endblock %}
 
-{% block javascripts %}
-{{ parent() }}
-<script>
-function quickAddSpecies() {
-    // TODO: Open quick add species modal
-    alert('Ouverture du formulaire de création rapide d\'espèce');
-}
+{% block body %}
+<div class="admin-shell">
 
-function quickAddCharacter() {
-    // TODO: Open quick add character modal
-    alert('Ouverture du formulaire de création rapide de personnage');
-}
+    {# ===== Page header ===== #}
+    <header class="admin-page-header">
+        <div>
+            <h1 class="admin-page-header__title">Tableau de bord</h1>
+            <p class="admin-page-header__subtitle">
+                Bienvenue {{ app.user.fullName ?? app.user.username }} —
+                gérez votre univers en un seul endroit.
+            </p>
+        </div>
+        <div class="admin-page-header__actions">
+            <a href="{{ path('homepage') }}" class="btn-admin btn-admin--ghost">← Retour au site</a>
+            <a href="{{ path('admin_users_index') }}" class="btn-admin btn-admin--primary">Gérer les utilisateurs</a>
+        </div>
+    </header>
 
-function exportData() {
-    // TODO: Implement data export functionality
-    alert('Fonction d\'exportation des données à implémenter');
-}
+    {# ===== KPI cards ===== #}
+    <section class="admin-stats" aria-label="Statistiques">
+        <article class="admin-stat admin-stat--species">
+            <p class="admin-stat__label">Espèces</p>
+            <p class="admin-stat__value">{{ stats.species_count }}</p>
+            <p class="admin-stat__hint">Total des espèces enregistrées</p>
+        </article>
 
-function importData() {
-    // TODO: Implement data import functionality
-    alert('Fonction d\'importation des données à implémenter');
-}
+        <article class="admin-stat admin-stat--races">
+            <p class="admin-stat__label">Races</p>
+            <p class="admin-stat__value">{{ stats.races_count }}</p>
+            <p class="admin-stat__hint">Toutes espèces confondues</p>
+        </article>
 
-function manageUsers() {
-    // TODO: Redirect to user management page
-    alert('Redirection vers la gestion des utilisateurs');
-}
+        <article class="admin-stat admin-stat--characters">
+            <p class="admin-stat__label">Personnages</p>
+            <p class="admin-stat__value">{{ stats.characters_count }}</p>
+            <p class="admin-stat__hint">
+                {{ stats.male_count }} ♂ · {{ stats.female_count }} ♀ · {{ stats.other_count }} autre(s)
+            </p>
+        </article>
 
-function manageDimensions() {
-    // TODO: Redirect to dimensions management page
-    alert('Redirection vers la gestion des dimensions');
-}
+        <article class="admin-stat admin-stat--users">
+            <p class="admin-stat__label">Utilisateurs</p>
+            <p class="admin-stat__value">{{ stats.users_count }}</p>
+            <p class="admin-stat__hint">
+                {{ stats.users_with_roles }} avec rôle · {{ stats.users_without_roles }} sans rôle
+            </p>
+        </article>
+    </section>
 
-function manageIdeas() {
-    // TODO: Redirect to ideas management page
-    alert('Redirection vers la gestion des idées');
-}
+    {# ===== Main grid: modules + sidebar ===== #}
+    <div class="admin-grid">
 
-// Load dashboard statistics
-function loadDashboardStats() {
-    // TODO: Load real statistics via AJAX when backend is ready
-    console.log('Loading dashboard statistics...');
-}
+        {# ----- Modules (main column) ----- #}
+        <section aria-label="Modules d'administration">
+            <div class="admin-modules">
 
-// Initialize dashboard
-document.addEventListener('DOMContentLoaded', function() {
-    loadDashboardStats();
-});
-</script>
+                <article class="admin-module admin-module--species">
+                    <header class="admin-module__head">
+                        <span class="admin-module__icon" aria-hidden="true">🧬</span>
+                        <h2 class="admin-module__title">Espèces &amp; Races</h2>
+                    </header>
+                    <p class="admin-module__desc">
+                        Créez et organisez les espèces de votre univers et leurs races associées.
+                    </p>
+                    <div class="admin-module__actions">
+                        <a href="{{ path('admin_species_management') }}" class="btn-admin btn-admin--primary">Gérer</a>
+                        <a href="{{ path('admin_species_new') }}" class="btn-admin btn-admin--success">+ Espèce</a>
+                        <a href="{{ path('admin_race_new') }}" class="btn-admin btn-admin--ghost">+ Race</a>
+                    </div>
+                </article>
+
+                <article class="admin-module admin-module--characters">
+                    <header class="admin-module__head">
+                        <span class="admin-module__icon" aria-hidden="true">⚔️</span>
+                        <h2 class="admin-module__title">Personnages</h2>
+                    </header>
+                    <p class="admin-module__desc">
+                        Ajoutez des personnages à vos races, gérez leurs informations et historique.
+                    </p>
+                    <div class="admin-module__actions">
+                        <a href="{{ path('admin_characters') }}" class="btn-admin btn-admin--primary">Gérer</a>
+                        <a href="{{ path('characters_index') }}" class="btn-admin btn-admin--ghost">Voir la liste publique</a>
+                    </div>
+                </article>
+
+                <article class="admin-module admin-module--users">
+                    <header class="admin-module__head">
+                        <span class="admin-module__icon" aria-hidden="true">👥</span>
+                        <h2 class="admin-module__title">Utilisateurs</h2>
+                    </header>
+                    <p class="admin-module__desc">
+                        Gérez les comptes, attribuez les rôles et suivez l'activité des membres.
+                    </p>
+                    <div class="admin-module__actions">
+                        <a href="{{ path('admin_users_index') }}" class="btn-admin btn-admin--primary">Gérer</a>
+                        <a href="{{ path('admin_users_create') }}" class="btn-admin btn-admin--success">+ Utilisateur</a>
+                        <a href="{{ path('admin_users_stats') }}" class="btn-admin btn-admin--ghost">Statistiques</a>
+                    </div>
+                </article>
+
+                <article class="admin-module admin-module--events">
+                    <header class="admin-module__head">
+                        <span class="admin-module__icon" aria-hidden="true">📅</span>
+                        <h2 class="admin-module__title">Événements &amp; Calendrier</h2>
+                    </header>
+                    <p class="admin-module__desc">
+                        Gérez la chronologie du monde et la configuration du calendrier custom.
+                    </p>
+                    <div class="admin-module__actions">
+                        <a href="{{ path('admin_world_events_index') }}" class="btn-admin btn-admin--primary">Événements</a>
+                        <a href="{{ path('admin_calendar_index') }}" class="btn-admin btn-admin--ghost">Calendrier</a>
+                    </div>
+                </article>
+
+                <article class="admin-module admin-module--ideas">
+                    <header class="admin-module__head">
+                        <span class="admin-module__icon" aria-hidden="true">💡</span>
+                        <h2 class="admin-module__title">Idées</h2>
+                    </header>
+                    <p class="admin-module__desc">
+                        Consultez, organisez et exportez les idées de world-building.
+                    </p>
+                    <div class="admin-module__actions">
+                        <a href="{{ path('ideas_index') }}" class="btn-admin btn-admin--primary">Voir</a>
+                        <a href="{{ path('ideas_create') }}" class="btn-admin btn-admin--success">+ Idée</a>
+                        <a href="{{ path('ideas_export') }}" class="btn-admin btn-admin--ghost">Exporter</a>
+                    </div>
+                </article>
+
+                <article class="admin-module admin-module--data">
+                    <header class="admin-module__head">
+                        <span class="admin-module__icon" aria-hidden="true">📊</span>
+                        <h2 class="admin-module__title">Tables de données</h2>
+                    </header>
+                    <p class="admin-module__desc">
+                        Visualisez les tables brutes avec leurs liens relationnels.
+                    </p>
+                    <div class="admin-module__actions">
+                        <a href="{{ path('admin_table_view', {'table': 'species'}) }}" class="btn-admin btn-admin--ghost">Espèces</a>
+                        <a href="{{ path('admin_table_view', {'table': 'races'}) }}" class="btn-admin btn-admin--ghost">Races</a>
+                        <a href="{{ path('admin_table_view', {'table': 'characters'}) }}" class="btn-admin btn-admin--ghost">Persos</a>
+                        <a href="{{ path('admin_table_view', {'table': 'users'}) }}" class="btn-admin btn-admin--ghost">Users</a>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        {# ----- Sidebar (right column) ----- #}
+        <aside class="admin-sidebar" aria-label="Aperçus rapides">
+
+            <section class="admin-section">
+                <header class="admin-section__header">
+                    <h3 class="admin-section__title">
+                        <span class="admin-section__icon" aria-hidden="true">🆕</span>
+                        Personnages récents
+                    </h3>
+                </header>
+                {% if recent_characters is not empty %}
+                    <ul class="admin-list">
+                        {% for character in recent_characters %}
+                            <li class="admin-list__item">
+                                <a href="{{ path('characters_show', {'characterId': character.id}) }}">
+                                    {{ character.name }}
+                                </a>
+                                <span class="admin-list__meta">
+                                    {% if character.race %}{{ character.race.name }} · {% endif %}
+                                    {{ character.createdAt|date('d/m/Y') }}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="admin-list__empty">Aucun personnage pour le moment.</p>
+                {% endif %}
+            </section>
+
+            <section class="admin-section">
+                <header class="admin-section__header">
+                    <h3 class="admin-section__title">
+                        <span class="admin-section__icon" aria-hidden="true">🏆</span>
+                        Espèces les plus riches
+                    </h3>
+                </header>
+                {% if top_species is not empty %}
+                    <ul class="admin-list">
+                        {% for species in top_species %}
+                            <li class="admin-list__item">
+                                <a href="{{ path('beings_species', {'speciesId': species.id}) }}">
+                                    {{ species.name }}
+                                </a>
+                                <span class="admin-list__meta">{{ species.races|length }} race(s)</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="admin-list__empty">Aucune espèce pour le moment.</p>
+                {% endif %}
+            </section>
+
+            {% if user_role_stats is defined and user_role_stats is not empty %}
+            <section class="admin-section">
+                <header class="admin-section__header">
+                    <h3 class="admin-section__title">
+                        <span class="admin-section__icon" aria-hidden="true">🛡️</span>
+                        Répartition des rôles
+                    </h3>
+                </header>
+                <ul class="admin-list">
+                    {% for role, count in user_role_stats %}
+                        <li class="admin-list__item">
+                            <span>{{ role|replace({'ROLE_': ''})|lower|title }}</span>
+                            <span class="admin-list__meta">{{ count }} utilisateur(s)</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+            {% endif %}
+
+        </aside>
+    </div>
+
+</div>
 {% endblock %}

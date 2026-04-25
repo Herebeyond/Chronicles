@@ -105,7 +105,11 @@ This user is created in migration `Version20250919113508` to ensure there's alwa
 ### Templates
 - **Base**: French language, `templates/base.html.twig`, color scheme #2c3e50/#34495e
 - **Two layouts**: Homepage (sidebar) vs. single-column via `leftContent` block
-- **CSS**: Centralized in `public/css/style.css` - no inline styles
+- **CSS architecture** (modular):
+  - `public/css/theme.css` — design tokens (color palette, spacing, fonts, radii, shadows). Loaded globally **before** other stylesheets. Always reference these CSS variables (`var(--color-primary)`, `var(--space-4)`, etc.) instead of hard-coded values when adding new styles.
+  - `public/css/style.css` — global/legacy site styles (header, nav, layouts, all public pages). Loaded on every page.
+  - `public/css/admin.css` — admin-only UI (dashboard, modules, stat cards). Loaded **only** by admin templates via `{% block stylesheets %}<link rel="stylesheet" href="{{ asset('css/admin.css') }}">{% endblock %}`.
+  - **No inline styles** in templates. Add new selectors to the appropriate file. For new feature areas, create a dedicated `public/css/<feature>.css` and opt-in via the `stylesheets` block of the relevant templates.
 - **JavaScript**: External files only in `public/js/` - see JavaScript & Template Rules
 - **Security**: `is_granted('ROLE_ADMIN')` for admin features
 - **Details**: See `docs/TWIG_TEMPLATING_GUIDE.md` for template patterns

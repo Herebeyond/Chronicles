@@ -5,6 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}The Rift Chronicles - The Forgotten Worlds{% endblock %}</title>
         <link rel="icon" href="{{ asset('images/icons/favicon.svg') }}">
+        {# CSS architecture: theme.css (design tokens) → style.css (global) → page-scoped #}
+        <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
         <link rel="stylesheet" href="{{ asset('css/style.css') }}">
         {% block stylesheets %}{% endblock %}
     </head>

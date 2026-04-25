@@ -1,0 +1,381 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Événements{% endblock %}
+{# TODO: make the notification of success/error, floating and dismissible instead of static and intrusive #}
+{# TODO: make the dates buttons display the calendar's custom months and days floating around the button instead of being at the bottom of the page #}
+
+{% block body %}
+<div class="admin-container">
+    <h1>Gestion des Événements Mondiaux</h1>
+    
+    <div class="admin-actions">
+        <a href="{{ path('admin_world_events_create') }}" class="btn-create">Créer un événement</a>
+        <a href="{{ path('world_events_index') }}" class="btn-secondary">Voir la chronologie</a>
+    </div>
+
+    <div id="flash-messages"></div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    {% if events is empty %}
+        <p class="no-content">Aucun événement créé.</p>
+    {% else %}
+        <table class="admin-table inline-editable-table">
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Description</th>
+                    <th>Date de début</th>
+                    <th>Date de fin</th>
+                    <th>Couleur</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                    <tr data-event-id="{{ event.id }}">
+                        <td>
+                            <input type="text" class="inline-input" 
+                                   data-field="title" 
+                                   value="{{ event.title }}">
+                        </td>
+                        <td>
+                            <textarea class="inline-textarea" 
+                                      data-field="description" 
+                                      rows="2">{{ event.description }}</textarea>
+                        </td>
+                        <td class="date-cell">
+                            <button class="date-picker-btn" data-date-type="start" 
+                                    data-year="{{ event.startYear }}" 
+                                    data-month="{{ event.startMonth }}" 
+                                    data-day="{{ event.startDay }}">
+                                {{ event.startDay }}/{{ event.startMonth }}/{{ event.startYear }}
+                            </button>
+                        </td>
+                        <td class="date-cell">
+                            {% if event.isOngoing %}
+                                <button class="date-picker-btn ongoing-toggle" 
+                                        data-date-type="end" 
+                                        data-year="" 
+                                        data-month="" 
+                                        data-day="">
+                                    <span class="badge-ongoing">En cours</span>
+                                </button>
+                            {% else %}
+                                <button class="date-picker-btn" 
+                                        data-date-type="end" 
+                                        data-year="{{ event.endYear }}" 
+                                        data-month="{{ event.endMonth }}" 
+                                        data-day="{{ event.endDay }}">
+                                    {{ event.endDay }}/{{ event.endMonth }}/{{ event.endYear }}
+                                </button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <input type="color" class="color-picker" 
+                                   data-field="color" 
+                                   value="{{ event.color }}">
+                            <span class="color-value">{{ event.color }}</span>
+                        </td>
+                        <td class="actions-cell">
+                            <form action="{{ path('admin_world_events_delete', {id: event.id}) }}" 
+                                  method="post" 
+                                  style="display: inline;" 
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');">
+                                <button type="submit" class="btn-delete">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+
+<!-- Custom Date Picker Modal -->
+<div id="date-picker-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content date-picker-modal">
+        <h3 id="date-picker-title">Choisir une date</h3>
+        
+        <div class="date-picker-controls">
+            <div class="form-group">
+                <label>Année</label>
+                <input type="number" id="date-year" class="form-input">
+            </div>
+            
+            <div class="form-group">
+                <label>Mois</label>
+                <select id="date-month" class="form-input">
+                    {% for month in calendarMonths %}
+                        <option value="{{ month.monthNumber }}">{{ month.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Jour</label>
+                <select id="date-day" class="form-input">
+                    <!-- Populated dynamically based on selected month -->
+                </select>
+            </div>
+        </div>
+        
+        <div class="date-picker-actions">
+            <button id="date-ongoing-toggle" class="btn-secondary">Marquer comme "En cours"</button>
+            <button id="date-save" class="btn-primary">Enregistrer</button>
+            <button id="date-cancel" class="btn-secondary">Annuler</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// Calendar configuration
+const calendarMonths = {{ calendarMonths|json_encode|raw }};
+
+// Current editing context
+let currentRow = null;
+let currentDateType = null;
+
+// Initialize inline editing
+document.addEventListener('DOMContentLoaded', function() {
+    // Text and number inputs - save on blur
+    document.querySelectorAll('.inline-input, .inline-textarea').forEach(input => {
+        input.addEventListener('blur', function() {
+            saveField(this);
+        });
+        
+        // Save on Enter for text inputs
+        if (input.tagName === 'INPUT') {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur();
+                }
+            });
+        }
+    });
+    
+    // Color pickers - save on change
+    document.querySelectorAll('.color-picker').forEach(picker => {
+        picker.addEventListener('change', function() {
+            const colorValue = this.parentElement.querySelector('.color-value');
+            colorValue.textContent = this.value;
+            saveField(this);
+        });
+    });
+    
+    // Date picker buttons
+    document.querySelectorAll('.date-picker-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            openDatePicker(this);
+        });
+    });
+    
+    // Modal controls
+    document.getElementById('date-save').addEventListener('click', saveDatePicker);
+    document.getElementById('date-cancel').addEventListener('click', closeDatePicker);
+    document.getElementById('date-ongoing-toggle').addEventListener('click', toggleOngoing);
+    document.getElementById('date-picker-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeDatePicker();
+    });
+    
+    // Month change - update days
+    document.getElementById('date-month').addEventListener('change', updateDayOptions);
+    
+    // Initialize day options
+    updateDayOptions();
+});
+
+function saveField(element) {
+    const row = element.closest('tr');
+    const eventId = row.dataset.eventId;
+    const field = element.dataset.field;
+    const value = element.value;
+    
+    fetch(`/admin/events/${eventId}/update-field`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            field: field,
+            value: value
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showFlash('Modification enregistrée', 'success');
+            element.classList.add('saved');
+            setTimeout(() => element.classList.remove('saved'), 1000);
+        } else {
+            showFlash('Erreur: ' + (data.message || 'Modification échouée'), 'error');
+        }
+    })
+    .catch(error => {
+        showFlash('Erreur de communication avec le serveur', 'error');
+        console.error('Error:', error);
+    });
+}
+
+function openDatePicker(button) {
+    currentRow = button.closest('tr');
+    currentDateType = button.dataset.dateType;
+    
+    const year = button.dataset.year || new Date().getFullYear();
+    const month = button.dataset.month || 1;
+    const day = button.dataset.day || 1;
+    
+    document.getElementById('date-picker-title').textContent = 
+        currentDateType === 'start' ? 'Date de début' : 'Date de fin';
+    document.getElementById('date-year').value = year;
+    document.getElementById('date-month').value = month;
+    
+    updateDayOptions();
+    document.getElementById('date-day').value = day;
+    
+    // Show/hide ongoing toggle based on date type
+    const ongoingBtn = document.getElementById('date-ongoing-toggle');
+    if (currentDateType === 'end') {
+        ongoingBtn.style.display = 'inline-block';
+        ongoingBtn.textContent = button.dataset.year ? 'Marquer comme "En cours"' : 'Définir une date de fin';
+    } else {
+        ongoingBtn.style.display = 'none';
+    }
+    
+    document.getElementById('date-picker-modal').style.display = 'flex';
+}
+
+function closeDatePicker() {
+    document.getElementById('date-picker-modal').style.display = 'none';
+    currentRow = null;
+    currentDateType = null;
+}
+
+function updateDayOptions() {
+    const monthSelect = document.getElementById('date-month');
+    const daySelect = document.getElementById('date-day');
+    const selectedMonth = parseInt(monthSelect.value);
+    
+    const month = calendarMonths.find(m => m.monthNumber === selectedMonth);
+    const daysCount = month ? month.daysCount : 30;
+    
+    const currentDay = parseInt(daySelect.value) || 1;
+    daySelect.innerHTML = '';
+    
+    for (let i = 1; i <= daysCount; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        daySelect.appendChild(option);
+    }
+    
+    daySelect.value = Math.min(currentDay, daysCount);
+}
+
+function saveDatePicker() {
+    const eventId = currentRow.dataset.eventId;
+    const year = document.getElementById('date-year').value;
+    const month = document.getElementById('date-month').value;
+    const day = document.getElementById('date-day').value;
+    
+    const data = {
+        dateType: currentDateType,
+        year: parseInt(year),
+        month: parseInt(month),
+        day: parseInt(day)
+    };
+    
+    fetch(`/admin/events/${eventId}/update-date`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showFlash('Date mise à jour', 'success');
+            updateDateButton(currentRow.querySelector(`[data-date-type="${currentDateType}"]`), 
+                            parseInt(year), parseInt(month), parseInt(day));
+            closeDatePicker();
+        } else {
+            showFlash('Erreur: ' + (data.message || 'Mise à jour échouée'), 'error');
+        }
+    })
+    .catch(error => {
+        showFlash('Erreur de communication avec le serveur', 'error');
+        console.error('Error:', error);
+    });
+}
+
+function toggleOngoing() {
+    const eventId = currentRow.dataset.eventId;
+    const button = currentRow.querySelector(`[data-date-type="end"]`);
+    const isCurrentlyOngoing = !button.dataset.year;
+    
+    if (isCurrentlyOngoing) {
+        // Set to today's date in the calendar
+        document.getElementById('date-year').value = 0;
+        document.getElementById('date-month').value = 1;
+        document.getElementById('date-day').value = 1;
+        saveDatePicker();
+    } else {
+        // Set to ongoing (null end date)
+        fetch(`/admin/events/${eventId}/update-date`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                dateType: 'end',
+                year: null,
+                month: null,
+                day: null
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showFlash('Événement marqué comme "En cours"', 'success');
+                button.innerHTML = '<span class="badge-ongoing">En cours</span>';
+                button.dataset.year = '';
+                button.dataset.month = '';
+                button.dataset.day = '';
+                button.classList.add('ongoing-toggle');
+                closeDatePicker();
+            } else {
+                showFlash('Erreur: ' + (data.message || 'Mise à jour échouée'), 'error');
+            }
+        });
+    }
+}
+
+function updateDateButton(button, year, month, day) {
+    button.textContent = `${day}/${month}/${year}`;
+    button.dataset.year = year;
+    button.dataset.month = month;
+    button.dataset.day = day;
+    button.classList.remove('ongoing-toggle');
+    button.innerHTML = `${day}/${month}/${year}`;
+}
+
+function showFlash(message, type) {
+    const container = document.getElementById('flash-messages');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.textContent = message;
+    container.appendChild(alert);
+    
+    setTimeout(() => {
+        alert.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

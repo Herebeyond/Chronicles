@@ -45,7 +45,7 @@ CAN BE SERVER-SIDE:
 
 REVIEW/KEEP MINIMAL:
 10. templates/beings/display.html.twig - Smooth scroll (small, keep or remove)
-11. templates/admin/species_management/edit_*.html.twig - iframe postMessage (verify if used)
+11. [DONE 2026-04-25] Removed iframe-based edit modal from beings/display.html.twig and postMessage scripts from species_management/edit_*.html.twig - now uses direct navigation to admin_species_edit / admin_race_edit
 12. templates/admin/characters.html.twig - Verify if modal still used
 
 TEMPLATES TO UPDATE AFTER MIGRATION:

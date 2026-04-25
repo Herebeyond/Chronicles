@@ -94,7 +94,7 @@ final class SpeciesManagementController extends AbstractController
             
             $this->addFlash('success', 'Species "' . $species->getName() . '" has been updated successfully.');
             
-            return $this->redirectToRoute('admin_species_edit', ['id' => $species->getId(), 'saved' => 1]);
+            return $this->redirectToRoute('admin_species_edit', ['id' => $species->getId()]);
         }
 
         return $this->render('admin/species_management/edit_species.html.twig', [
@@ -184,7 +184,7 @@ final class SpeciesManagementController extends AbstractController
             
             $this->addFlash('success', 'Race "' . $race->getName() . '" has been updated successfully.');
             
-            return $this->redirectToRoute('admin_race_edit', ['id' => $race->getId(), 'saved' => 1]);
+            return $this->redirectToRoute('admin_race_edit', ['id' => $race->getId()]);
         }
 
         return $this->render('admin/species_management/edit_race.html.twig', [

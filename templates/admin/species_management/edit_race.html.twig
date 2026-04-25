@@ -66,13 +66,4 @@
         {{ form_end(form) }}
     </div>
 </div>
-
-<script>
-// Notify parent window if we're in an iframe and form was saved
-if (window.location.search.includes('saved=1')) {
-    if (window.parent && window.parent !== window) {
-        window.parent.postMessage('formSaved', '*');
-    }
-}
-</script>
 {% endblock %}

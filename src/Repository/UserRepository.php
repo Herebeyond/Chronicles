@@ -53,9 +53,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findByRole(string $role): array
     {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.roles LIKE :role')
+            ->innerJoin('u.userRoles', 'r')
+            ->andWhere('r.name = :role')
             ->andWhere('u.isActive = :active')
-            ->setParameter('role', '%' . $role . '%')
+            ->setParameter('role', $role)
             ->setParameter('active', true)
             ->orderBy('u.username', 'ASC')
             ->getQuery()
@@ -69,10 +70,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findUsersWithRoles(): array
     {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.roles != :emptyRoles')
+            ->innerJoin('u.userRoles', 'r')
             ->andWhere('u.isActive = :active')
-            ->setParameter('emptyRoles', '[]')
             ->setParameter('active', true)
+            ->groupBy('u.id')
             ->orderBy('u.username', 'ASC')
             ->getQuery()
             ->getResult();
@@ -85,9 +86,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findUsersWithoutRoles(): array
     {
         return $this->createQueryBuilder('u')
-            ->andWhere('u.roles = :emptyRoles')
+            ->leftJoin('u.userRoles', 'r')
+            ->andWhere('r.id IS NULL')
             ->andWhere('u.isActive = :active')
-            ->setParameter('emptyRoles', '[]')
             ->setParameter('active', true)
             ->orderBy('u.username', 'ASC')
             ->getQuery()
@@ -99,11 +100,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      */
     public function countByRole(string $role): int
     {
-        return $this->createQueryBuilder('u')
-            ->select('COUNT(u.id)')
-            ->andWhere('u.roles LIKE :role')
+        return (int) $this->createQueryBuilder('u')
+            ->select('COUNT(DISTINCT u.id)')
+            ->innerJoin('u.userRoles', 'r')
+            ->andWhere('r.name = :role')
             ->andWhere('u.isActive = :active')
-            ->setParameter('role', '%' . $role . '%')
+            ->setParameter('role', $role)
             ->setParameter('active', true)
             ->getQuery()
             ->getSingleScalarResult();
