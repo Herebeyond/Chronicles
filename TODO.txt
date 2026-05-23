@@ -60,4 +60,143 @@ OTHER TODOS:
 - upgrade the backup to only create a new backup if its different from the last one (make 2 different checks, if the images are the same but the BDD is different, do not add an image backup but make a new BDD backup)
 - add ngrok
 - make the "edit event dates" work
-- rework the zoom in the timeline in world events 
+- rework the zoom in the timeline in world events
+
+🔒 SECURITY ISSUES & RECOMMENDATIONS:
+=====================================
+
+CRITICAL - SECRETS EXPOSURE:
+-----------------------------
+1. ⚠️ APP_SECRET is EMPTY in .env file
+   - File: .env (line 28)
+   - FIX: Generate a strong secret using `php bin/console secrets:generate-keys` or `openssl rand -hex 32`
+   - This is used for CSRF tokens, remember-me cookies, and other security features
+
+2. ⚠️ Mercure JWT secret uses default value "!ChangeThisMercureHubJWTSecretKey!"
+   - Files: .env (line 22), compose.yaml (lines 8, 9, 15)
+   - FIX: Generate a unique secret for production
+
+3. ⚠️ Database password hardcoded in backup script
+   - File: scripts/backup.ps1 (line 18)
+   - FIX: Use environment variables instead: $env:MYSQL_PASSWORD
+
+HIGH PRIORITY:
+--------------
+4. 🔐 No login rate limiting / brute force protection
+   - The login form has no rate limiting to prevent brute force attacks
+   - FIX: Install symfony/rate-limiter and configure login throttling in security.yaml
+   - Example: Add login_throttling: { max_attempts: 5, interval: '15 minutes' } to form_login config
+
+5. 🔐 No security headers configured
+   - Missing Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection
+   - FIX: Add security headers in Caddyfile or via Symfony NelmioSecurityBundle
+   - Only Permissions-Policy for browsing-topics is set in Caddyfile
+
+6. 🔐 isActive check not enforced at login
+   - CustomUserProvider loads user but doesn't check if isActive is false
+   - A deactivated user could still log in with valid credentials
+   - FIX: Add isActive check in CustomUserProvider.loadUserByIdentifier() or use a UserChecker
+
+MEDIUM PRIORITY:
+----------------
+7. 📝 Debug console.log statements left in templates
+   - templates/registration/register.html.twig (lines 397-399)
+   - templates/ideas/index.html.twig (lines 309, 353, 366)
+   - templates/beings/display.html.twig (lines 275, 278)
+   - FIX: Remove all console.log statements before production
+
+8. 📝 alert() calls used for user feedback
+   - templates/ideas/index.html.twig (multiple lines)
+   - templates/characters/show.html.twig (line 170)
+   - FIX: Replace with proper toast/notification system
+
+9. 🔐 File upload validation could be bypassed
+   - mimeTypes validation relies on guessExtension() which can be spoofed
+   - FIX: Consider adding file content validation (magic bytes check)
+   - Files: src/Form/SpeciesType.php, RaceType.php, UserProfileType.php
+
+10. 🔐 Session configuration not explicitly defined
+    - Session is enabled but cookie security settings aren't explicit
+    - FIX: Add session configuration in config/packages/framework.yaml:
+      session:
+        cookie_secure: auto
+        cookie_httponly: true
+        cookie_samesite: lax
+
+LOW PRIORITY / RECOMMENDATIONS:
+-------------------------------
+11. 📝 Database port exposed on 3307
+    - compose.yaml exposes MySQL externally on port 3307
+    - Consider removing for production or restricting to localhost only
+
+12. 📝 phpMyAdmin not configured but mentioned in docs
+    - copilot-instructions.md mentions phpMyAdmin on port 8081 but it's not in compose.yaml
+    - Either add it or update documentation
+
+13. 📝 No audit logging for admin actions
+    - Admin operations (user management, species/race CRUD) are not logged
+    - Consider adding Symfony event listeners for security-relevant actions
+
+🚀 POSSIBLE UPGRADES & IMPROVEMENTS:
+====================================
+
+AUTHENTICATION & SECURITY:
+--------------------------
+- [ ] Add 2FA support (symfony/scheb-2fa-bundle)
+- [ ] Add OAuth login (Google, Discord, etc.) for easier sign-in
+- [ ] Implement password reset via email functionality
+- [ ] Add email verification for new accounts
+- [ ] Add account lockout after X failed login attempts
+- [ ] Add "currently logged in sessions" view for users
+
+DATABASE & PERFORMANCE:
+-----------------------
+- [ ] Add database indexes for frequently searched columns
+- [ ] Consider Redis/Memcached for session storage in production
+- [ ] Add pagination to all list views (some already have it)
+- [ ] Implement soft deletes for entities to prevent data loss
+
+USER EXPERIENCE:
+----------------
+- [ ] Replace alert() with modern toast notification library (e.g., notyf, toastify)
+- [ ] Add dark mode toggle (CSS already has color variables)
+- [ ] Add keyboard shortcuts for power users
+- [ ] Implement autocomplete for search fields
+- [ ] Add drag-and-drop reordering for ideas with priorities
+- [ ] Add real-time updates using Mercure (already configured in compose.yaml)
+
+CODE QUALITY:
+-------------
+- [ ] Add PHPUnit tests for controllers and services
+- [ ] Add PHPStan/Psalm for static analysis
+- [ ] Add CS-Fixer for code style enforcement
+- [ ] Create custom exception classes for better error handling
+- [ ] Add API endpoints for potential mobile app or integrations
+
+BACKUP SYSTEM:
+--------------
+- [ ] Add backup integrity verification (checksum comparison)
+- [ ] Implement incremental backups for large databases
+- [ ] Add backup restoration script
+- [ ] Consider offsite backup to cloud storage (S3, Azure Blob, etc.)
+
+DEPLOYMENT:
+-----------
+- [ ] Create GitHub Actions workflow for CI/CD
+- [ ] Add automated testing in CI pipeline
+- [ ] Create proper .env.prod template with placeholder values
+- [ ] Document production deployment process
+- [ ] Add health check endpoint for monitoring
+
+💡 IDEAS FOR NEW FEATURES:
+==========================
+- [ ] Character relationship mapping (family trees, alliances, rivalries)
+- [ ] Interactive map integration with characters/events locations
+- [ ] Timeline visualization for character lifespans across world events
+- [ ] Version history / changelog for entities (audit trail)
+- [ ] Export to PDF for character sheets
+- [ ] Import/Export data in JSON format for backup/sharing
+- [ ] Tags/labels system for cross-entity organization
+- [ ] Search across all entities (global search)
+- [ ] Comments/Notes attached to any entity
+- [ ] Collaborative editing with user attribution 

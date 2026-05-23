@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🗺️ Carte Interactive - The Rift Chronicles{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/map.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="map-page-container">
+    <!-- Help Icon with Tooltip -->
+    <div class="map-help-container" id="map-help-container">
+        <div class="map-help-icon" id="map-help-trigger" title="Cliquez pour l'aide">
+            <span>?</span>
+        </div>
+        <div class="map-help-tooltip" id="map-help-content">
+            <div class="notification-content">
+                <h3>🗺️ Bienvenue sur la Carte Interactive des Mondes Oubliés !</h3>
+                <p id="dynamic-welcome-text">Explorez les vastes terres et découvrez les lieux, cités, donjons et autres points d'intérêt de ce royaume mystique.</p>
+                <p><strong>Comment explorer :</strong> Survolez les points colorés pour découvrir des informations sur chaque lieu.</p>
+            </div>
+            <button class="tooltip-close" onclick="hideHelp()">&times;</button>
+        </div>
+    </div>
+    
+    <div class="map-view-container">
+        <h1 class="map-view-title">🗺️ Carte Interactive des Mondes Oubliés</h1>
+        <p class="map-view-description">
+            Explorez les vastes terres des Mondes Oubliés. Survolez les points d'intérêt pour découvrir 
+            les lieux, cités, donjons et autres endroits importants de ce royaume mystique.
+        </p>
+        
+        <!-- Map Selection Section -->
+        <div class="map-selector-section">
+            <h3>🗺️ Choisir une carte</h3>
+            <div class="map-selector-controls">
+                <div class="map-selector-group">
+                    <label for="map-selector">Couche de carte :</label>
+                    <select id="map-selector" class="map-select">
+                        {% for mapData in maps %}
+                            {% set map = mapData[0] is defined ? mapData[0] : mapData %}
+                            {% set pointCount = mapData.pointCount is defined ? mapData.pointCount : map.interestPoints|length %}
+                            <option value="{{ map.id }}" 
+                                    data-image="{{ map.imageFile ? asset('images/maps/' ~ map.imageFile) : asset('images/maps/default-map.jpg') }}"
+                                    {% if defaultMap and map.id == defaultMap.id %}selected{% endif %}>
+                                {{ map.name }} ({{ pointCount }} lieux)
+                            </option>
+                        {% else %}
+                            <option value="">Aucune carte disponible</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="map-info" class="map-info">
+                    <!-- Map info will be displayed here -->
+                </div>
+            </div>
+        </div>
+        
+        <div id="interactive-map-container" class="interactive-map-container">
+            <img id="interactive-map-image" 
+                 src="{{ defaultMap and defaultMap.imageFile ? asset('images/maps/' ~ defaultMap.imageFile) : asset('images/maps/default-map.jpg') }}" 
+                 alt="Carte du Monde">
+            <div id="interactive-map-overlay" class="interactive-map-overlay"></div>
+        </div>
+        
+        <div id="map-legend" class="map-legend">
+            <h3>🔍 Comment explorer :</h3>
+            <ul>
+                <li>🖱️ <strong>Survolez</strong> les points pour voir les détails du lieu</li>
+                <li>🖱️ <strong>Cliquez</strong> sur un point pour voir plus de détails</li>
+                <li>🏰 <strong>Cités :</strong> Grandes villes et capitales</li>
+                <li>⚔️ <strong>Donjons :</strong> Lieux dangereux pleins de trésors</li>
+                <li>🏛️ <strong>Temples :</strong> Lieux sacrés et mystiques</li>
+                <li>📍 <strong>Lieux :</strong> Autres points d'intérêt</li>
+            </ul>
+            
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="admin-tools">
+                <p class="admin-tools-label"><em>Outils administrateur :</em></p>
+                <a href="{{ path('admin_maps_index') }}" class="admin-link">
+                    🔧 Gérer les Cartes
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/map-view.js') }}"></script>
+    <script>
+        // Initialize map with current map ID
+        document.addEventListener('DOMContentLoaded', function() {
+            const mapSelector = document.getElementById('map-selector');
+            if (mapSelector && mapSelector.value) {
+                initializeMap(parseInt(mapSelector.value));
+            }
+        });
+    </script>
+{% endblock %}

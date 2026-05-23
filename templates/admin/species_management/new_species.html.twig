@@ -37,15 +37,6 @@
             <small class="form-help">Upload an image file for the species icon (JPG, PNG, GIF, WebP). Maximum size: 2MB.</small>
         </div>
 
-        {% if species.icon %}
-        <div class="current-image-preview">
-            <img src="{{ asset('images/species/' ~ species.icon) }}" 
-                 alt="{{ species.name }}"
-                 onerror="this.style.display='none'">
-            <p>Current icon: {{ species.icon }}</p>
-        </div>
-        {% endif %}
-
         <div class="form-actions">
             <button type="submit" class="btn btn-success">
                 Create Species

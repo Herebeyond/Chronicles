@@ -1,0 +1,168 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🗺️ {{ map.name }} - The Rift Chronicles{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/map.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="map-page-container">
+    <div class="map-view-container">
+        <h1 class="map-view-title">🗺️ {{ map.name }}</h1>
+        {% if map.description %}
+        <p class="map-view-description">{{ map.description }}</p>
+        {% endif %}
+        
+        <!-- Map Selection Section -->
+        <div class="map-selector-section">
+            <h3>🗺️ Changer de carte</h3>
+            <div class="map-selector-controls">
+                <div class="map-selector-group">
+                    <label for="map-selector">Couche de carte :</label>
+                    <select id="map-selector" class="map-select" onchange="changeMap(this.value)">
+                        {% for mapData in maps %}
+                            {% set m = mapData[0] is defined ? mapData[0] : mapData %}
+                            {% set pointCount = mapData.pointCount is defined ? mapData.pointCount : m.interestPoints|length %}
+                            <option value="{{ m.id }}" 
+                                    data-image="{{ m.imageFile ? asset('images/maps/' ~ m.imageFile) : asset('images/maps/default-map.jpg') }}"
+                                    {% if m.id == map.id %}selected{% endif %}>
+                                {{ m.name }} ({{ pointCount }} lieux)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div id="interactive-map-container" class="interactive-map-container">
+            <img id="interactive-map-image" 
+                 src="{{ map.imageFile ? asset('images/maps/' ~ map.imageFile) : asset('images/maps/default-map.jpg') }}" 
+                 alt="{{ map.name }}">
+            <div id="interactive-map-overlay" class="interactive-map-overlay">
+                {% for point in points %}
+                <div class="map-point-of-interest" 
+                     style="left: {{ point.xCoordinate }}%; top: {{ point.yCoordinate }}%; background-color: {{ point.type ? point.type.color : '#ff4444' }};"
+                     data-point-id="{{ point.id }}"
+                     data-point-name="{{ point.name }}"
+                     data-point-description="{{ point.description }}"
+                     data-point-type="{{ point.type ? point.type.name : 'Lieu' }}"
+                     onclick="window.location.href='{{ path('map_place_detail', {id: point.id}) }}'">
+                    <div class="map-poi-tooltip">
+                        <strong>{{ point.name }}</strong><br>
+                        Type: {{ point.type ? point.type.name : 'Lieu' }}<br>
+                        {% if point.description %}
+                        <p class="tooltip-description">{{ point.description|slice(0, 150) }}{% if point.description|length > 150 %}...{% endif %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div id="map-legend" class="map-legend">
+            <h3>🔍 Légende des types :</h3>
+            <ul class="type-legend">
+                {% for type in types %}
+                <li>
+                    <span class="type-color" style="background-color: {{ type.color }};"></span>
+                    {{ type.icon }} <strong>{{ type.name }}</strong>
+                </li>
+                {% endfor %}
+            </ul>
+            
+            {% if is_granted('ROLE_ADMIN') %}
+            <div class="admin-tools">
+                <p class="admin-tools-label"><em>Outils administrateur :</em></p>
+                <a href="{{ path('admin_maps_editor', {id: map.id}) }}" class="admin-link">
+                    🔧 Modifier cette carte
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/map-view.js') }}"></script>
+    <script>
+        // Store map data for dynamic switching
+        const mapsData = {
+            {% for mapData in maps %}
+                {% set m = mapData[0] is defined ? mapData[0] : mapData %}
+                {% set pointCount = mapData.pointCount is defined ? mapData.pointCount : m.interestPoints|length %}
+                {{ m.id }}: {
+                    name: "{{ m.name|e('js') }}",
+                    description: "{{ m.description|e('js')|default('') }}",
+                    image: "{{ m.imageFile ? asset('images/maps/' ~ m.imageFile) : asset('images/maps/default-map.jpg') }}"
+                }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        };
+        
+        // Override changeMap to be dynamic
+        function changeMap(mapId) {
+            const mapData = mapsData[mapId];
+            if (!mapData) return;
+            
+            // Update page title
+            const titleElement = document.querySelector('.map-view-title');
+            if (titleElement) {
+                titleElement.textContent = '🗺️ ' + mapData.name;
+            }
+            
+            // Update browser title
+            document.title = '🗺️ ' + mapData.name + ' - The Rift Chronicles';
+            
+            // Update description
+            const descElement = document.querySelector('.map-view-description');
+            if (mapData.description) {
+                if (descElement) {
+                    descElement.textContent = mapData.description;
+                    descElement.style.display = '';
+                } else {
+                    // Create description element if it doesn't exist
+                    const newDesc = document.createElement('p');
+                    newDesc.className = 'map-view-description';
+                    newDesc.textContent = mapData.description;
+                    titleElement.insertAdjacentElement('afterend', newDesc);
+                }
+            } else if (descElement) {
+                descElement.style.display = 'none';
+            }
+            
+            // Update map image
+            const mapImage = document.getElementById('interactive-map-image');
+            if (mapImage) {
+                mapImage.src = mapData.image;
+                mapImage.alt = mapData.name;
+            }
+            
+            // Update admin link if present
+            const adminLink = document.querySelector('.admin-link');
+            if (adminLink) {
+                adminLink.href = '/admin/maps/' + mapId + '/editor';
+            }
+            
+            // Update URL without reload (for bookmarking/sharing)
+            history.pushState({mapId: mapId}, '', '/map/' + mapId);
+            
+            // Reload points dynamically using map-view.js function
+            if (typeof loadPointsFromServer === 'function') {
+                currentMapId = mapId;
+                loadPointsFromServer(mapId);
+            }
+        }
+        
+        // Handle browser back/forward navigation
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.mapId) {
+                const selector = document.getElementById('map-selector');
+                if (selector) {
+                    selector.value = event.state.mapId;
+                    changeMap(event.state.mapId);
+                }
+            }
+        });
+    </script>
+{% endblock %}

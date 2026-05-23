@@ -1,0 +1,655 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}📍 {{ point.name }} - The Rift Chronicles{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/map.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="place-detail-container">
+    <!-- Navigation -->
+    <div class="place-navigation">
+        <a href="{{ path('map_view', {id: point.map.id}) }}" class="back-link">
+            ← Retour à la carte
+        </a>
+    </div>
+    
+    <!-- Main Content Layout -->
+    <div class="place-content-grid">
+        <!-- Left Column: Main Content -->
+        <div class="main-content">
+            <!-- Place Title -->
+            <div class="place-title-section">
+                <h1 class="place-title">
+                    {{ point.type ? point.type.icon : '📍' }} {{ point.name }}
+                </h1>
+                {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('admin_maps_points_edit', {id: point.id}) }}" class="edit-btn">
+                    ✏️ Modifier
+                </a>
+                {% endif %}
+            </div>
+            
+            <!-- Description Box -->
+            <div class="description-section">
+                <div class="content-box">
+                    <h3>📝 Description</h3>
+                    <div class="description-content">
+                        {% if point.description %}
+                            {{ point.description|nl2br }}
+                        {% else %}
+                            <em>Aucune description disponible.</em>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Image -->
+            {% if point.mainImage %}
+            <div class="image-section">
+                <div class="content-box">
+                    <h3>🖼️ Image</h3>
+                    <div class="main-image-container">
+                        <img src="{{ asset('images/places/' ~ point.mainImage) }}" 
+                             alt="{{ point.name }}" 
+                             class="place-main-image">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Gallery -->
+            {% set gallery = point.galleryNormalized %}
+            <div class="gallery-section">
+                <div class="content-box">
+                    <h3>
+                        📸 Galerie ({{ gallery|length }} image{{ gallery|length > 1 ? 's' : '' }})
+                        {% if is_granted('ROLE_ADMIN') %}
+                        <button class="gallery-add-btn" onclick="openUploadModal()">➕ Ajouter</button>
+                        {% endif %}
+                    </h3>
+                    {% if gallery|length > 0 %}
+                    <div class="gallery-grid">
+                        {% for image in gallery %}
+                        <div class="gallery-item" 
+                             data-filename="{{ image.filename }}"
+                             data-name="{{ image.name }}"
+                             onclick="openGalleryLightbox({{ loop.index0 }})">
+                            <img src="{{ asset('images/places/gallery/' ~ image.filename) }}" 
+                                 alt="{{ image.name }}">
+                            <div class="gallery-item-name">{{ image.name }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="gallery-empty">Aucune image dans la galerie.{% if is_granted('ROLE_ADMIN') %} Cliquez sur "Ajouter" pour en ajouter.{% endif %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Info Box (Wikipedia style) -->
+        <div class="info-box">
+            <!-- Place Name -->
+            <h2 class="info-box-title">{{ point.name }}</h2>
+            
+            <!-- Main Image Thumbnail -->
+            {% if point.mainImage %}
+            <div class="info-box-image">
+                <img src="{{ asset('images/places/' ~ point.mainImage) }}" alt="{{ point.name }}">
+            </div>
+            {% endif %}
+            
+            <!-- Other Names -->
+            <div class="info-row">
+                <strong>Autres noms :</strong>
+                <div class="info-value">
+                    {% set otherNames = point.otherNamesArray %}
+                    {% if otherNames|length > 0 %}
+                        {{ otherNames|join(', ') }}
+                    {% else %}
+                        <em>Aucun</em>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Type -->
+            <div class="info-row">
+                <strong>Type :</strong>
+                <div class="info-value">
+                    {% if point.type %}
+                        <span class="type-badge" style="background-color: {{ point.type.color }};">
+                            {{ point.type.icon }} {{ point.type.name }}
+                        </span>
+                    {% else %}
+                        <em>Non défini</em>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Map -->
+            <div class="info-row">
+                <strong>Carte :</strong>
+                <div class="info-value">
+                    <a href="{{ path('map_view', {id: point.map.id}) }}">{{ point.map.name }}</a>
+                </div>
+            </div>
+            
+            <!-- Coordinates -->
+            <div class="info-row">
+                <strong>Coordonnées :</strong>
+                <div class="info-value">
+                    X: {{ point.xCoordinate|number_format(2) }}%, Y: {{ point.yCoordinate|number_format(2) }}%
+                </div>
+            </div>
+            
+            <!-- Created Date -->
+            <div class="info-row">
+                <strong>Ajouté le :</strong>
+                <div class="info-value">
+                    {{ point.createdAt|date('d/m/Y') }}
+                </div>
+            </div>
+            
+            {% if point.updatedAt %}
+            <div class="info-row">
+                <strong>Modifié le :</strong>
+                <div class="info-value">
+                    {{ point.updatedAt|date('d/m/Y H:i') }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Gallery Lightbox -->
+<div id="gallery-lightbox" class="gallery-lightbox">
+    <div class="lightbox-backdrop" onclick="closeGalleryLightbox()"></div>
+    <div class="lightbox-container">
+        <button class="lightbox-close" onclick="closeGalleryLightbox()">&times;</button>
+        <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1)">&#10094;</button>
+        <div class="lightbox-content">
+            <img id="lightbox-image" class="lightbox-image" src="" alt="">
+            <div class="lightbox-info">
+                <span id="lightbox-name" class="lightbox-name"></span>
+                {% if is_granted('ROLE_ADMIN') %}
+                <button id="lightbox-edit-btn" class="lightbox-edit-btn" onclick="toggleNameEdit()">✏️</button>
+                <div id="lightbox-edit-form" class="lightbox-edit-form" style="display: none;">
+                    <input type="text" id="lightbox-name-input" class="lightbox-name-input" placeholder="Nouveau nom...">
+                    <button onclick="saveImageName()" class="lightbox-save-btn">💾</button>
+                    <button onclick="cancelNameEdit()" class="lightbox-cancel-btn">✖️</button>
+                </div>
+                <button id="lightbox-delete-btn" class="lightbox-delete-btn" onclick="deleteGalleryImage()">🗑️</button>
+                {% endif %}
+            </div>
+        </div>
+        <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(1)">&#10095;</button>
+    </div>
+</div>
+
+{% if is_granted('ROLE_ADMIN') %}
+<!-- Gallery Upload Modal -->
+<div id="upload-modal" class="upload-modal">
+    <div class="upload-modal-backdrop" onclick="closeUploadModal()"></div>
+    <div class="upload-modal-container">
+        <button class="upload-modal-close" onclick="closeUploadModal()">&times;</button>
+        <h2 class="upload-modal-title">📸 Ajouter des images à la galerie</h2>
+        
+        <form id="gallery-upload-form" class="upload-form">
+            <div class="upload-dropzone" id="upload-dropzone">
+                <div class="dropzone-content">
+                    <span class="dropzone-icon">📁</span>
+                    <p class="dropzone-text">Glissez-déposez vos images ici</p>
+                    <p class="dropzone-subtext">ou cliquez pour sélectionner</p>
+                    <input type="file" id="gallery-files-input" name="gallery_images[]" multiple 
+                           accept="image/jpeg,image/png,image/gif,image/webp" class="dropzone-input">
+                </div>
+            </div>
+            
+            <div id="upload-preview" class="upload-preview"></div>
+            
+            <div class="upload-info">
+                <p>📌 Formats acceptés : JPG, PNG, GIF, WebP</p>
+                <p>📌 Taille maximale : 5 Mo par image</p>
+                <p>📌 Vous pouvez sélectionner plusieurs images à la fois</p>
+            </div>
+            
+            <div id="upload-status" class="upload-status" style="display: none;"></div>
+            
+            <div class="upload-actions">
+                <button type="button" class="upload-cancel-btn" onclick="closeUploadModal()">Annuler</button>
+                <button type="submit" class="upload-submit-btn" id="upload-submit-btn" disabled>
+                    <span class="btn-text">📤 Télécharger</span>
+                    <span class="btn-loading" style="display: none;">⏳ Envoi en cours...</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // Configuration
+    const pointId = {{ point.id }};
+    const pointSlug = "{{ point.slug }}";
+    const isAdmin = {{ is_granted('ROLE_ADMIN') ? 'true' : 'false' }};
+    
+    // Gallery data
+    let galleryImages = [
+        {% set gallery = point.galleryNormalized %}
+        {% for image in gallery %}
+        {
+            filename: "{{ image.filename }}",
+            name: "{{ image.name|e('js') }}",
+            src: "/images/places/gallery/{{ image.filename }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    let currentImageIndex = 0;
+    
+    // ===== Lightbox Functions =====
+    
+    function openGalleryLightbox(index) {
+        if (galleryImages.length === 0) return;
+        currentImageIndex = index;
+        updateLightboxImage();
+        document.getElementById('gallery-lightbox').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeGalleryLightbox() {
+        document.getElementById('gallery-lightbox').classList.remove('show');
+        document.body.style.overflow = '';
+        cancelNameEdit();
+    }
+    
+    function navigateLightbox(direction) {
+        if (galleryImages.length === 0) return;
+        currentImageIndex = (currentImageIndex + direction + galleryImages.length) % galleryImages.length;
+        updateLightboxImage();
+        cancelNameEdit();
+    }
+    
+    function updateLightboxImage() {
+        if (galleryImages.length === 0) return;
+        const image = galleryImages[currentImageIndex];
+        document.getElementById('lightbox-image').src = image.src;
+        document.getElementById('lightbox-name').textContent = image.name;
+    }
+    
+    function toggleNameEdit() {
+        const nameSpan = document.getElementById('lightbox-name');
+        const editForm = document.getElementById('lightbox-edit-form');
+        const editBtn = document.getElementById('lightbox-edit-btn');
+        const nameInput = document.getElementById('lightbox-name-input');
+        
+        if (editForm.style.display === 'none') {
+            nameInput.value = galleryImages[currentImageIndex].name;
+            editForm.style.display = 'flex';
+            editBtn.style.display = 'none';
+            nameSpan.style.display = 'none';
+            nameInput.focus();
+        } else {
+            cancelNameEdit();
+        }
+    }
+    
+    function cancelNameEdit() {
+        const nameSpan = document.getElementById('lightbox-name');
+        const editForm = document.getElementById('lightbox-edit-form');
+        const editBtn = document.getElementById('lightbox-edit-btn');
+        
+        if (editForm) {
+            editForm.style.display = 'none';
+            if (editBtn) editBtn.style.display = 'inline-block';
+            if (nameSpan) nameSpan.style.display = 'inline';
+        }
+    }
+    
+    function saveImageName() {
+        const newName = document.getElementById('lightbox-name-input').value.trim();
+        if (!newName) {
+            alert('Le nom ne peut pas être vide');
+            return;
+        }
+        
+        const image = galleryImages[currentImageIndex];
+        
+        fetch('/admin/maps/api/gallery/rename', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                point_id: pointId,
+                filename: image.filename,
+                new_name: newName
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                galleryImages[currentImageIndex].name = newName;
+                document.getElementById('lightbox-name').textContent = newName;
+                
+                const gridItems = document.querySelectorAll('.gallery-item');
+                if (gridItems[currentImageIndex]) {
+                    gridItems[currentImageIndex].querySelector('.gallery-item-name').textContent = newName;
+                }
+                
+                cancelNameEdit();
+            } else {
+                alert('Erreur: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Erreur de connexion');
+            console.error(error);
+        });
+    }
+    
+    function deleteGalleryImage() {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cette image ?')) return;
+        
+        const image = galleryImages[currentImageIndex];
+        
+        fetch('/admin/maps/api/gallery/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                point_id: pointId,
+                filename: image.filename
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                galleryImages.splice(currentImageIndex, 1);
+                
+                const gridItems = document.querySelectorAll('.gallery-item');
+                if (gridItems[currentImageIndex]) {
+                    gridItems[currentImageIndex].remove();
+                }
+                
+                updateGalleryCount();
+                
+                if (galleryImages.length === 0) {
+                    closeGalleryLightbox();
+                    showEmptyGalleryMessage();
+                } else {
+                    if (currentImageIndex >= galleryImages.length) {
+                        currentImageIndex = galleryImages.length - 1;
+                    }
+                    updateLightboxImage();
+                }
+            } else {
+                alert('Erreur: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Erreur de connexion');
+            console.error(error);
+        });
+    }
+    
+    // ===== Upload Modal Functions =====
+    
+    let selectedFiles = [];
+    
+    function openUploadModal() {
+        document.getElementById('upload-modal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+        selectedFiles = [];
+        updatePreview();
+        document.getElementById('upload-status').style.display = 'none';
+    }
+    
+    function closeUploadModal() {
+        document.getElementById('upload-modal').classList.remove('show');
+        document.body.style.overflow = '';
+        document.getElementById('gallery-files-input').value = '';
+        selectedFiles = [];
+        updatePreview();
+    }
+    
+    function updatePreview() {
+        const preview = document.getElementById('upload-preview');
+        const submitBtn = document.getElementById('upload-submit-btn');
+        
+        preview.innerHTML = '';
+        
+        if (selectedFiles.length === 0) {
+            submitBtn.disabled = true;
+            return;
+        }
+        
+        submitBtn.disabled = false;
+        
+        selectedFiles.forEach((file, index) => {
+            const item = document.createElement('div');
+            item.className = 'preview-item';
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                item.innerHTML = `
+                    <img src="${e.target.result}" alt="${file.name}">
+                    <span class="preview-name">${file.name}</span>
+                    <button type="button" class="preview-remove" onclick="removeFile(${index})">×</button>
+                `;
+            };
+            reader.readAsDataURL(file);
+            
+            preview.appendChild(item);
+        });
+    }
+    
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        updatePreview();
+    }
+    
+    // Setup dropzone and file input
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropzone = document.getElementById('upload-dropzone');
+        const fileInput = document.getElementById('gallery-files-input');
+        const form = document.getElementById('gallery-upload-form');
+        
+        if (!dropzone || !fileInput || !form) return;
+        
+        // Click on dropzone triggers file input
+        dropzone.addEventListener('click', function(e) {
+            if (e.target !== fileInput) {
+                fileInput.click();
+            }
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', function(e) {
+            selectedFiles = Array.from(e.target.files);
+            updatePreview();
+        });
+        
+        // Drag and drop
+        dropzone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        
+        dropzone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+        });
+        
+        dropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            
+            const files = Array.from(e.dataTransfer.files).filter(f => 
+                f.type.startsWith('image/')
+            );
+            
+            selectedFiles = files;
+            updatePreview();
+        });
+        
+        // Form submit
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (selectedFiles.length === 0) return;
+            
+            const submitBtn = document.getElementById('upload-submit-btn');
+            const statusDiv = document.getElementById('upload-status');
+            
+            submitBtn.disabled = true;
+            submitBtn.querySelector('.btn-text').style.display = 'none';
+            submitBtn.querySelector('.btn-loading').style.display = 'inline';
+            
+            const formData = new FormData();
+            formData.append('point_id', pointId);
+            
+            selectedFiles.forEach(file => {
+                formData.append('gallery_images[]', file);
+            });
+            
+            fetch('/admin/maps/api/gallery/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                submitBtn.disabled = false;
+                submitBtn.querySelector('.btn-text').style.display = 'inline';
+                submitBtn.querySelector('.btn-loading').style.display = 'none';
+                
+                if (data.total_uploaded > 0) {
+                    // Add new images to gallery
+                    data.uploaded.forEach(img => {
+                        galleryImages.push(img);
+                        addImageToGrid(img);
+                    });
+                    
+                    updateGalleryCount();
+                    hideEmptyGalleryMessage();
+                }
+                
+                // Show status
+                statusDiv.style.display = 'block';
+                if (data.errors && data.errors.length > 0) {
+                    statusDiv.className = 'upload-status warning';
+                    statusDiv.innerHTML = `
+                        <p>✅ ${data.total_uploaded} image(s) ajoutée(s)</p>
+                        <p>⚠️ Erreurs :</p>
+                        <ul>${data.errors.map(e => `<li>${e}</li>`).join('')}</ul>
+                    `;
+                } else {
+                    statusDiv.className = 'upload-status success';
+                    statusDiv.textContent = `✅ ${data.total_uploaded} image(s) ajoutée(s) avec succès !`;
+                    
+                    // Auto-close after success
+                    setTimeout(() => {
+                        closeUploadModal();
+                    }, 1500);
+                }
+                
+                // Reset form
+                selectedFiles = [];
+                updatePreview();
+                document.getElementById('gallery-files-input').value = '';
+            })
+            .catch(error => {
+                submitBtn.disabled = false;
+                submitBtn.querySelector('.btn-text').style.display = 'inline';
+                submitBtn.querySelector('.btn-loading').style.display = 'none';
+                
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'upload-status error';
+                statusDiv.textContent = '❌ Erreur de connexion au serveur';
+                
+                console.error(error);
+            });
+        });
+    });
+    
+    function addImageToGrid(imageData) {
+        const grid = document.querySelector('.gallery-grid');
+        if (!grid) {
+            // Create grid if it doesn't exist
+            const galleryBox = document.querySelector('.gallery-section .content-box');
+            const emptyMsg = galleryBox.querySelector('.gallery-empty');
+            if (emptyMsg) emptyMsg.remove();
+            
+            const newGrid = document.createElement('div');
+            newGrid.className = 'gallery-grid';
+            galleryBox.appendChild(newGrid);
+        }
+        
+        const targetGrid = document.querySelector('.gallery-grid');
+        const index = galleryImages.length - 1;
+        
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.dataset.filename = imageData.filename;
+        item.dataset.name = imageData.name;
+        item.onclick = function() { openGalleryLightbox(index); };
+        
+        item.innerHTML = `
+            <img src="${imageData.src}" alt="${imageData.name}">
+            <div class="gallery-item-name">${imageData.name}</div>
+        `;
+        
+        targetGrid.appendChild(item);
+    }
+    
+    function updateGalleryCount() {
+        const h3 = document.querySelector('.gallery-section h3');
+        if (h3) {
+            const addBtn = h3.querySelector('.gallery-add-btn');
+            const btnHtml = addBtn ? addBtn.outerHTML : '';
+            h3.innerHTML = `📸 Galerie (${galleryImages.length} image${galleryImages.length > 1 ? 's' : ''}) ${btnHtml}`;
+        }
+    }
+    
+    function showEmptyGalleryMessage() {
+        const galleryBox = document.querySelector('.gallery-section .content-box');
+        const grid = galleryBox.querySelector('.gallery-grid');
+        if (grid) grid.remove();
+        
+        const p = document.createElement('p');
+        p.className = 'gallery-empty';
+        p.textContent = isAdmin ? 'Aucune image dans la galerie. Cliquez sur "Ajouter" pour en ajouter.' : 'Aucune image dans la galerie.';
+        galleryBox.appendChild(p);
+    }
+    
+    function hideEmptyGalleryMessage() {
+        const emptyMsg = document.querySelector('.gallery-empty');
+        if (emptyMsg) emptyMsg.remove();
+    }
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        const lightbox = document.getElementById('gallery-lightbox');
+        const uploadModal = document.getElementById('upload-modal');
+        
+        if (uploadModal && uploadModal.classList.contains('show')) {
+            if (e.key === 'Escape') {
+                closeUploadModal();
+            }
+            return;
+        }
+        
+        if (lightbox && lightbox.classList.contains('show')) {
+            if (e.key === 'Escape') {
+                closeGalleryLightbox();
+            } else if (e.key === 'ArrowLeft') {
+                navigateLightbox(-1);
+            } else if (e.key === 'ArrowRight') {
+                navigateLightbox(1);
+            }
+        }
+    });
+</script>
+{% endblock %}

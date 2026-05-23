@@ -12,8 +12,14 @@
     {# TODO: add a button to scroll to the top of the page, appearing when the page isn't at the top, do the same with a down button #}
     {# TODO: check every templates and make sure every scripts are not in the templates but in public/js/ then add it to the copilot-instructions.md #}
     {# TODO: check every templates and make sure every styles are not in the templates but in public/css/ then add it to the copilot-instructions.md if necessary #}
-
+    {# TODO: make the additional names of the places be displayed one below the other instead of being separated by commas #}
     <body>
+        {% if is_granted('ROLE_PREVIOUS_ADMIN') %}
+        <div id="impersonation-banner">
+            ⚠️ You are impersonating <strong>{{ app.user.username }}</strong>
+            <a href="{{ path(app.request.get('_route', 'homepage'), app.request.get('_route_params', {})|merge({'_su': '_exit'})) }}">Exit impersonation</a>
+        </div>
+        {% endif %}
         <div id="global">
             <!-- Header -->
             <div id="header">
@@ -53,8 +59,8 @@
                                     </div>
                                 </li>
                                 <li class="dropdownFirstLevel" role="none">
-                                    <div class="liIntro disabled" role="menuitem" tabindex="-1" title="Coming soon">
-                                        <span>🗺️ Map View</span>
+                                    <div class="liIntro" onclick="window.location.href='{{ path('map_index') }}'" role="menuitem" tabindex="-1">
+                                        <span>🗺️ Carte Interactive</span>
                                     </div>
                                 </li>
                                 {% if is_granted('ROLE_ADMIN') %}

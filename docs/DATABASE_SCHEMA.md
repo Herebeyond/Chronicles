@@ -107,6 +107,35 @@
 - `description` (longtext, nullable)
 - `created_at` (datetime, NOT NULL, immutable)
 
+### `maps` table
+- `id` (int, AUTO_INCREMENT, PRIMARY KEY)
+- `name` (varchar(255), NOT NULL)
+- `image_file` (varchar(255), nullable)
+- `description` (longtext, nullable)
+- `created_at` (datetime, NOT NULL, immutable)
+- `updated_at` (datetime, nullable, immutable)
+
+### `interest_point_types` table
+- `id` (int, AUTO_INCREMENT, PRIMARY KEY)
+- `name` (varchar(100), NOT NULL)
+- `color` (varchar(7), NOT NULL, default '#ff4444')
+- `icon` (varchar(50), nullable) - Emoji or icon identifier
+- `created_at` (datetime, NOT NULL, immutable)
+
+### `interest_points` table
+- `id` (int, AUTO_INCREMENT, PRIMARY KEY)
+- `map_id` (int, NOT NULL, FOREIGN KEY to maps.id, ON DELETE CASCADE)
+- `type_id` (int, nullable, FOREIGN KEY to interest_point_types.id, ON DELETE SET NULL)
+- `name` (varchar(255), NOT NULL)
+- `description` (longtext, nullable)
+- `x_coordinate` (decimal(10,6), NOT NULL) - Percentage (0-100)
+- `y_coordinate` (decimal(10,6), NOT NULL) - Percentage (0-100)
+- `other_names` (longtext, nullable)
+- `main_image` (varchar(255), nullable) - Stored in `public/images/places/`
+- `gallery` (json, nullable) - Array of `{filename, name}` objects, stored in `public/images/places/gallery/`
+- `created_at` (datetime, NOT NULL, immutable)
+- `updated_at` (datetime, nullable, immutable)
+
 ## Entity Relationships
 
 - **Species** (1:Many) **→** **Races** (Many:1) **Species**
@@ -116,6 +145,8 @@
 - **User** (Many:Many) **←→** **Role** - Users can have multiple roles, roles can be assigned to multiple users
 - **Idea** (Self-referential) **→** **Parent Idea** (Many:1) - Ideas can have parent-child relationships for hierarchical organization
 - **WorldEvent** - Standalone entity for tracking historical events with custom calendar dates
+- **Map** (1:Many) **→** **InterestPoint** (Many:1) **Map** - Maps contain multiple points of interest
+- **InterestPointType** (1:Many) **→** **InterestPoint** (Many:1) **Type** (nullable) - Points can optionally have a type
 
 ## Key Database Rules
 
@@ -127,6 +158,7 @@
 6. **Default roles are created by migrations** - ROLE_USER, ROLE_MODERATOR, ROLE_ADMIN, ROLE_SUPER_ADMIN
 7. **No lifespan, homeworld, or other extended race properties exist** - templates should not reference these
 8. **World events use custom calendar system** - Dates are stored as year/month/day integers, not DateTime objects
+9. **Interest point coordinates are percentages** - Values from 0-100 representing position on map image
 
 ## Enumeration Values
 
@@ -161,6 +193,7 @@
 - `Version20251215150253` - User roles many-to-many relationship
 - `Version20251215154313` - User avatar support
 - `Version20251215160251` - Role descriptions
+- `Version20260118225509` - Maps and interest points tables with default types
 
 ## Notes
 

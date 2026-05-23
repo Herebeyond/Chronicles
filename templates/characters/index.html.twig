@@ -52,36 +52,37 @@
         </div>
     {% else %}
         <!-- Characters display in hierarchical structure like the old project -->
-        {% for species in species %}
+        {% for specie in species %}
             {% set species_characters = [] %}
             {% for character in characters %}
-                {% if character.species and character.species.id == species.id %}
+                {% if character.species and character.species.id == specie.id %}
                     {% set species_characters = species_characters|merge([character]) %}
                 {% endif %}
             {% endfor %}
             
             {% if species_characters|length > 0 %}
                 <div class="species-item">
-                    <span class="species-name" id="specie-{{ species.id }}">{{ species.name }}</span>
+                    <span class="species-name" id="specie-{{ specie.id }}">{{ specie.name }}</span>
                     
                     <ul class="races-list">
                         {% set races_with_characters = {} %}
                         {% for character in species_characters %}
-                            {% set race_id = character.race ? character.race.id : 'no_race' %}
+                            {% set race_id = character.race ? ('race_' ~ character.race.id) : 'no_race' %}
+                            {% set race_id_display = character.race ? character.race.id : 'no_race' %}
                             {% set race_name = character.race ? character.race.name : 'Sans race' %}
                             {% if not races_with_characters[race_id] is defined %}
-                                {% set races_with_characters = races_with_characters|merge({(race_id): {'name': race_name, 'characters': []}}) %}
+                                {% set races_with_characters = races_with_characters|merge({(race_id): {'name': race_name, 'id_display': race_id_display, 'characters': []}}) %}
                             {% endif %}
                             {% set temp_chars = races_with_characters[race_id]['characters']|merge([character]) %}
-                            {% set races_with_characters = races_with_characters|merge({(race_id): {'name': race_name, 'characters': temp_chars}}) %}
+                            {% set races_with_characters = races_with_characters|merge({(race_id): {'name': race_name, 'id_display': race_id_display, 'characters': temp_chars}}) %}
                         {% endfor %}
                         
                         {% for race_id, race_data in races_with_characters %}
-                            <li class="race-item" data-race-id="{{ race_id }}">
-                                <span class="race-name" id="race-{{ race_id }}">{{ race_data.name }}</span>
+                            <li class="race-item" data-race-id="{{ race_data.id_display }}">
+                                <span class="race-name" id="race-{{ race_data.id_display }}">{{ race_data.name }}</span>
                                 <img class="small-icon-list" src="{{ asset('images/icons/dropdown-arrow.svg') }}">
                                 
-                                <ul class="characters-list" id="characters-{{ race_id }}" style="display: none;">
+                                <ul class="characters-list" id="characters-{{ race_data.id_display }}" style="display: none;">
                                     {% for character in race_data.characters %}
                                         <li class="character-item" onclick="window.location.href='{{ path('characters_show', {characterId: character.id}) }}'">
                                             <span>{{ character.name }}</span>
@@ -125,11 +126,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-        </div>
-    </div>
-    {% endif %}
-{% endif %}
-
 {% endblock %}
 
 {% block javascripts %}
@@ -140,11 +136,4 @@ document.querySelector('select[name="species"]').addEventListener('change', func
     this.form.submit();
 });
 </script>
-{% endblock %}
-            </div>
-        </div>
-
-        {% for race_name, race_data in species_data.races %}
-        <div class="race-section" style="background: white; border-left: 4px solid #3498db; padding: 1.5rem; margin-bottom: 1rem; border-radius: 0 8px 8px 0;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
 {% endblock %}

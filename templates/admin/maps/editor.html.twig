@@ -1,0 +1,219 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🔧 Éditeur de Carte - {{ map.name }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/map.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="map-editor-container">
+    <!-- Admin Help Icon with Tooltip -->
+    <div class="map-help-container" id="admin-help-container">
+        <div class="map-help-icon admin-help-icon" id="admin-help-trigger" title="Cliquez pour les instructions">
+            <span>?</span>
+        </div>
+        <div class="map-help-tooltip admin-help-tooltip" id="admin-help-content">
+            <div class="notification-content">
+                <h3>🔧 Éditeur de Carte Interactif</h3>
+                <p><strong>Instructions :</strong></p>
+                <ul>
+                    <li>Cliquez sur "Mode Ajout" pour activer l'ajout de points</li>
+                    <li>Cliquez sur "Mode Déplacement" pour déplacer les points</li>
+                    <li>Sélectionnez un type dans le menu déroulant</li>
+                    <li>Cliquez sur la carte pour ajouter un point d'intérêt</li>
+                    <li>Survolez les points pour voir leurs informations</li>
+                    <li><strong>Cliquez une fois sur un point pour le modifier</strong></li>
+                    <li>Appuyez sur Échap pour désactiver les modes</li>
+                    <li><strong>Important :</strong> Utilisez "Sauvegarder" pour enregistrer les changements</li>
+                </ul>
+            </div>
+            <button class="tooltip-close" onclick="hideAdminHelp()">&times;</button>
+        </div>
+    </div>
+    
+    <div class="map-admin-container">
+        <h1 class="map-admin-title">🔧 Éditeur - {{ map.name }}</h1>
+        
+        <!-- Navigation -->
+        <div class="editor-navigation">
+            <a href="{{ path('admin_maps_index') }}" class="btn btn-secondary">← Retour à la gestion</a>
+            <a href="{{ path('map_view', {id: map.id}) }}" class="btn btn-secondary">👁️ Voir la carte</a>
+        </div>
+        
+        <!-- Map Selection Section -->
+        <div class="map-selector-section admin-style">
+            <h3>🗺️ Sélection de la carte</h3>
+            <div class="map-selector-controls">
+                <div class="map-selector-group">
+                    <label for="map-selector">Carte actuelle :</label>
+                    <select id="map-selector" class="map-select" onchange="changeEditorMap(this.value)">
+                        {% for m in maps %}
+                            <option value="{{ m.id }}" 
+                                    data-image="{{ m.imageFile ? asset('images/maps/' ~ m.imageFile) : asset('images/maps/default-map.jpg') }}"
+                                    {% if m.id == map.id %}selected{% endif %}>
+                                {{ m.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="map-info" class="map-info">
+                    {{ points|length }} point(s) d'intérêt
+                </div>
+            </div>
+        </div>
+        
+        <!-- Editor Controls -->
+        <div id="map-admin-controls" class="map-admin-controls">
+            <div class="controls-layout">
+                <!-- Point Management Section -->
+                <div class="control-section">
+                    <h3>Ajouter un point d'intérêt</h3>
+                    <div class="control-group">
+                        <label for="poi-name">Nom du lieu :</label>
+                        <input type="text" id="poi-name" placeholder="Ex: Citadelle des Elfes" class="form-control">
+                    </div>
+                    <div class="control-group">
+                        <label for="poi-description">Description :</label>
+                        <textarea id="poi-description" placeholder="Description du lieu..." class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="control-group">
+                        <label for="poi-type">Type :</label>
+                        <select id="poi-type" class="form-control">
+                            <option value="">Sélectionner un type...</option>
+                            {% for type in types %}
+                                <option value="{{ type.name }}" data-color="{{ type.color }}">
+                                    {{ type.icon }} {{ type.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="control-buttons">
+                        <button class="btn btn-mode" id="add-mode-btn" onclick="toggleAddMode()">
+                            Mode Ajout: <span id="mode-status">Inactif</span>
+                        </button>
+                        <button class="btn btn-mode" id="move-mode-btn" onclick="toggleMoveMode()">
+                            Mode Déplacement: <span id="move-status">Inactif</span>
+                        </button>
+                    </div>
+                    
+                    <div class="control-buttons save-buttons">
+                        <button class="btn btn-primary" id="save-btn" onclick="saveAllPoints()">
+                            💾 Sauvegarder
+                        </button>
+                        <button class="btn btn-danger" onclick="clearAllPoints()">
+                            🗑️ Tout supprimer
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Type Management Section -->
+                <div class="control-section types-section">
+                    <h3>Types disponibles</h3>
+                    <div id="types-list" class="types-list">
+                        {% for type in types %}
+                            <div class="type-item">
+                                <span class="type-color" style="background-color: {{ type.color }};"></span>
+                                <span class="type-icon">{{ type.icon }}</span>
+                                <span class="type-name">{{ type.name }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{{ path('admin_maps_types_new') }}" class="btn btn-small btn-secondary">
+                        ➕ Nouveau type
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interactive Map -->
+        <div id="interactive-map-container" class="interactive-map-container editor-mode">
+            <img id="interactive-map-image" 
+                 src="{{ map.imageFile ? asset('images/maps/' ~ map.imageFile) : asset('images/maps/default-map.jpg') }}" 
+                 alt="{{ map.name }}">
+            <div id="interactive-map-overlay" class="interactive-map-overlay"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Point Edit Modal -->
+<div id="point-edit-modal" class="point-edit-modal">
+    <div class="point-edit-modal-content">
+        <div class="point-edit-modal-header">
+            <h2>📍 Modifier le point d'intérêt</h2>
+            <button type="button" class="point-edit-modal-close" onclick="closePointEditModal()">&times;</button>
+        </div>
+        <div class="point-edit-modal-body">
+            <div class="form-group">
+                <label for="edit-poi-name">Nom du lieu :</label>
+                <input type="text" id="edit-poi-name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="edit-poi-description">Description :</label>
+                <textarea id="edit-poi-description" class="form-control" rows="5"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit-poi-type">Type :</label>
+                <select id="edit-poi-type" class="form-control">
+                    <option value="">Sélectionner un type...</option>
+                    {% for type in types %}
+                        <option value="{{ type.name }}" data-color="{{ type.color }}">
+                            {{ type.icon }} {{ type.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="point-edit-modal-footer">
+            <button type="button" class="btn btn-primary" onclick="savePointEdit()">💾 Enregistrer</button>
+            <button type="button" class="btn btn-info" onclick="viewPointDetails()">📋 Voir détails</button>
+            <button type="button" class="btn btn-danger" onclick="deletePointFromModal()">🗑️ Supprimer</button>
+            <button type="button" class="btn btn-secondary" onclick="closePointEditModal()">❌ Annuler</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // Configuration
+    const CONFIG = {
+        mapId: {{ map.id }},
+        apiSaveUrl: '{{ path('admin_maps_api_save_points') }}',
+        apiDeleteUrl: '{{ path('admin_maps_api_delete_point') }}',
+        apiUpdateUrl: '{{ path('admin_maps_api_update_point') }}',
+        apiClearUrl: '{{ path('admin_maps_api_clear_points') }}',
+        placeDetailUrl: '{{ path('map_place_detail', {id: 0}) }}'.replace('/0', '/'),
+    };
+    
+    // Initial points from database
+    const initialPoints = [
+        {% for point in points %}
+        {
+            id: '{{ point.id }}',
+            database_id: {{ point.id }},
+            name: '{{ point.name|escape('js') }}',
+            description: '{{ point.description|escape('js') }}',
+            type: '{{ point.type ? point.type.name|escape('js') : '' }}',
+            x: {{ point.xCoordinate }},
+            y: {{ point.yCoordinate }},
+            color: '{{ point.type ? point.type.color : '#ff4444' }}'
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    // Point types
+    const pointTypes = [
+        {% for type in types %}
+        {
+            id: {{ type.id }},
+            name: '{{ type.name|escape('js') }}',
+            color: '{{ type.color }}',
+            icon: '{{ type.icon|escape('js') }}'
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+</script>
+<script src="{{ asset('js/map-editor.js') }}"></script>
+{% endblock %}

@@ -75,14 +75,6 @@ class RaceType extends AbstractType
                     ])
                 ]
             ])
-            ->add('icon', TextType::class, [
-                'label' => 'Current Icon',
-                'required' => false,
-                'attr' => [
-                    'readonly' => true,
-                    'class' => 'form-input readonly-input'
-                ]
-            ])
             ->add('species', EntityType::class, [
                 'class' => Species::class,
                 'choice_label' => 'name',

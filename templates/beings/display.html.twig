@@ -194,14 +194,14 @@
 
     <!-- Action buttons -->
     <div class="display-actions">
-        <button class="btn-back" onclick="window.history.back()">← Retour</button>
+        <button class="btn-back-gray" onclick="window.history.back()">← Retour</button>
         {% if is_granted('ROLE_ADMIN') %}
         <div class="admin-actions">
-            <button class="btn-edit" onclick="openEditModal('species', {{ species.id }})">
+            <button class="btn-edit-yellow" onclick="openEditModal('species', {{ species.id }})">
                 Modifier l'Espèce
             </button>
             {% if race %}
-            <button class="btn-edit" onclick="openEditModal('race', {{ race.id }})">
+            <button class="btn-edit-yellow" onclick="openEditModal('race', {{ race.id }})">
                 Modifier la Race
             </button>
             {% endif %}
@@ -212,7 +212,7 @@
 
 <!-- Edit Modal -->
 {% if is_granted('ROLE_ADMIN') %}
-<div id="editModal" class="modal" style="display: none;" onclick="closeEditModal()">
+<div id="editModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999999;" onclick="closeEditModal()">
     <div class="modal-content modal-large" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h2 id="editModalTitle">✏️ Modifier</h2>
@@ -290,10 +290,10 @@ function openEditModal(type, id) {
     // Set title based on type
     if (type === 'species') {
         modalTitle.textContent = '✏️ Modifier l\'Espèce';
-        iframe.src = '/admin/species-management/species/' + id + '/edit';
+        iframe.src = '/admin/species-management/species/' + id + '/edit?iframe=1';
     } else if (type === 'race') {
         modalTitle.textContent = '✏️ Modifier la Race';
-        iframe.src = '/admin/species-management/race/' + id + '/edit';
+        iframe.src = '/admin/species-management/race/' + id + '/edit?iframe=1';
     }
     
     modal.style.display = 'block';
@@ -316,61 +316,4 @@ window.addEventListener('message', function(event) {
 });
 {% endif %}
 </script>
-
-<style>
-.clickable {
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.clickable:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.admin-actions {
-    display: flex;
-    gap: 1rem;
-}
-
-.btn-edit {
-    background: #ffc107;
-    color: #212529;
-    text-decoration: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-.btn-edit:hover {
-    background: #e0a800;
-    text-decoration: none;
-    color: #212529;
-}
-
-.btn-back {
-    background: #6c757d;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-.btn-back:hover {
-    background: #545b62;
-}
-
-.display-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid #eee;
-}
-</style>
 {% endblock %}

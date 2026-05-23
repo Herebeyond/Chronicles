@@ -16,7 +16,7 @@ The backup script creates timestamped backups in `backups/database/` and maintai
 Chronicles is a Symfony web application for managing fictional characters, species, and races in a fantasy universe. Built with Docker, FrankenPHP, and MySQL.
 
 **Core Conventions:**
-- French language UI and content
+- English language UI and content
 - Fantasy/medieval theme with rich character lore
 - Hierarchical data model: Species → Races → Characters
 - Nullable-first approach for optional attributes
@@ -254,5 +254,79 @@ Chronological event tracker with horizontal Gantt-style timeline and custom 360-
 - **Ongoing events**: Use NULL end dates, not far-future dates
 - **Start dates**: Must be before end dates (validation enforced)
 - **Color coding**: Use distinct hex colors for different event types
+
+## Interactive Map System
+
+World map viewer with clickable points of interest and admin editing functionality.
+
+### Core Features
+- **Multiple Maps**: Support for different map layers (overworld, underground, aerial, regional)
+- **Interest Points**: Clickable locations with types, colors, descriptions, and optional detail pages
+- **Point Types**: Categorized locations (City, Temple, Dungeon, Forest, etc.) with customizable colors/icons
+- **Admin Editor**: Interactive point placement with add/move modes, drag-and-drop positioning
+- **Place Details**: Wikipedia-style info pages with descriptions, other names, and image galleries
+
+### Entities & Relationships
+- **Map** → **InterestPoint** (OneToMany, orphanRemoval)
+- **InterestPointType** → **InterestPoint** (OneToMany, nullable)
+- Coordinates stored as DECIMAL(10,6) percentages (0-100 range)
+
+### Main Routes
+**Public:**
+- `/map` - Map index/selection page
+- `/map/{id}` - View specific map with points
+- `/map/place/{id}` - Place detail page
+
+**Admin (ROLE_ADMIN required):**
+- `/admin/maps` - Map management dashboard
+- `/admin/maps/new`, `/admin/maps/{id}/edit` - Map CRUD
+- `/admin/maps/{id}/editor` - Interactive point editor
+- `/admin/maps/types/new`, `/admin/maps/types/{id}/edit` - Type CRUD
+- `/admin/maps/points/new`, `/admin/maps/points/{id}/edit` - Point form CRUD
+
+**API Endpoints:**
+- `/map/api/maps` - List all maps (JSON)
+- `/map/api/points/{mapId}` - Points for a map (JSON)
+- `/map/api/types` - All point types (JSON)
+- `/admin/maps/api/save-points` - Save editor points (POST)
+- `/admin/maps/api/delete-point` - Delete point (POST)
+- `/admin/maps/api/clear-points` - Clear all map points (POST)
+
+### File Storage
+- **Map images**: `public/images/maps/` (max 10MB, JPG/PNG/GIF/WebP)
+- **Place main images**: `public/images/places/` (max 5MB, JPG/PNG/GIF/WebP)
+- **Place gallery images**: `public/images/places/gallery/` (max 5MB each)
+
+### Gallery System
+- **Upload Modal**: Admins can add gallery images directly from the place detail page via a modal popup (no need to go through the edit form)
+- **Drag & Drop**: Upload modal supports drag-and-drop for easy multi-file selection
+- **Multiple upload**: Multiple images can be selected and uploaded at once
+- **Error reporting**: If an upload fails, the error message includes the specific filename that caused the issue
+- **Image names**: Each gallery image has a display name (defaults to filename, editable by admins)
+- **Lightbox viewer**: Clicking a gallery image opens fullscreen view with navigation
+- **Admin controls**: In lightbox, admins can rename images (✏️ button) or delete them (🗑️ button)
+- **Keyboard navigation**: Arrow keys navigate between images, Escape closes lightbox
+- **JSON storage**: Gallery stored as JSON array of `{filename, name}` objects in `interest_points.gallery`
+
+**Gallery API Endpoints:**
+- `/admin/maps/api/gallery/upload` - Upload gallery images via modal (POST, requires point_id, files[])
+- `/admin/maps/api/gallery/rename` - Rename gallery image (POST, requires point_id, filename, new_name)
+- `/admin/maps/api/gallery/delete` - Delete gallery image (POST, requires point_id, filename)
+
+### JavaScript Files
+- `public/js/map-view.js` - Public map viewing (point rendering, tooltips, navigation)
+- `public/js/map-editor.js` - Admin editor (add/move modes, drag-drop, save/delete)
+
+### Default Data (Migration)
+- 15 default French point types with colors: Ville, Temple, Donjon, Forêt, etc.
+- One default "Carte du Monde" map
+
+### Editor Usage
+1. Upload map image in Maps management
+2. Open Editor for the map
+3. Enable "Mode Ajout" to click and place points
+4. Enable "Mode Déplacement" to drag points
+5. Click existing points to edit details
+6. Save all points with the save button
 
 When working with this codebase, prioritize maintaining the hierarchical Species→Race→Character model and the rich French-language fantasy theme throughout all additions.

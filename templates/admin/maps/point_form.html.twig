@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }} - Administration{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/map.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="admin-form-container">
+    <div class="form-header">
+        <a href="{{ path('admin_maps_editor', {id: point ? point.map.id : 1}) }}" class="back-link">← Retour à l'éditeur</a>
+        <h1>{{ title }}</h1>
+    </div>
+    
+    {{ form_start(form, {'attr': {'class': 'admin-form', 'enctype': 'multipart/form-data'}}) }}
+        <div class="form-group">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name) }}
+            {{ form_errors(form.name) }}
+        </div>
+        
+        <div class="form-group">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description) }}
+            {{ form_errors(form.description) }}
+        </div>
+        
+        <div class="form-group">
+            {{ form_label(form.otherNames) }}
+            {{ form_widget(form.otherNames) }}
+            {{ form_errors(form.otherNames) }}
+            {{ form_help(form.otherNames) }}
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group half">
+                {{ form_label(form.map) }}
+                {{ form_widget(form.map) }}
+                {{ form_errors(form.map) }}
+            </div>
+            
+            <div class="form-group half">
+                {{ form_label(form.type) }}
+                {{ form_widget(form.type) }}
+                {{ form_errors(form.type) }}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            {{ form_label(form.mainImageUpload) }}
+            {% if point and point.mainImage %}
+                <div class="current-image">
+                    <p>Image actuelle :</p>
+                    <img src="{{ asset('images/places/' ~ point.mainImage) }}" alt="{{ point.name }}" class="preview-image">
+                </div>
+            {% endif %}
+            {{ form_widget(form.mainImageUpload) }}
+            {{ form_errors(form.mainImageUpload) }}
+            {{ form_help(form.mainImageUpload) }}
+        </div>
+        
+        <div class="form-row coordinates-row">
+            <div class="form-group half">
+                <label>Coordonnée X (%)</label>
+                {{ form_widget(form.xCoordinate, {'attr': {'type': 'number', 'step': '0.000001', 'min': '0', 'max': '100'}}) }}
+            </div>
+            <div class="form-group half">
+                <label>Coordonnée Y (%)</label>
+                {{ form_widget(form.yCoordinate, {'attr': {'type': 'number', 'step': '0.000001', 'min': '0', 'max': '100'}}) }}
+            </div>
+        </div>
+        <p class="help-text">💡 Les coordonnées peuvent être définies plus facilement via l'éditeur interactif de carte.</p>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                💾 {{ point ? 'Enregistrer les modifications' : 'Créer le lieu' }}
+            </button>
+            <a href="{{ path('admin_maps_index') }}" class="btn btn-secondary">
+                ❌ Annuler
+            </a>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}
