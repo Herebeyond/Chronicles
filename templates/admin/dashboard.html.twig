@@ -122,6 +122,23 @@
                     </div>
                 </article>
 
+                <article class="admin-module admin-module--maps">
+                    <header class="admin-module__head">
+                        <span class="admin-module__icon" aria-hidden="true">🗺️</span>
+                        <h2 class="admin-module__title">Cartes &amp; Lieux</h2>
+                    </header>
+                    <p class="admin-module__desc">
+                        Gérez les cartes, l'éditeur interactif, les types de lieux et les points d'intérêt.
+                    </p>
+                    <div class="admin-module__actions">
+                        <a href="{{ path('admin_maps_index') }}" class="btn-admin btn-admin--primary">Dashboard Cartes</a>
+                        <a href="{{ path('admin_maps_new') }}" class="btn-admin btn-admin--success">+ Carte</a>
+                        <a href="{{ path('admin_maps_types_new') }}" class="btn-admin btn-admin--ghost">+ Type de lieu</a>
+                        <a href="{{ path('admin_maps_points_new') }}" class="btn-admin btn-admin--ghost">+ Lieu</a>
+                        <a href="{{ path('map_index') }}" class="btn-admin btn-admin--ghost">Vue publique</a>
+                    </div>
+                </article>
+
                 <article class="admin-module admin-module--ideas">
                     <header class="admin-module__head">
                         <span class="admin-module__icon" aria-hidden="true">💡</span>

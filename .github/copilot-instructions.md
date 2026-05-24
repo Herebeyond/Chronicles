@@ -333,4 +333,10 @@ World map viewer with clickable points of interest and admin editing functionali
 5. Click existing points to edit details
 6. Save all points with the save button
 
+### Map Navigation Access (May 2026)
+- Restored direct access to all map options from admin and global navigation:
+  - Admin dashboard now includes a dedicated **Cartes & Lieux** module with shortcuts to map dashboard, create map, create type, create point, and public map view.
+  - Global navigation and connected-user dropdown include **Gestion Cartes** linking to `/admin/maps`.
+- If map options seem missing, first check access through `/admin/maps` and then clear cache (`docker compose exec php php bin/console cache:clear`).
+
 When working with this codebase, prioritize maintaining the hierarchical Species→Race→Character model and the rich French-language fantasy theme throughout all additions.

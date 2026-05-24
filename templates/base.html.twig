@@ -72,6 +72,11 @@
                                     </div>
                                 </li>
                                 <li class="dropdownFirstLevel" role="none">
+                                    <div class="liIntro" onclick="window.location.href='{{ path('admin_maps_index') }}'" role="menuitem" tabindex="-1">
+                                        <span>🗺️ Gestion Cartes</span>
+                                    </div>
+                                </li>
+                                <li class="dropdownFirstLevel" role="none">
                                     <div class="liIntro" onclick="window.location.href='{{ path('admin_users_index') }}'" role="menuitem" tabindex="-1">
                                         <span>👥 Gestion Utilisateurs</span>
                                     </div>
@@ -119,6 +124,9 @@
                                 <li class="menu-separator" role="none"></li>
                                 <li role="none">
                                     <a href="{{ path('admin_dashboard') }}" role="menuitem">Administration</a>
+                                </li>
+                                <li role="none">
+                                    <a href="{{ path('admin_maps_index') }}" role="menuitem">Gestion des cartes</a>
                                 </li>
                                 <li role="none">
                                     <a href="{{ path('admin_users_index') }}" role="menuitem">Gestion des utilisateurs</a>
