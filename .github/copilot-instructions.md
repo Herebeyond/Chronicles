@@ -185,6 +185,7 @@ Seeds database with realistic sample data:
 - **JSON Functions**: DQL doesn't support MySQL JSON functions - use LIKE queries instead
   - `u.roles LIKE '%ROLE_ADMIN%'` instead of `JSON_CONTAINS(u.roles, 'ROLE_ADMIN')`
 - **Entity Properties**: Always verify entity fields exist before using in templates
+- **Empty Controller Files**: Do not leave empty files in `src/Controller/` (or subfolders). Symfony attribute route loading can fail with autoloader errors if the expected class is missing.
 - **Docker Containers**: Check with `docker compose ps`, restart with `docker compose up --wait`
 
 ### Performance
