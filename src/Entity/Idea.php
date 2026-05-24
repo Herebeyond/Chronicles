@@ -47,7 +47,7 @@ class Idea
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $comments = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $inspirationSource = null;
 
     #[ORM\Column(type: Types::INTEGER, nullable: true)]

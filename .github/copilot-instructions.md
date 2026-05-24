@@ -186,6 +186,7 @@ Seeds database with realistic sample data:
   - `u.roles LIKE '%ROLE_ADMIN%'` instead of `JSON_CONTAINS(u.roles, 'ROLE_ADMIN')`
 - **Entity Properties**: Always verify entity fields exist before using in templates
 - **Empty Controller Files**: Do not leave empty files in `src/Controller/` (or subfolders). Symfony attribute route loading can fail with autoloader errors if the expected class is missing.
+- **Ideas inspiration_source**: Keep `ideas.inspiration_source` as TEXT-compatible mapping. Reducing it to `VARCHAR(255)` can fail migrations when existing rows exceed 255 chars.
 - **Docker Containers**: Check with `docker compose ps`, restart with `docker compose up --wait`
 
 ### Performance
