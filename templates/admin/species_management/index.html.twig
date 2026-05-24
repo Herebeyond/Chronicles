@@ -50,39 +50,39 @@
             </div>
 
             {% if species|length > 0 %}
-                <div class="entity-grid">
+                <div class="species-mgmt-grid">
                     {% for speciesItem in species %}
-                        <div class="entity-card">
-                            <div class="entity-header">
+                        <div class="species-mgmt-card">
+                            <div class="species-mgmt-header">
                                 {% if speciesItem.icon %}
                                     <img src="{{ asset('images/species/' ~ speciesItem.icon) }}" 
                                          alt="{{ speciesItem.name }}"
-                                         class="entity-icon"
+                                         class="species-mgmt-icon"
                                          onerror="this.style.display='none'">
                                 {% else %}
-                                    <div class="entity-icon-placeholder">🧬</div>
+                                    <div class="species-mgmt-icon-placeholder">🧬</div>
                                 {% endif %}
-                                <div class="entity-info">
+                                <div class="species-mgmt-info">
                                     <h3>{{ speciesItem.name }}</h3>
-                                    <p class="entity-meta">
+                                    <p class="species-mgmt-meta">
                                         {{ speciesItem.races|length }} race(s) associated
                                     </p>
                                 </div>
                             </div>
 
                             {% if speciesItem.description %}
-                                <div class="entity-description">
+                                <div class="species-mgmt-description">
                                     {{ speciesItem.description|slice(0, 150) }}{% if speciesItem.description|length > 150 %}...{% endif %}
                                 </div>
                             {% endif %}
 
-                            <div class="entity-actions">
+                            <div class="species-mgmt-actions">
                                 <a href="{{ path('admin_species_edit', {'id': speciesItem.id}) }}" 
                                    class="btn btn-sm btn-outline">
                                     ✏️ Edit
                                 </a>
                                 <button class="btn btn-sm btn-danger" 
-                                        onclick="confirmDelete('species', '{{ speciesItem.name }}', {{ speciesItem.id }})">
+                                        onclick="confirmDelete('species', '{{ speciesItem.name|e('js') }}', {{ speciesItem.id }}, '{{ csrf_token('delete_species_' ~ speciesItem.id) }}')">
                                     🗑️ Delete
                                 </button>
                             </div>
@@ -90,8 +90,8 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="empty-state">
-                    <div class="empty-icon">🧬</div>
+                <div class="species-empty-state">
+                    <div class="species-empty-icon">🧬</div>
                     <h3>No Species Found</h3>
                     <p>Start by creating your first species to organize your fictional universe.</p>
                     <a href="{{ path('admin_species_new') }}" class="btn btn-primary">
@@ -113,21 +113,21 @@
             </div>
 
             {% if races|length > 0 %}
-                <div class="entity-grid">
+                <div class="species-mgmt-grid">
                     {% for race in races %}
-                        <div class="entity-card">
-                            <div class="entity-header">
+                        <div class="species-mgmt-card">
+                            <div class="species-mgmt-header">
                                 {% if race.icon %}
                                     <img src="{{ asset('images/races/' ~ race.icon) }}" 
                                          alt="{{ race.name }}"
-                                         class="entity-icon"
+                                         class="species-mgmt-icon"
                                          onerror="this.style.display='none'">
                                 {% else %}
-                                    <div class="entity-icon-placeholder">🎭</div>
+                                    <div class="species-mgmt-icon-placeholder">🎭</div>
                                 {% endif %}
-                                <div class="entity-info">
+                                <div class="species-mgmt-info">
                                     <h3>{{ race.name }}</h3>
-                                    <p class="entity-meta">
+                                    <p class="species-mgmt-meta">
                                         Species: {{ race.species.name }}
                                         <br>
                                         {{ race.characters|length }} character(s)
@@ -136,18 +136,18 @@
                             </div>
 
                             {% if race.description %}
-                                <div class="entity-description">
+                                <div class="species-mgmt-description">
                                     {{ race.description|slice(0, 150) }}{% if race.description|length > 150 %}...{% endif %}
                                 </div>
                             {% endif %}
 
-                            <div class="entity-actions">
+                            <div class="species-mgmt-actions">
                                 <a href="{{ path('admin_race_edit', {'id': race.id}) }}" 
                                    class="btn btn-sm btn-outline">
                                     ✏️ Edit
                                 </a>
                                 <button class="btn btn-sm btn-danger" 
-                                        onclick="confirmDelete('race', '{{ race.name }}', {{ race.id }})">
+                                        onclick="confirmDelete('race', '{{ race.name|e('js') }}', {{ race.id }}, '{{ csrf_token('delete_race_' ~ race.id) }}')">
                                     🗑️ Delete
                                 </button>
                             </div>
@@ -155,8 +155,8 @@
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="empty-state">
-                    <div class="empty-icon">🎭</div>
+                <div class="species-empty-state">
+                    <div class="species-empty-icon">🎭</div>
                     <h3>No Races Found</h3>
                     <p>Create races to add subcategories within your species.</p>
                     <a href="{{ path('admin_race_new') }}" class="btn btn-primary">
@@ -172,34 +172,34 @@
                 <h2>Statistics Overview</h2>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">🧬</div>
-                    <div class="stat-content">
+            <div class="species-stats-grid">
+                <div class="species-stat-card">
+                    <div class="species-stat-icon">🧬</div>
+                    <div class="species-stat-content">
                         <h3>{{ species|length }}</h3>
                         <p>Total Species</p>
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon">🎭</div>
-                    <div class="stat-content">
+                <div class="species-stat-card">
+                    <div class="species-stat-icon">🎭</div>
+                    <div class="species-stat-content">
                         <h3>{{ races|length }}</h3>
                         <p>Total Races</p>
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon">⚔️</div>
-                    <div class="stat-content">
+                <div class="species-stat-card">
+                    <div class="species-stat-icon">⚔️</div>
+                    <div class="species-stat-content">
                         <h3>{{ races|reduce((carry, race) => carry + race.characters|length, 0) }}</h3>
                         <p>Total Characters</p>
                     </div>
                 </div>
 
-                <div class="stat-card">
-                    <div class="stat-icon">📊</div>
-                    <div class="stat-content">
+                <div class="species-stat-card">
+                    <div class="species-stat-icon">📊</div>
+                    <div class="species-stat-content">
                         <h3>{{ races|length > 0 ? (races|reduce((carry, race) => carry + race.characters|length, 0) / races|length)|round(1) : 0 }}</h3>
                         <p>Avg Characters/Race</p>
                     </div>
@@ -214,13 +214,13 @@
                             <div class="species-stat-row">
                                 <div class="species-stat-info">
                                     <strong>{{ speciesItem.name }}</strong>
-                                    <span class="species-stat-meta">
+                                    <span class="species-stat-meta-text">
                                         {{ speciesItem.races|length }} race(s), 
                                         {{ speciesItem.characters|length }} character(s)
                                     </span>
                                 </div>
                                 <div class="species-stat-bar">
-                                    <div class="progress-bar" 
+                                    <div class="species-progress-bar" 
                                          style="width: {{ speciesItem.characters|length > 0 ? (speciesItem.characters|length / races|reduce((carry, race) => carry + race.characters|length, 0) * 100)|round : 0 }}%">
                                     </div>
                                 </div>
@@ -234,13 +234,16 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="modal" style="display: none;">
-    <div class="modal-content">
+<div id="deleteModal" class="species-mgmt-modal" style="display: none;">
+    <div class="species-mgmt-modal-content">
         <h3>Confirm Deletion</h3>
         <p id="deleteMessage"></p>
-        <div class="modal-actions">
+        <div class="species-mgmt-modal-actions">
             <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            <form id="deleteForm" method="POST" style="display: inline;">
+                <input type="hidden" name="_token" id="deleteToken" value="">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
         </div>
     </div>
 </div>
@@ -262,18 +265,15 @@
     });
 
     // Delete confirmation functionality
-    function confirmDelete(type, name, id) {
+    function confirmDelete(type, name, id, token) {
         const modal = document.getElementById('deleteModal');
         const message = document.getElementById('deleteMessage');
-        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const form = document.getElementById('deleteForm');
+        const tokenInput = document.getElementById('deleteToken');
         
         message.textContent = `Are you sure you want to delete the ${type} "${name}"? This action cannot be undone.`;
-        
-        confirmBtn.onclick = function() {
-            // Here you would typically make an AJAX request to delete the entity
-            // For now, we'll redirect to a delete route
-            window.location.href = `/admin/species-management/${type}/${id}/delete`;
-        };
+        form.action = `/admin/species-management/${type}/${id}/delete`;
+        tokenInput.value = token;
         
         modal.style.display = 'flex';
     }
@@ -289,233 +289,4 @@
         }
     });
 </script>
-
-<style>
-    /* Management-specific styles */
-    .management-tabs {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 12px;
-        padding: 0;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
-
-    .tab-buttons {
-        display: flex;
-        background: #f8f9fa;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .tab-button {
-        flex: 1;
-        padding: 1rem 1.5rem;
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        border-bottom: 3px solid transparent;
-    }
-
-    .tab-button:hover {
-        background: #e9ecef;
-    }
-
-    .tab-button.active {
-        background: white;
-        border-bottom-color: #007bff;
-        color: #007bff;
-    }
-
-    .tab-content {
-        display: none;
-        padding: 2rem;
-    }
-
-    .tab-content.active {
-        display: block;
-    }
-
-    .entity-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 1.5rem;
-        margin-top: 1.5rem;
-    }
-
-    .entity-card {
-        background: white;
-        border-radius: 8px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-    }
-
-    .entity-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    }
-
-    .entity-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .entity-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 8px;
-        object-fit: cover;
-    }
-
-    .entity-icon-placeholder {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f8f9fa;
-        border-radius: 8px;
-        font-size: 1.5rem;
-    }
-
-    .entity-info h3 {
-        margin: 0 0 0.25rem 0;
-        font-size: 1.25rem;
-        color: #2c3e50;
-    }
-
-    .entity-meta {
-        margin: 0;
-        color: #6c757d;
-        font-size: 0.9rem;
-    }
-
-    .entity-description {
-        color: #666;
-        margin-bottom: 1rem;
-        line-height: 1.5;
-    }
-
-    .entity-actions {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: flex-end;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .stat-icon {
-        font-size: 2rem;
-        width: 60px;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f8f9fa;
-        border-radius: 50%;
-    }
-
-    .stat-content h3 {
-        margin: 0;
-        font-size: 2rem;
-        color: #2c3e50;
-    }
-
-    .stat-content p {
-        margin: 0;
-        color: #6c757d;
-    }
-
-    .detailed-stats {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .species-stat-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #f8f9fa;
-    }
-
-    .species-stat-row:last-child {
-        border-bottom: none;
-    }
-
-    .species-stat-info {
-        flex: 1;
-    }
-
-    .species-stat-meta {
-        display: block;
-        color: #6c757d;
-        font-size: 0.9rem;
-        margin-top: 0.25rem;
-    }
-
-    .species-stat-bar {
-        width: 100px;
-        height: 8px;
-        background: #f8f9fa;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    .progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #007bff, #0056b3);
-        transition: width 0.3s ease;
-    }
-
-    /* Modal styles */
-    .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-
-    .modal-content {
-        background: white;
-        padding: 2rem;
-        border-radius: 8px;
-        max-width: 400px;
-        width: 90%;
-        text-align: center;
-    }
-
-    .modal-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin-top: 1.5rem;
-    }
-</style>
 {% endblock %}

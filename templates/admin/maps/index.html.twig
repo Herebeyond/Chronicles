@@ -1,0 +1,191 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🗺️ Gestion des Cartes - Administration{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/map.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="admin-maps-container">
+    <h1 class="admin-title">🗺️ Gestion des Cartes Interactives</h1>
+    
+    <div class="admin-layout">
+        <!-- Sidebar Navigation -->
+        <div class="admin-sidebar">
+            <nav class="admin-nav">
+                <a href="#maps-section" class="admin-nav-item active" data-section="maps">
+                    🗺️ Cartes
+                </a>
+                <a href="#types-section" class="admin-nav-item" data-section="types">
+                    🏷️ Types de Lieux
+                </a>
+                <a href="#stats-section" class="admin-nav-item" data-section="stats">
+                    📊 Statistiques
+                </a>
+            </nav>
+            
+            <div class="admin-actions">
+                <a href="{{ path('map_index') }}" class="btn btn-secondary">
+                    👁️ Voir les Cartes
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="admin-content">
+            <!-- Maps Section -->
+            <section id="maps-section" class="admin-section active">
+                <div class="section-header">
+                    <h2>🗺️ Cartes</h2>
+                    <a href="{{ path('admin_maps_new') }}" class="btn btn-primary">
+                        ➕ Nouvelle Carte
+                    </a>
+                </div>
+                
+                <div class="cards-grid">
+                    {% for mapData in maps %}
+                        {% set map = mapData[0] is defined ? mapData[0] : mapData %}
+                        {% set pointCount = mapData.pointCount is defined ? mapData.pointCount : map.interestPoints|length %}
+                        <div class="card">
+                            <div class="card-image">
+                                {% if map.imageFile %}
+                                    <img src="{{ asset('images/maps/' ~ map.imageFile) }}" alt="{{ map.name }}">
+                                {% else %}
+                                    <div class="no-image">🗺️</div>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">{{ map.name }}</h3>
+                                <p class="card-stats">{{ pointCount }} point(s) d'intérêt</p>
+                                {% if map.description %}
+                                    <p class="card-description">{{ map.description|slice(0, 100) }}{% if map.description|length > 100 %}...{% endif %}</p>
+                                {% endif %}
+                            </div>
+                            <div class="card-actions">
+                                <a href="{{ path('admin_maps_editor', {id: map.id}) }}" class="btn btn-small btn-primary">
+                                    🖊️ Éditeur
+                                </a>
+                                <a href="{{ path('admin_maps_edit', {id: map.id}) }}" class="btn btn-small btn-secondary">
+                                    ⚙️ Modifier
+                                </a>
+                                <form action="{{ path('admin_maps_delete', {id: map.id}) }}" method="post" class="inline-form" 
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette carte ? Tous les points d\'intérêt associés seront également supprimés.');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ map.id) }}">
+                                    <button type="submit" class="btn btn-small btn-danger">🗑️</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="no-items">Aucune carte créée. <a href="{{ path('admin_maps_new') }}">Créer une carte</a></p>
+                    {% endfor %}
+                </div>
+            </section>
+            
+            <!-- Types Section -->
+            <section id="types-section" class="admin-section">
+                <div class="section-header">
+                    <h2>🏷️ Types de Lieux</h2>
+                    <a href="{{ path('admin_maps_types_new') }}" class="btn btn-primary">
+                        ➕ Nouveau Type
+                    </a>
+                </div>
+                
+                <div class="types-table-container">
+                    <table class="types-table">
+                        <thead>
+                            <tr>
+                                <th>Couleur</th>
+                                <th>Icône</th>
+                                <th>Nom</th>
+                                <th>Utilisation</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for typeData in types %}
+                                {% set type = typeData[0] is defined ? typeData[0] : typeData %}
+                                {% set pointCount = typeData.pointCount is defined ? typeData.pointCount : type.interestPoints|length %}
+                                <tr>
+                                    <td>
+                                        <span class="type-color-sample" style="background-color: {{ type.color }};"></span>
+                                        <code>{{ type.color }}</code>
+                                    </td>
+                                    <td class="type-icon">{{ type.icon ?: '📍' }}</td>
+                                    <td>{{ type.name }}</td>
+                                    <td>{{ pointCount }} lieu(x)</td>
+                                    <td class="actions">
+                                        <a href="{{ path('admin_maps_types_edit', {id: type.id}) }}" class="btn btn-small btn-secondary">
+                                            ✏️
+                                        </a>
+                                        {% if pointCount == 0 %}
+                                        <form action="{{ path('admin_maps_types_delete', {id: type.id}) }}" method="post" class="inline-form"
+                                              onsubmit="return confirm('Supprimer ce type de lieu ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ type.id) }}">
+                                            <button type="submit" class="btn btn-small btn-danger">🗑️</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="no-items">Aucun type de lieu défini.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Stats Section -->
+            <section id="stats-section" class="admin-section">
+                <div class="section-header">
+                    <h2>📊 Statistiques</h2>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ maps|length }}</div>
+                        <div class="stat-label">Cartes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">
+                            {% set totalPoints = 0 %}
+                            {% for mapData in maps %}
+                                {% set pointCount = mapData.pointCount is defined ? mapData.pointCount : mapData[0].interestPoints|length %}
+                                {% set totalPoints = totalPoints + pointCount %}
+                            {% endfor %}
+                            {{ totalPoints }}
+                        </div>
+                        <div class="stat-label">Points d'intérêt</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ types|length }}</div>
+                        <div class="stat-label">Types de lieux</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // Section navigation
+    document.querySelectorAll('.admin-nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Update active nav item
+            document.querySelectorAll('.admin-nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show corresponding section
+            const sectionId = this.dataset.section + '-section';
+            document.querySelectorAll('.admin-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+        });
+    });
+</script>
+{% endblock %}

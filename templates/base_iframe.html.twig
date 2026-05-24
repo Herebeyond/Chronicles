@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Edit{% endblock %}</title>
+        <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+        {% block stylesheets %}{% endblock %}
+        <style>
+            /* Hide Symfony debug toolbar in iframe */
+            .sf-toolbar {
+                display: none !important;
+            }
+            
+            /* Minimal iframe styles - clean form display */
+            body {
+                background: #f8f9fa;
+                margin: 0;
+                padding: 1rem;
+                min-height: auto;
+            }
+            
+            .container {
+                max-width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .admin-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #dee2e6;
+            }
+            
+            .admin-header h1 {
+                margin: 0;
+                font-size: 1.5rem;
+                color: #2c3e50;
+            }
+            
+            .admin-header p {
+                margin: 0.25rem 0 0 0;
+                color: #6c757d;
+                font-size: 0.9rem;
+            }
+            
+            .form-card {
+                background: white;
+                border-radius: 8px;
+                padding: 1.5rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .form-group {
+                margin-bottom: 1rem;
+            }
+            
+            .form-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+                color: #2c3e50;
+            }
+            
+            .form-group input[type="text"],
+            .form-group input[type="file"],
+            .form-group textarea,
+            .form-group select {
+                width: 100%;
+                padding: 0.5rem;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 1rem;
+                box-sizing: border-box;
+            }
+            
+            .form-group textarea {
+                min-height: 100px;
+                resize: vertical;
+            }
+            
+            .form-help {
+                display: block;
+                margin-top: 0.25rem;
+                font-size: 0.85rem;
+                color: #6c757d;
+            }
+            
+            .current-image-preview {
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .current-image-preview h4 {
+                margin: 0 0 0.5rem 0;
+                font-size: 0.9rem;
+                color: #495057;
+            }
+            
+            .current-image-preview img {
+                max-width: 100px;
+                max-height: 100px;
+                border-radius: 4px;
+                object-fit: cover;
+            }
+            
+            .current-image-preview p {
+                margin: 0.5rem 0 0 0;
+                font-size: 0.85rem;
+                color: #6c757d;
+            }
+            
+            .form-actions {
+                display: flex;
+                gap: 0.5rem;
+                justify-content: flex-end;
+                margin-top: 1.5rem;
+                padding-top: 1rem;
+                border-top: 1px solid #dee2e6;
+            }
+            
+            /* Hide the back link in iframe context */
+            .admin-header .btn-secondary {
+                display: none;
+            }
+            
+            /* Success/error messages */
+            .flash-message {
+                padding: 0.75rem 1rem;
+                border-radius: 4px;
+                margin-bottom: 1rem;
+            }
+            
+            .flash-message.success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            
+            .flash-message.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+        </style>
+    </head>
+    <body>
+        {% for message in app.flashes('success') %}
+            <div class="flash-message success">{{ message }}</div>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <div class="flash-message error">{{ message }}</div>
+        {% endfor %}
+        
+        {% block body %}{% endblock %}
+        
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>

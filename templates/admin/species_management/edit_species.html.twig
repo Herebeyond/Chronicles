@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends app.request.query.get('iframe') ? 'base_iframe.html.twig' : 'base.html.twig' %}
 
 {% block title %}Edit Species - Administration{% endblock %}
 

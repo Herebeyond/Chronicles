@@ -73,14 +73,6 @@ class SpeciesType extends AbstractType
                     ])
                 ]
             ])
-            ->add('icon', TextType::class, [
-                'label' => 'Current Icon',
-                'required' => false,
-                'attr' => [
-                    'readonly' => true,
-                    'class' => 'form-input readonly-input'
-                ]
-            ])
         ;
     }
 
