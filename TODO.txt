@@ -269,6 +269,46 @@ UI/UX IMPROVEMENTS:
 - [ ] Add compact/mobile suggestion mode and tap target tuning
 - [ ] Add loading/skeleton state while suggestions are fetched
 
+BEINGS / CHARACTERS / SPECIES-RACES REWORK:
+===========================================
+
+BEINGS + CHARACTERS LISTING CLEANUP:
+-----------------------------------
+- [ ] Rework Beings and Characters pages together because their structures and UX problems are very similar
+- [ ] Reduce visual density on Beings page so it feels less stuffy and easier to scan
+- [ ] Review Characters page for the same “too much information everywhere” feeling and align its hierarchy/spacing with the Beings rework
+- [ ] Audit other public pages to make sure the same cluttered feeling is not present elsewhere
+- [ ] Remove redundant `Voir les détails` button on species cards because clicking the card already performs the same action
+- [ ] Improve race count label grammar so it displays `race` / `races` intelligently depending on the actual count
+
+SPECIES PAGE / RACES DISPLAY:
+-----------------------------
+- [ ] Redesign species detail page to better organize races with cleaner boxes, spacing, and borders
+- [ ] Remove the number of characters associated with each race from the species page display
+- [ ] Reassess visual hierarchy on species pages so the eye knows where to look first
+- [ ] Add full-image viewing for species artwork when clicking the species image, similar to the gallery/lightbox behavior used in map place pages
+- [ ] If full-screen image is too large/complex, provide at least a very large modal/lightbox preview for species images
+
+DATA MODEL / DISPLAY LOGIC:
+---------------------------
+- [ ] Add a Species option/flag to indicate that a species does not have distinct races
+- [ ] If needed, add the new species “has/no races” behavior in the database schema and admin forms
+- [ ] Update Beings page display logic for species marked as having no different races
+- [ ] Update species detail page display logic for species marked as having no different races
+- [ ] Review Character page behavior for species without races so filtering/grouping stays coherent
+
+MODALS / LAYERING:
+------------------
+- [ ] Fix `Gérer les espèces` modal layering so the site header no longer overlaps or blocks part of the popup
+- [ ] Review z-index/modal layering consistency across the rest of the project
+
+ADMIN UX REWORK:
+----------------
+- [ ] Review the admin pages because they currently feel confusing and/or too numerous
+- [ ] Identify whether the problem is too many separate admin pages, weak grouping, unclear labels, or poor navigation flow
+- [ ] Simplify the species/races admin experience so it is easier to understand at a glance
+- [ ] Audit the broader admin information architecture and propose a clearer organization model
+
 TESTING / QUALITY:
 ------------------
 - [ ] Add unit tests for scoring and token order logic
