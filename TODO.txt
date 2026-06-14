@@ -225,10 +225,18 @@ CURRENTLY IMPLEMENTED (BASE VERSION):
 NEXT TASKS FOR THIS SYSTEM:
 ---------------------------
 - [ ] Add/adjust Search Hub entry placement in main menu and user dropdown (final UX pass)
+- [ ] Add multiple future Navigation pages for Items and Materials
+- [ ] Define Items page hierarchy for Navigation search (example: item groups -> item types -> items)
+- [ ] Define Materials page hierarchy for Navigation search (example: material groups -> material types -> materials)
 - [ ] Add provider for Ideas page (title-only initially)
 - [ ] Add provider for World Events page (title-only initially)
 - [ ] Add provider for Map places/page names (title-only initially)
 - [ ] Add provider for future item pages (item groups + items)
+- [ ] Add all other existing pages to the Navigation page as direct clickable entries
+- [ ] Ensure every added page is also supported by the Navigation search system
+- [ ] Add a dedicated search integration plan for Maps because its internal structure differs from beings/characters/ideas
+- [ ] Define how Navigation search should index maps: map names, place names, place types, and possibly map layers
+- [ ] Define map-specific hierarchy/priority rules so map results rank coherently with other Navigation entities
 
 GENERALIZATION / ARCHITECTURE TASKS (FUTURE-PROOF):
 ----------------------------------------------------
