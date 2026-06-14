@@ -341,4 +341,38 @@ World map viewer with clickable points of interest and admin editing functionali
   - Global navigation and connected-user dropdown include **Gestion Cartes** linking to `/admin/maps`.
 - If map options seem missing, first check access through `/admin/maps` and then clear cache (`docker compose exec php php bin/console cache:clear`).
 
+## Search Hub System (June 2026)
+
+### New Page
+- **Search Hub** (`/hub`) provides two entry points:
+  - Page-type redirect search (e.g., `beings`, `characters`)
+  - Direct suggestion search over names/titles
+
+### Current Search Behavior
+- Suggestions are limited to **10** items.
+- Matching supports:
+  - contiguous input including hyphen (`-`)
+  - tokenized space-separated input (e.g. `el da`)
+  - priority bonus when tokens are matched in user-entered order
+- Suggestions display:
+  - main icon (species/race/character image when available)
+  - label + type suffix in parentheses
+  - hierarchy-first ordering (Species before Race before Character)
+  - depth-based indentation and type-based color variation
+  - highlighted matched tokens
+
+### Architecture
+- Implemented with a **provider-based search system** for future extension:
+  - `App\Search\HubSearchProviderInterface`
+  - Providers currently available:
+    - `BeingsHubSearchProvider` (species + races)
+    - `CharactersHubSearchProvider` (characters)
+  - Aggregation/scoring service:
+    - `App\Service\HubSearchService`
+- Providers are tagged via `app.hub_search_provider` and collected with `AutowireIterator`.
+
+### Future Extension Rule
+- New pages/entities must integrate by creating a new provider implementing `HubSearchProviderInterface` rather than duplicating search logic.
+- Keep server-side-first behavior and external JS only (`public/js/hub-search.js`).
+
 When working with this codebase, prioritize maintaining the hierarchical Species→Race→Character model and the rich French-language fantasy theme throughout all additions.

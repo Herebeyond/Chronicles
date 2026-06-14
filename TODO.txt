@@ -200,3 +200,70 @@ DEPLOYMENT:
 - [ ] Search across all entities (global search)
 - [ ] Comments/Notes attached to any entity
 - [ ] Collaborative editing with user attribution 
+
+🧭 HUB SEARCH ROADMAP (NEW - 2026-06-14):
+=========================================
+
+CURRENTLY IMPLEMENTED (BASE VERSION):
+-------------------------------------
+- ✅ New page: Search Hub (`/hub`)
+- ✅ Page-type redirect search (example: beings, characters)
+- ✅ Direct search suggestions by names/titles only
+- ✅ Max 10 suggestions
+- ✅ Search rules:
+   - contiguous characters search (hyphen included)
+   - tokenized search with spaces (`"el da"` style)
+   - ordered token match is prioritized over unordered
+- ✅ Suggestion metadata:
+   - icon displayed before name
+   - type shown at end in parentheses (Species, Race, Character)
+   - hierarchy priority (Species before Race before Character)
+   - hierarchy visual indentation by depth
+   - slight color variants by suggestion type
+   - matched token highlighting (darker + bordered)
+
+NEXT TASKS FOR THIS SYSTEM:
+---------------------------
+- [ ] Add/adjust Search Hub entry placement in main menu and user dropdown (final UX pass)
+- [ ] Add provider for Ideas page (title-only initially)
+- [ ] Add provider for World Events page (title-only initially)
+- [ ] Add provider for Map places/page names (title-only initially)
+- [ ] Add provider for future item pages (item groups + items)
+
+GENERALIZATION / ARCHITECTURE TASKS (FUTURE-PROOF):
+----------------------------------------------------
+- [ ] Convert current providers to a shared "hierarchy search contract" for all pages
+- [ ] Support per-page local search mode (page searches its own tree only)
+- [ ] Support cross-page hub mode (hub searches across selected pages)
+- [ ] Add configurable page access-rank priority model:
+   - rank 1 = main menu root
+   - rank 2+ = pages accessed from previous page
+   - ignore header shortcuts for rank calculations
+- [ ] Add configurable type weights per page (e.g. item group > item)
+- [ ] Add configurable depth visuals (indentation + palette map)
+- [ ] Add synonym/alias support for page-type redirect (ex: "being", "beast", "chars")
+- [ ] Add locale-aware normalization strategy (accents/plurals)
+- [ ] Add cache layer for suggestion nodes to reduce DB reads
+
+SEARCH BEHAVIOR REFINEMENTS:
+----------------------------
+- [ ] Improve scoring for "near match" and typo tolerance
+- [ ] Add exact-order phrase bonus across word boundaries
+- [ ] Add optional transliteration aware matching (fantasy names)
+- [ ] Add optional fallback strategy when 0 results are found
+- [ ] Add optional category filters in hub UI (Species/Race/Character/etc.)
+
+UI/UX IMPROVEMENTS:
+-------------------
+- [ ] Add keyboard shortcuts for quick focus (`/` to focus search)
+- [ ] Add arrow key + Enter navigation hint below search input
+- [ ] Add suggestion group headers when mixed entity types are returned
+- [ ] Add compact/mobile suggestion mode and tap target tuning
+- [ ] Add loading/skeleton state while suggestions are fetched
+
+TESTING / QUALITY:
+------------------
+- [ ] Add unit tests for scoring and token order logic
+- [ ] Add integration tests for `/hub/suggestions` endpoint
+- [ ] Add functional tests for hub page-type redirect
+- [ ] Validate behavior on large datasets (performance benchmarks)

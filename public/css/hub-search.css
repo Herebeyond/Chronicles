@@ -1,0 +1,175 @@
+.hub-page {
+    max-width: 960px;
+    margin: 0 auto;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.hub-hero,
+.hub-panel {
+    background: rgba(15, 18, 33, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 1.25rem;
+    color: #f4f5ff;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+}
+
+.hub-hero h1 {
+    margin: 0 0 0.4rem;
+    color: #f7e28f;
+}
+
+.hub-hero p,
+.hub-help {
+    margin: 0;
+    color: #ced2ff;
+}
+
+.hub-panel h2 {
+    margin: 0 0 0.8rem;
+    font-size: 1.15rem;
+}
+
+.hub-page-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.hub-page input,
+#hub-search-input {
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    padding: 0.65rem 0.8rem;
+    color: #f4f5ff;
+    background: rgba(8, 10, 22, 0.82);
+}
+
+.hub-page button {
+    border: 0;
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+    background: #1f8f6e;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.hub-page-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.hub-page-chip {
+    text-decoration: none;
+    color: #eff2ff;
+    border: 1px solid rgba(255, 255, 255, 0.23);
+    border-radius: 999px;
+    padding: 0.38rem 0.7rem;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.hub-suggestions {
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.38rem;
+}
+
+.hub-suggestion {
+    display: grid;
+    grid-template-columns: 38px 1fr;
+    align-items: center;
+    column-gap: 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 0.45rem 0.6rem;
+}
+
+.hub-suggestion:hover,
+.hub-suggestion.is-active {
+    border-color: rgba(255, 245, 184, 0.8);
+    background: rgba(255, 250, 220, 0.08);
+}
+
+.hub-suggestion img {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.hub-suggestion-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.9rem;
+}
+
+.hub-suggestion-label {
+    word-break: break-word;
+}
+
+.hub-suggestion-type {
+    color: #ccd1ff;
+    font-size: 0.88rem;
+    white-space: nowrap;
+}
+
+.hub-type-species {
+    background: rgba(173, 216, 255, 0.12);
+}
+
+.hub-type-race {
+    background: rgba(194, 255, 221, 0.12);
+}
+
+.hub-type-character {
+    background: rgba(255, 223, 177, 0.12);
+}
+
+.hub-depth-1 {
+    margin-left: 0;
+}
+
+.hub-depth-2 {
+    margin-left: 18px;
+}
+
+.hub-depth-3 {
+    margin-left: 36px;
+}
+
+.hub-match {
+    display: inline-block;
+    padding: 0 0.1rem;
+    margin: 0 0.02rem;
+    border: 1px solid rgba(255, 235, 156, 0.75);
+    border-radius: 4px;
+    background: rgba(255, 228, 133, 0.16);
+    color: #ffe9a6;
+}
+
+.hub-empty {
+    color: #d4d8ff;
+    opacity: 0.8;
+    padding: 0.4rem 0.1rem;
+}
+
+@media (max-width: 640px) {
+    .hub-page-form {
+        grid-template-columns: 1fr;
+    }
+
+    .hub-suggestion-text {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}

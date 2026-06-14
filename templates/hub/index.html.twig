@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ page_title }} - {{ parent() }}{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/hub-search.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="hub-page"
+     data-suggestions-endpoint="{{ path('hub_suggestions') }}"
+     data-enabled-pages="{{ enabled_pages|join(',') }}">
+
+    <div class="hub-hero">
+        <h1>Search Hub</h1>
+        <p>Jump to a page type or find an item by name/title across enabled pages.</p>
+    </div>
+
+    <section class="hub-panel">
+        <h2>Go To A Page Type</h2>
+        <form class="hub-page-form" method="get" action="{{ path('hub_go') }}">
+            <input id="hub-page-type-input"
+                   name="page"
+                   type="text"
+                   list="hub-page-types"
+                   placeholder="Try: beings, characters"
+                   autocomplete="off"
+                   required>
+            <datalist id="hub-page-types">
+                {% for page in pages %}
+                    <option value="{{ page.key }}">{{ page.label }}</option>
+                {% endfor %}
+            </datalist>
+            <button type="submit">Go</button>
+        </form>
+
+        <div class="hub-page-chips">
+            {% for page in pages %}
+                <a class="hub-page-chip" href="{{ path(page.routeName) }}">{{ page.label }}</a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="hub-panel">
+        <h2>Search Names / Titles</h2>
+        <p class="hub-help">The search matches contiguous text (including -) and split tokens. Max: 10 suggestions.</p>
+        <input id="hub-search-input"
+               type="text"
+               placeholder="Example: el, el da, dark-el"
+               autocomplete="off"
+               aria-label="Search items by name">
+
+        <ul id="hub-suggestions" class="hub-suggestions" aria-live="polite"></ul>
+    </section>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/hub-search.js') }}"></script>
+{% endblock %}
