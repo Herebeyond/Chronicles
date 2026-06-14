@@ -341,10 +341,10 @@ World map viewer with clickable points of interest and admin editing functionali
   - Global navigation and connected-user dropdown include **Gestion Cartes** linking to `/admin/maps`.
 - If map options seem missing, first check access through `/admin/maps` and then clear cache (`docker compose exec php php bin/console cache:clear`).
 
-## Search Hub System (June 2026)
+## Navigation Hub System (June 2026)
 
 ### New Page
-- **Search Hub** (`/hub`) provides two entry points:
+- **Navigation** (`/hub`) provides two entry points:
   - Page-type redirect search (e.g., `beings`, `characters`)
   - Direct suggestion search over names/titles
 

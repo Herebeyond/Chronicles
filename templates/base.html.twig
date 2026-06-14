@@ -35,7 +35,13 @@
                 <nav id="nav">
                     <ul class="menu">
                         <li class="menu-item">
-                            <div class="divLi nav-trigger" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
+                            <div class="divLi nav-trigger"
+                                 tabindex="0"
+                                 role="button"
+                                 aria-haspopup="true"
+                                 aria-expanded="false"
+                                 data-nav-url="{{ path('hub_index') }}"
+                                 onclick="window.location.href='{{ path('hub_index') }}'">
                                 <a>Navigation</a>
                                 <img class="small-icon dropdown-arrow" src="{{ asset('images/icons/dropdown-arrow.svg') }}">
                             </div>
@@ -48,11 +54,6 @@
                                 <li class="dropdownFirstLevel" role="none">
                                     <div class="liIntro" onclick="window.location.href='{{ path('characters_index') }}'" role="menuitem" tabindex="-1">
                                         <span>⚔️ Characters</span>
-                                    </div>
-                                </li>
-                                <li class="dropdownFirstLevel" role="none">
-                                    <div class="liIntro" onclick="window.location.href='{{ path('hub_index') }}'" role="menuitem" tabindex="-1">
-                                        <span>🔎 Search Hub</span>
                                     </div>
                                 </li>
                                 <li class="dropdownFirstLevel" role="none">
@@ -229,9 +230,9 @@
                 navTrigger.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        this.focus();
-                        if (menuItems.length > 0) {
-                            menuItems[0].focus();
+                        const navUrl = this.dataset.navUrl;
+                        if (navUrl) {
+                            window.location.href = navUrl;
                         }
                     }
                 });

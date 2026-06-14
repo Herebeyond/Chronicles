@@ -15,34 +15,9 @@
      data-enabled-pages="{{ enabled_pages|join(',') }}">
 
     <div class="hub-hero">
-        <h1>Search Hub</h1>
-        <p>Jump to a page type or find an item by name/title across enabled pages.</p>
+        <h1>Navigation</h1>
+        <p>Search names/titles first, then jump quickly to a page.</p>
     </div>
-
-    <section class="hub-panel">
-        <h2>Go To A Page Type</h2>
-        <form class="hub-page-form" method="get" action="{{ path('hub_go') }}">
-            <input id="hub-page-type-input"
-                   name="page"
-                   type="text"
-                   list="hub-page-types"
-                   placeholder="Try: beings, characters"
-                   autocomplete="off"
-                   required>
-            <datalist id="hub-page-types">
-                {% for page in pages %}
-                    <option value="{{ page.key }}">{{ page.label }}</option>
-                {% endfor %}
-            </datalist>
-            <button type="submit">Go</button>
-        </form>
-
-        <div class="hub-page-chips">
-            {% for page in pages %}
-                <a class="hub-page-chip" href="{{ path(page.routeName) }}">{{ page.label }}</a>
-            {% endfor %}
-        </div>
-    </section>
 
     <section class="hub-panel">
         <h2>Search Names / Titles</h2>
@@ -54,6 +29,16 @@
                aria-label="Search items by name">
 
         <ul id="hub-suggestions" class="hub-suggestions" aria-live="polite"></ul>
+    </section>
+
+    <section class="hub-panel">
+        <h2>Pages</h2>
+        <p class="hub-help">Click to open one of the available pages directly.</p>
+        <div class="hub-page-chips">
+            {% for page in pages %}
+                <a class="hub-page-chip" href="{{ path(page.routeName) }}">{{ page.label }}</a>
+            {% endfor %}
+        </div>
     </section>
 </div>
 {% endblock %}

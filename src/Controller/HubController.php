@@ -23,7 +23,7 @@ final class HubController extends AbstractController
         $enabledPages = array_map(static fn(array $page): string => $page['key'], $pages);
 
         return $this->render('hub/index.html.twig', [
-            'page_title' => 'Search Hub',
+            'page_title' => 'Navigation',
             'pages' => $pages,
             'enabled_pages' => $enabledPages,
         ]);
