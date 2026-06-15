@@ -72,6 +72,9 @@ final class NavigationPageCardService
                     @unlink($oldImagePath);
                 }
             }
+
+            // Extra safety: remove any older generated files for this page key.
+            $this->removeReplacedPageImages($pageKey, $newFileName);
         }
 
         // Persist crop params so the editor can restore state on re-open
@@ -139,8 +142,6 @@ final class NavigationPageCardService
         $srcY = max(0, min($srcY, $availY));
 
         $outputSize = 600;
-
-        $outputSize = 600;
         $output = imagecreatetruecolor($outputSize, $outputSize);
 
         if ($output === false) {
@@ -186,10 +187,14 @@ final class NavigationPageCardService
 
         $configDir = dirname($this->configPath());
         if (!is_dir($configDir)) {
-            mkdir($configDir, 0775, true);
+            if (!mkdir($configDir, 0775, true) && !is_dir($configDir)) {
+                throw new \RuntimeException('Failed to create navigation page card config directory.');
+            }
         }
 
-        file_put_contents($this->configPath(), $json);
+        if (file_put_contents($this->configPath(), $json) === false) {
+            throw new \RuntimeException('Failed to write navigation page card configuration file.');
+        }
     }
 
     /**
@@ -223,7 +228,31 @@ final class NavigationPageCardService
     {
         $path = $this->imageDirectoryPath();
         if (!is_dir($path)) {
-            mkdir($path, 0775, true);
+            if (!mkdir($path, 0775, true) && !is_dir($path)) {
+                throw new \RuntimeException('Failed to create navigation page card image directory.');
+            }
+        }
+    }
+
+    private function removeReplacedPageImages(string $pageKey, string $keepFile): void
+    {
+        $pattern = $this->imageDirectoryPath() . DIRECTORY_SEPARATOR . $pageKey . '-*';
+        $matches = glob($pattern);
+
+        if ($matches === false) {
+            return;
+        }
+
+        foreach ($matches as $path) {
+            if (!is_file($path)) {
+                continue;
+            }
+
+            if (basename($path) === $keepFile) {
+                continue;
+            }
+
+            @unlink($path);
         }
     }
 

@@ -361,6 +361,17 @@ World map viewer with clickable points of interest and admin editing functionali
   - depth-based indentation and type-based color variation
   - highlighted matched tokens
 
+### Navigation Page Cards (June 2026)
+- Navigation page links are displayed as **large square image cards** instead of plain text chips.
+- Admin users can customize each page card image and crop area directly from `/hub`.
+- When replacing a page image, previously generated files for that page key are automatically deleted to avoid stale files in `public/images/navigation-pages/`.
+- Crop editor behavior:
+  - uploaded image appears slightly darkened
+  - movable square crop zone shows visible area
+  - crop square stays inside image bounds
+  - crop square size is adjustable
+- Card settings are persisted through `App\Service\NavigationPageCardService` using local configuration storage.
+
 ### Architecture
 - Implemented with a **provider-based search system** for future extension:
   - `App\Search\HubSearchProviderInterface`

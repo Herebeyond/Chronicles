@@ -78,7 +78,8 @@
                     <div class="species-info">
                         <h2 class="species-name">{{ species.name }}</h2>
                         <div class="species-meta">
-                            <span class="species-race-count">{{ species.races|length }} race(s)</span>
+                            {% set raceCount = species.races|length %}
+                            <span class="species-race-count">{{ raceCount }} {{ raceCount > 1 ? 'races' : 'race' }}</span>
                         </div>
                     </div>
                 </div>
@@ -94,13 +95,10 @@
 
                 <!-- Species Actions -->
                 <div class="species-actions">
-                    <button class="btn-view-details" onclick="event.stopPropagation(); window.location.href='{{ path('beings_species', {'speciesId': species.id}) }}'">
-                        Voir les Détails
-                    </button>
                     {% if species.races is not empty %}
                     <button class="btn-show-races" id="btn-races-{{ species.id }}" onclick="event.stopPropagation(); toggleSpeciesRaces('{{ species.id }}')">
                         <span class="races-toggle-icon" id="toggle-icon-{{ species.id }}">▼</span>
-                        Afficher les Races
+                        Afficher les races
                     </button>
                     {% endif %}
                 </div>
@@ -337,7 +335,7 @@ function closeDropdownsOnOutsideClick(event) {
                     const toggleIcon = document.getElementById('toggle-icon-' + speciesId);
                     const button = document.getElementById('btn-races-' + speciesId);
                     if (toggleIcon) toggleIcon.textContent = '▼';
-                    if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Afficher les Races';
+                    if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Afficher les races';
                 }
             }
         });
@@ -374,7 +372,7 @@ function toggleSpeciesRaces(speciesId) {
             const otherIcon = document.getElementById('toggle-icon-' + otherId);
             const otherButton = document.getElementById('btn-races-' + otherId);
             if (otherIcon) otherIcon.textContent = '▼';
-            if (otherButton) otherButton.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + otherId + '">▼</span> Afficher les Races';
+            if (otherButton) otherButton.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + otherId + '">▼</span> Afficher les races';
         }
     });
     
@@ -405,7 +403,7 @@ function toggleSpeciesRaces(speciesId) {
         
         // Update button
         if (toggleIcon) toggleIcon.textContent = '▲';
-        if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▲</span> Masquer les Races';
+        if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▲</span> Masquer les races';
     } else {
         // Hide the dropdown
         globalDropdown.style.display = 'none';
@@ -413,7 +411,7 @@ function toggleSpeciesRaces(speciesId) {
         
         // Update button
         if (toggleIcon) toggleIcon.textContent = '▼';
-        if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Afficher les Races';
+        if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Afficher les races';
     }
 }
 
@@ -431,7 +429,7 @@ function closeAllDropdowns() {
             const toggleIcon = document.getElementById('toggle-icon-' + speciesId);
             const button = document.getElementById('btn-races-' + speciesId);
             if (toggleIcon) toggleIcon.textContent = '▼';
-            if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Afficher les Races';
+            if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Afficher les races';
         }
     });
 }

@@ -2494,6 +2494,174 @@ input[type="checkbox"] {
     transform: translateY(-2px);
 }
 
+/* Beings + Characters UX cleanup (June 2026) */
+.beings-header--compact {
+    margin-bottom: 20px;
+}
+
+.beings-header--compact h1 {
+    font-size: 2.1rem;
+}
+
+.beings-grid {
+    gap: 16px;
+}
+
+.species-card {
+    background: linear-gradient(165deg, rgba(9, 13, 28, 0.92), rgba(18, 22, 45, 0.85));
+    border-color: rgba(117, 138, 255, 0.28);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+}
+
+.species-card:hover {
+    border-color: rgba(0, 212, 255, 0.65);
+    box-shadow: 0 10px 26px rgba(0, 212, 255, 0.18);
+}
+
+.species-header {
+    padding: 16px 18px;
+    gap: 14px;
+}
+
+.species-image {
+    width: 78px;
+    height: 78px;
+}
+
+.species-name {
+    font-size: 1.55rem;
+    margin-bottom: 6px;
+}
+
+.species-race-count {
+    color: #ffe291;
+    font-weight: 600;
+}
+
+.species-description-box {
+    padding: 0 18px 12px;
+}
+
+.species-description {
+    color: #d3d9ff;
+    line-height: 1.5;
+    margin-top: 10px;
+}
+
+.species-actions {
+    justify-content: flex-end;
+    padding: 12px 18px 16px;
+}
+
+.btn-show-races {
+    flex: 0 1 auto;
+    min-width: 190px;
+}
+
+.characters-filter-species {
+    min-width: 170px;
+}
+
+.characters-taxonomy-grid {
+    display: grid;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.taxonomy-species-card {
+    border: 1px solid rgba(117, 138, 255, 0.3);
+    border-radius: 14px;
+    background: linear-gradient(160deg, rgba(8, 13, 30, 0.9), rgba(16, 25, 52, 0.82));
+    padding: 14px;
+}
+
+.taxonomy-species-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.taxonomy-species-name {
+    margin: 0;
+    color: #7fddff;
+    font-size: 1.35rem;
+}
+
+.taxonomy-species-count {
+    color: #d4dbff;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.taxonomy-races-list {
+    display: grid;
+    gap: 8px;
+}
+
+.taxonomy-race-item {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+}
+
+.taxonomy-race-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 10px;
+}
+
+.taxonomy-race-summary::-webkit-details-marker {
+    display: none;
+}
+
+.taxonomy-race-name {
+    color: #ff8c8c;
+    font-weight: 700;
+}
+
+.taxonomy-race-count {
+    color: #cfd7ff;
+    font-size: 0.86rem;
+    white-space: nowrap;
+}
+
+.taxonomy-characters-list {
+    margin: 0;
+    list-style: none;
+    padding: 0 10px 10px;
+    display: grid;
+    gap: 7px;
+}
+
+.taxonomy-character-item {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.taxonomy-character-item:hover {
+    background: rgba(0, 212, 255, 0.1);
+    border-color: rgba(0, 212, 255, 0.35);
+}
+
+.taxonomy-character-meta {
+    color: #bfc9ff;
+    font-size: 0.8rem;
+}
+
 .races-toggle-icon {
     transition: transform 0.3s ease;
     display: inline-block;

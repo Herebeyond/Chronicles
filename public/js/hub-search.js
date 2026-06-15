@@ -164,5 +164,211 @@
                 window.location.href = url;
             }
         });
+
+        if (page.dataset.isAdmin === '1') {
+            const modal = document.getElementById('hub-admin-modal');
+            const form = document.getElementById('hub-card-form');
+            const tokenInput = document.getElementById('hub-card-token');
+            const imageInput = document.getElementById('hub-card-image-input');
+            const preview = document.getElementById('hub-card-preview');
+            const previewWrap = document.getElementById('hub-card-preview-wrap');
+            const cropBox = document.getElementById('hub-card-crop-box');
+            const cropXInput = document.getElementById('hub-crop-x');
+            const cropYInput = document.getElementById('hub-crop-y');
+            const cropSizeInput = document.getElementById('hub-crop-size');
+            const cropSizeRange = document.getElementById('hub-crop-size-range');
+            const editButtons = document.querySelectorAll('.hub-card-edit-btn');
+
+            let crop = { x: 0, y: 0, size: 100 };
+            let dragState = null;
+            let currentPageKey = '';
+
+            function clamp(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
+            function toPreviewPixels() {
+                const rect = preview.getBoundingClientRect();
+                return {
+                    width: rect.width,
+                    height: rect.height
+                };
+            }
+
+            function renderCropBox() {
+                const box = toPreviewPixels();
+                const minEdge = Math.min(box.width, box.height);
+
+                const sizePx = (crop.size / 100) * minEdge;
+                const maxOffset = 100 - crop.size;
+                const xPx = maxOffset > 0 ? (crop.x / maxOffset) * (box.width - sizePx) : (box.width - sizePx) / 2;
+                const yPx = maxOffset > 0 ? (crop.y / maxOffset) * (box.height - sizePx) : (box.height - sizePx) / 2;
+
+                cropBox.style.width = sizePx + 'px';
+                cropBox.style.height = sizePx + 'px';
+                cropBox.style.left = xPx + 'px';
+                cropBox.style.top = yPx + 'px';
+
+                cropXInput.value = crop.x.toFixed(2);
+                cropYInput.value = crop.y.toFixed(2);
+                cropSizeInput.value = crop.size.toFixed(2);
+                cropSizeRange.value = String(Math.round(crop.size));
+            }
+
+            function updateCropFromDrag(clientX, clientY) {
+                if (!dragState) {
+                    return;
+                }
+
+                const box = toPreviewPixels();
+                const minEdge = Math.min(box.width, box.height);
+                const sizePx = (crop.size / 100) * minEdge;
+
+                const deltaX = clientX - dragState.startX;
+                const deltaY = clientY - dragState.startY;
+
+                const nextLeft = clamp(dragState.startLeft + deltaX, 0, box.width - sizePx);
+                const nextTop = clamp(dragState.startTop + deltaY, 0, box.height - sizePx);
+
+                const maxOffset = Math.max(0.0001, 100 - crop.size);
+
+                crop.x = ((nextLeft / Math.max(1, (box.width - sizePx))) * maxOffset);
+                crop.y = ((nextTop / Math.max(1, (box.height - sizePx))) * maxOffset);
+
+                renderCropBox();
+            }
+
+            function openModal(pageCard, button) {
+                currentPageKey = button.dataset.pageKey;
+                const label = button.dataset.pageLabel || 'Page';
+                const title = document.getElementById('hub-admin-modal-title');
+                title.textContent = 'Edit image - ' + label;
+
+                crop = {
+                    x: clamp(parseFloat(button.dataset.cropX || '0'), 0, 100),
+                    y: clamp(parseFloat(button.dataset.cropY || '0'), 0, 100),
+                    size: clamp(parseFloat(button.dataset.cropSize || '100'), 10, 100)
+                };
+
+                tokenInput.value = button.dataset.csrfToken || '';
+
+                const template = page.dataset.updateUrlTemplate;
+                form.action = template.replace('__PAGE_KEY__', currentPageKey);
+
+                if (pageCard && pageCard.classList.contains('hub-page-card--with-image')) {
+                    const backgroundImage = pageCard.style.backgroundImage;
+                    const match = backgroundImage.match(/url\("?([^"\)]+)"?\)/);
+                    if (match && match[1]) {
+                        preview.src = match[1];
+                    }
+                }
+
+                if (!preview.getAttribute('src')) {
+                    preview.removeAttribute('src');
+                }
+
+                modal.hidden = false;
+                setTimeout(renderCropBox, 50);
+            }
+
+            function closeModal() {
+                modal.hidden = true;
+                imageInput.value = '';
+                dragState = null;
+                cropBox.classList.remove('is-dragging');
+            }
+
+            editButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const card = document.querySelector('.hub-page-card[data-page-key="' + button.dataset.pageKey + '"]');
+                    if (!card) {
+                        return;
+                    }
+                    openModal(card, button);
+                });
+            });
+
+            modal.addEventListener('click', function (event) {
+                if (event.target.closest('[data-close-modal="1"]')) {
+                    closeModal();
+                }
+            });
+
+            imageInput.addEventListener('change', function () {
+                const file = imageInput.files && imageInput.files[0];
+                if (!file) {
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    preview.src = String(event.target && event.target.result ? event.target.result : '');
+                    preview.onload = function () {
+                        crop = { x: 0, y: 0, size: 100 };
+                        renderCropBox();
+                    };
+                };
+                reader.readAsDataURL(file);
+            });
+
+            cropSizeRange.addEventListener('input', function () {
+                const newSize = clamp(parseFloat(cropSizeRange.value || '100'), 10, 100);
+                const centerX = crop.x + (crop.size / 2);
+                const centerY = crop.y + (crop.size / 2);
+
+                crop.size = newSize;
+                const maxOffset = 100 - crop.size;
+                crop.x = clamp(centerX - (crop.size / 2), 0, maxOffset);
+                crop.y = clamp(centerY - (crop.size / 2), 0, maxOffset);
+
+                renderCropBox();
+            });
+
+            cropBox.addEventListener('mousedown', function (event) {
+                event.preventDefault();
+
+                const box = toPreviewPixels();
+                const cropRect = cropBox.getBoundingClientRect();
+                const wrapRect = previewWrap.getBoundingClientRect();
+
+                dragState = {
+                    startX: event.clientX,
+                    startY: event.clientY,
+                    startLeft: cropRect.left - wrapRect.left,
+                    startTop: cropRect.top - wrapRect.top,
+                    boxWidth: box.width,
+                    boxHeight: box.height
+                };
+
+                cropBox.classList.add('is-dragging');
+            });
+
+            window.addEventListener('mousemove', function (event) {
+                if (!dragState) {
+                    return;
+                }
+
+                updateCropFromDrag(event.clientX, event.clientY);
+            });
+
+            window.addEventListener('mouseup', function () {
+                if (!dragState) {
+                    return;
+                }
+
+                dragState = null;
+                cropBox.classList.remove('is-dragging');
+            });
+
+            window.addEventListener('resize', function () {
+                if (!modal.hidden) {
+                    renderCropBox();
+                }
+            });
+
+            form.addEventListener('submit', function () {
+                renderCropBox();
+            });
+        }
     });
 })();

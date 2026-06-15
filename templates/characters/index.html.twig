@@ -1,9 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Characters - The Rift Chronicles{% endblock %}
+{% block title %}Personnages - The Rift Chronicles{% endblock %}
 
 {% block body %}
-    <button id="Return" onclick="window.history.back()">Return</button>
+    <button id="Return" onclick="window.history.back()">Retour</button>
+
+    <div class="beings-header beings-header--compact">
+        <h1>Personnages</h1>
+        <p>Explorez les personnages, regroupés par espèce et par race.</p>
+    </div>
 
     {% if is_granted('ROLE_ADMIN') %}
     <div class="margin-bottom-20">
@@ -18,7 +23,7 @@
                 <label>Rechercher un personnage</label>
                 <input type="text" name="search" value="{{ search }}" placeholder="Nom du personnage...">
             </div>
-            <div class="form-group" style="min-width: 150px;">
+            <div class="form-group characters-filter-species">
                 <label>Filtrer par espèce</label>
                 <select name="species">
                     <option value="">Toutes les espèces</option>
@@ -51,7 +56,7 @@
             {% endif %}
         </div>
     {% else %}
-        <!-- Characters display in hierarchical structure like the old project -->
+        <div class="characters-taxonomy-grid">
         {% for specie in species %}
             {% set species_characters = [] %}
             {% for character in characters %}
@@ -61,10 +66,13 @@
             {% endfor %}
 
             {% if species_characters|length > 0 %}
-                <div class="species-item">
-                    <span class="species-name" id="specie-{{ specie.id }}">{{ specie.name }}</span>
+                <section class="taxonomy-species-card" id="specie-{{ specie.id }}">
+                    <header class="taxonomy-species-header">
+                        <h2 class="taxonomy-species-name">{{ specie.name }}</h2>
+                        <span class="taxonomy-species-count">{{ species_characters|length }} personnage{{ species_characters|length > 1 ? 's' : '' }}</span>
+                    </header>
 
-                    <ul class="races-list">
+                    <div class="taxonomy-races-list">
                         {% set races_with_characters = {} %}
                         {% for character in species_characters %}
                             {% set race_id = character.race ? ('race_' ~ character.race.id) : 'no_race' %}
@@ -78,62 +86,41 @@
                         {% endfor %}
 
                         {% for race_id, race_data in races_with_characters %}
-                            <li class="race-item" data-race-id="{{ race_data.id_display }}">
-                                <span class="race-name" id="race-{{ race_data.id_display }}">{{ race_data.name }}</span>
-                                <img class="small-icon-list" src="{{ asset('images/icons/dropdown-arrow.svg') }}">
+                            <details class="taxonomy-race-item" data-race-id="{{ race_data.id_display }}">
+                                <summary class="taxonomy-race-summary" id="race-{{ race_data.id_display }}">
+                                    <span class="taxonomy-race-name">{{ race_data.name }}</span>
+                                    <span class="taxonomy-race-count">{{ race_data.characters|length }} personnage{{ race_data.characters|length > 1 ? 's' : '' }}</span>
+                                </summary>
 
-                                <ul class="characters-list" id="characters-{{ race_data.id_display }}" style="display: none;">
+                                <ul class="taxonomy-characters-list" id="characters-{{ race_data.id_display }}">
                                     {% for character in race_data.characters %}
-                                        <li class="character-item" onclick="window.location.href='{{ path('characters_show', {characterId: character.id}) }}'">
+                                        <li class="taxonomy-character-item" onclick="window.location.href='{{ path('characters_show', {characterId: character.id}) }}'">
                                             <span>{{ character.name }}</span>
                                             {% if character.occupation %}
-                                                <small style="color: #aaa; margin-left: 10px;">({{ character.occupation }})</small>
+                                                <small class="taxonomy-character-meta">{{ character.occupation }}</small>
                                             {% endif %}
                                         </li>
                                     {% endfor %}
                                 </ul>
-                            </li>
+                            </details>
                         {% endfor %}
-                    </ul>
-                </div>
+                    </div>
+                </section>
             {% endif %}
         {% endfor %}
+        </div>
     {% endif %}
-
-<script>
-// Function to display the list of characters when clicking on a race (replicated from old project)
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.race-item').forEach(function (raceItem) {
-        raceItem.addEventListener('click', function (event) {
-            event.stopPropagation();
-
-            // Check if the clicked element has a child with class 'small-icon-list'
-            const hasArrow = this.querySelector('.small-icon-list');
-            if (!hasArrow) {
-                return;
-            }
-
-            const raceId = this.getAttribute('data-race-id');
-            const charactersList = document.getElementById(`characters-${raceId}`);
-
-            // Toggle visibility
-            if (charactersList.style.display === 'none') {
-                charactersList.style.display = 'block';
-            } else {
-                charactersList.style.display = 'none';
-            }
-        });
-    });
-});
-</script>
 {% endblock %}
 
 {% block javascripts %}
 {{ parent() }}
 <script>
 // Auto-submit form when species filter changes
-document.querySelector('select[name="species"]').addEventListener('change', function() {
-    this.form.submit();
-});
+const speciesFilterSelect = document.querySelector('select[name="species"]');
+if (speciesFilterSelect) {
+    speciesFilterSelect.addEventListener('change', function() {
+        this.form.submit();
+    });
+}
 </script>
 {% endblock %}
