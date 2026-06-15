@@ -122,10 +122,23 @@ final class NavigationPageCardService
         $cropX      = (float) ($crop['x'] ?? 0);
         $cropY      = (float) ($crop['y'] ?? 0);
 
-        $srcX = (int) round(($cropX / $maxOffset) * ($imageWidth - $squarePx));
-        $srcY = (int) round(($cropY / $maxOffset) * ($imageHeight - $squarePx));
-        $srcX = max(0, min($srcX, $imageWidth - $squarePx));
-        $srcY = max(0, min($srcY, $imageHeight - $squarePx));
+        $availX = $imageWidth - $squarePx;
+        $availY = $imageHeight - $squarePx;
+
+        // When the crop covers the full short edge (maxOffset ≈ 0) the JS editor
+        // centres the crop box visually. Mirror that behaviour here.
+        if (100 - $size < 0.5) {
+            $srcX = max(0, (int) round($availX / 2));
+            $srcY = max(0, (int) round($availY / 2));
+        } else {
+            $srcX = (int) round(($cropX / $maxOffset) * $availX);
+            $srcY = (int) round(($cropY / $maxOffset) * $availY);
+        }
+
+        $srcX = max(0, min($srcX, $availX));
+        $srcY = max(0, min($srcY, $availY));
+
+        $outputSize = 600;
 
         $outputSize = 600;
         $output = imagecreatetruecolor($outputSize, $outputSize);
