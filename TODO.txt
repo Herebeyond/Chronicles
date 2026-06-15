@@ -1,317 +1,190 @@
-✅ COMPLETED:
-- rework the copilot-instructions.md
-- docs/DATABASE_SCHEMA.md created and separated
+# Chronicles TODO
 
-🚧 IN PROGRESS - JavaScript Migration to External Files:
-=====================================================
+## Completed
+- [x] Reworked `.github/copilot-instructions.md`
+- [x] Created and separated `docs/DATABASE_SCHEMA.md`
+- [x] Created `public/js/navigation.js`
+- [x] Created `public/js/password-utils.js`
+- [x] Removed iframe-based edit modal flow from beings/species management (2026-04-25)
+- [x] Added Navigation page (`/hub`) with base provider-based search architecture
 
-CREATED EXTERNAL JS FILES:
---------------------------
-✅ public/js/navigation.js - Base navigation dropdown and keyboard functionality
-✅ public/js/password-utils.js - Password visibility toggle and strength checker
+---
 
-REMAINING SCRIPTS TO MIGRATE:
-------------------------------
+## Priority 1 - Fix Soon
 
-HIGH PRIORITY (Functional & Used):
-1. templates/ideas/index.html.twig → public/js/ideas-management.js
-   - Modal functionality for create/edit forms
-   - AJAX form submission
-   - Bulk import/export
-   
-2. templates/beings/index.html.twig → public/js/beings-display.js
-   - Toggle dropdowns for races/characters
-   - Close on outside click
-   
-3. templates/admin/species_management/index.html.twig → public/js/species-management.js
-   - Tab switching
-   - Delete confirmation modals
-   
-4. templates/admin/world_events/index.html.twig → public/js/world-events-inline-edit.js
-   - Inline editing for event fields
-   - Calendar configuration
-   
-5. templates/admin/species.html.twig → public/js/admin-species.js
-   - Tab management
-   - AJAX loading for species/races/stats
+### Security (Critical)
+- [ ] Set a strong `APP_SECRET` in `.env`
+- [ ] Replace default Mercure JWT secret in `.env` and `compose.yaml`
+- [ ] Remove hardcoded DB password from `scripts/backup.ps1` and use env vars
+- [ ] Add login rate limiting / brute-force protection in `security.yaml`
+- [ ] Add missing security headers (CSP, X-Frame-Options, etc.)
+- [ ] Enforce `isActive` account checks during login
 
-TO REMOVE (Placeholder TODO alerts):
-6. templates/admin/dashboard.html.twig - Remove all TODO alert functions
-7. templates/characters/display.html.twig - Remove placeholder alerts
-8. templates/characters/show.html.twig - Remove placeholder alerts
+### Beings / Characters UX Rework
+- [ ] Rework Beings and Characters pages together (shared structure, shared UX issues)
+- [ ] Remove redundant `Voir les details` button (card click already opens details)
+- [ ] Improve race count label grammar (`race` vs `races`)
+- [ ] Reduce Beings page visual clutter and improve scan flow
+- [ ] Align Characters page visual hierarchy with Beings rework
+- [ ] Audit other public pages for similar clutter issues
 
-CAN BE SERVER-SIDE:
-9. templates/characters/index.html.twig - Form auto-submit can use <noscript> fallback
+### Species / Races Display Rework
+- [ ] Redesign species detail page race blocks (cleaner grouping, spacing, borders)
+- [ ] Remove character-count display from race cards in species page
+- [ ] Improve overall eye-path and information hierarchy on species pages
+- [ ] Add species image full-view behavior (lightbox/modal like map place gallery)
+- [ ] If full-screen is too heavy, at least provide very large preview mode
 
-REVIEW/KEEP MINIMAL:
-10. templates/beings/display.html.twig - Smooth scroll (small, keep or remove)
-11. [DONE 2026-04-25] Removed iframe-based edit modal from beings/display.html.twig and postMessage scripts from species_management/edit_*.html.twig - now uses direct navigation to admin_species_edit / admin_race_edit
-12. templates/admin/characters.html.twig - Verify if modal still used
+### Modal / Layering Fixes
+- [ ] Fix `Gerer les especes` popup being overlapped by header
+- [ ] Review global modal z-index/layering consistency across project
 
-TEMPLATES TO UPDATE AFTER MIGRATION:
-=====================================
-- templates/base.html.twig - Add <script src="{{ asset('js/navigation.js') }}"></script>
-- templates/registration/register.html.twig - Add <script src="{{ asset('js/password-utils.js') }}"></script>
-- All other templates listed above after creating their respective JS files
+---
 
-OTHER TODOS:
-============
-- check all the files to decide wich one should go into gitignore or not
-- upgrade the backup to only create a new backup if its different from the last one (make 2 different checks, if the images are the same but the BDD is different, do not add an image backup but make a new BDD backup)
-- add ngrok
-- make the "edit event dates" work
-- rework the zoom in the timeline in world events
+## Priority 2 - Navigation System Expansion
 
-🔒 SECURITY ISSUES & RECOMMENDATIONS:
-=====================================
+### Navigation Page (Hub) Scope Expansion
+- [ ] Add all existing pages as direct clickable entries on Navigation page
+- [ ] Ensure Navigation search supports all pages listed there
+- [ ] Add future Navigation pages for Items and Materials
+- [ ] Define hierarchy for Items search (example: groups -> types -> items)
+- [ ] Define hierarchy for Materials search (example: groups -> types -> materials)
 
-CRITICAL - SECRETS EXPOSURE:
------------------------------
-1. ⚠️ APP_SECRET is EMPTY in .env file
-   - File: .env (line 28)
-   - FIX: Generate a strong secret using `php bin/console secrets:generate-keys` or `openssl rand -hex 32`
-   - This is used for CSRF tokens, remember-me cookies, and other security features
+### Provider Integrations
+- [ ] Add Ideas provider (title-only first)
+- [ ] Add World Events provider (title-only first)
+- [ ] Add Maps provider with dedicated strategy (maps are structurally different)
+- [ ] Define map indexing scope: map names, place names, place types, optional layers
+- [ ] Define map ranking/priority rules compatible with other entities
 
-2. ⚠️ Mercure JWT secret uses default value "!ChangeThisMercureHubJWTSecretKey!"
-   - Files: .env (line 22), compose.yaml (lines 8, 9, 15)
-   - FIX: Generate a unique secret for production
+### Generalized Search Architecture
+- [ ] Keep provider-based approach as mandatory extension pattern
+- [ ] Add per-page local search mode (page searches only its own hierarchy)
+- [ ] Add cross-page global mode (Navigation searches selected pages)
+- [ ] Add configurable page rank model based on access hierarchy
+- [ ] Ignore header shortcuts in page-rank calculations
+- [ ] Add configurable per-type weights (example: group > item)
+- [ ] Add configurable depth visuals (indentation + palette)
+- [ ] Add aliases/synonyms for page redirect queries (`being`, `chars`, etc.)
+- [ ] Add locale-aware normalization (accents/plurals)
+- [ ] Add caching for suggestion nodes to reduce DB reads
 
-3. ⚠️ Database password hardcoded in backup script
-   - File: scripts/backup.ps1 (line 18)
-   - FIX: Use environment variables instead: $env:MYSQL_PASSWORD
+### Search Quality Improvements
+- [ ] Improve typo tolerance / near-match scoring
+- [ ] Add exact-order phrase bonuses
+- [ ] Add optional transliteration-aware matching
+- [ ] Add fallback behavior when no results are found
+- [ ] Add optional category filtering in suggestions
 
-HIGH PRIORITY:
---------------
-4. 🔐 No login rate limiting / brute force protection
-   - The login form has no rate limiting to prevent brute force attacks
-   - FIX: Install symfony/rate-limiter and configure login throttling in security.yaml
-   - Example: Add login_throttling: { max_attempts: 5, interval: '15 minutes' } to form_login config
+### Navigation UI/UX
+- [ ] Add keyboard shortcut to focus search (`/`)
+- [ ] Add arrow/Enter usage hint under search field
+- [ ] Add grouped suggestion headers when multiple types are mixed
+- [ ] Improve mobile/compact suggestion display
+- [ ] Add loading/skeleton state during search requests
 
-5. 🔐 No security headers configured
-   - Missing Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection
-   - FIX: Add security headers in Caddyfile or via Symfony NelmioSecurityBundle
-   - Only Permissions-Policy for browsing-topics is set in Caddyfile
+### Validation
+- [ ] Add unit tests for scoring/token-order logic
+- [ ] Add integration tests for `/hub/suggestions`
+- [ ] Add functional tests for page-type redirect
+- [ ] Benchmark large dataset behavior
 
-6. 🔐 isActive check not enforced at login
-   - CustomUserProvider loads user but doesn't check if isActive is false
-   - A deactivated user could still log in with valid credentials
-   - FIX: Add isActive check in CustomUserProvider.loadUserByIdentifier() or use a UserChecker
+---
 
-MEDIUM PRIORITY:
-----------------
-7. 📝 Debug console.log statements left in templates
-   - templates/registration/register.html.twig (lines 397-399)
-   - templates/ideas/index.html.twig (lines 309, 353, 366)
-   - templates/beings/display.html.twig (lines 275, 278)
-   - FIX: Remove all console.log statements before production
+## Priority 3 - Admin UX Simplification
+- [ ] Review admin IA (too many pages and unclear flow)
+- [ ] Identify root cause: page count vs grouping vs naming vs navigation
+- [ ] Simplify species/races admin experience for readability at a glance
+- [ ] Propose and implement clearer admin section organization
+- [ ] Add audit logging for sensitive admin actions
 
-8. 📝 alert() calls used for user feedback
-   - templates/ideas/index.html.twig (multiple lines)
-   - templates/characters/show.html.twig (line 170)
-   - FIX: Replace with proper toast/notification system
+---
 
-9. 🔐 File upload validation could be bypassed
-   - mimeTypes validation relies on guessExtension() which can be spoofed
-   - FIX: Consider adding file content validation (magic bytes check)
-   - Files: src/Form/SpeciesType.php, RaceType.php, UserProfileType.php
+## Priority 4 - JavaScript Migration Cleanup
 
-10. 🔐 Session configuration not explicitly defined
-    - Session is enabled but cookie security settings aren't explicit
-    - FIX: Add session configuration in config/packages/framework.yaml:
-      session:
-        cookie_secure: auto
-        cookie_httponly: true
-        cookie_samesite: lax
+### Remaining Inline Scripts to Extract
+- [ ] `templates/ideas/index.html.twig` -> `public/js/ideas-management.js`
+- [ ] `templates/beings/index.html.twig` -> `public/js/beings-display.js`
+- [ ] `templates/admin/species_management/index.html.twig` -> `public/js/species-management.js`
+- [ ] `templates/admin/world_events/index.html.twig` -> `public/js/world-events-inline-edit.js`
+- [ ] `templates/admin/species.html.twig` -> `public/js/admin-species.js`
 
-LOW PRIORITY / RECOMMENDATIONS:
--------------------------------
-11. 📝 Database port exposed on 3307
-    - compose.yaml exposes MySQL externally on port 3307
-    - Consider removing for production or restricting to localhost only
+### Placeholder Script Removals
+- [ ] Remove TODO `alert()` placeholders from `templates/admin/dashboard.html.twig`
+- [ ] Remove TODO `alert()` placeholders from `templates/characters/display.html.twig`
+- [ ] Remove TODO `alert()` placeholders from `templates/characters/show.html.twig`
 
-12. 📝 phpMyAdmin not configured but mentioned in docs
-    - copilot-instructions.md mentions phpMyAdmin on port 8081 but it's not in compose.yaml
-    - Either add it or update documentation
+### Review Items
+- [ ] Verify whether `templates/admin/characters.html.twig` still needs modal logic
+- [ ] Decide whether beings display smooth-scroll script should stay or be removed
 
-13. 📝 No audit logging for admin actions
-    - Admin operations (user management, species/race CRUD) are not logged
-    - Consider adding Symfony event listeners for security-relevant actions
+### Template Wiring After Migration
+- [ ] Ensure `templates/base.html.twig` includes `public/js/navigation.js`
+- [ ] Ensure `templates/registration/register.html.twig` includes `public/js/password-utils.js`
+- [ ] Wire new JS files per migrated template
 
-🚀 POSSIBLE UPGRADES & IMPROVEMENTS:
-====================================
+---
 
-AUTHENTICATION & SECURITY:
---------------------------
-- [ ] Add 2FA support (symfony/scheb-2fa-bundle)
-- [ ] Add OAuth login (Google, Discord, etc.) for easier sign-in
-- [ ] Implement password reset via email functionality
-- [ ] Add email verification for new accounts
-- [ ] Add account lockout after X failed login attempts
-- [ ] Add "currently logged in sessions" view for users
+## Priority 5 - Infrastructure / Reliability
 
-DATABASE & PERFORMANCE:
------------------------
-- [ ] Add database indexes for frequently searched columns
-- [ ] Consider Redis/Memcached for session storage in production
-- [ ] Add pagination to all list views (some already have it)
-- [ ] Implement soft deletes for entities to prevent data loss
+### Backups
+- [ ] Create differential backup behavior:
+  - [ ] only write new backup if different from previous backup
+  - [ ] split checks for DB and images independently
+  - [ ] if images are unchanged but DB changed, create DB backup only
+- [ ] Add backup integrity checks
+- [ ] Add backup restore script
+- [ ] Evaluate offsite backup strategy (S3/Azure/etc.)
 
-USER EXPERIENCE:
-----------------
-- [ ] Replace alert() with modern toast notification library (e.g., notyf, toastify)
-- [ ] Add dark mode toggle (CSS already has color variables)
-- [ ] Add keyboard shortcuts for power users
-- [ ] Implement autocomplete for search fields
-- [ ] Add drag-and-drop reordering for ideas with priorities
-- [ ] Add real-time updates using Mercure (already configured in compose.yaml)
+### Deployment / CI
+- [ ] Add GitHub Actions CI/CD workflow
+- [ ] Add automated tests in CI
+- [ ] Create `.env.prod` template with safe placeholders
+- [ ] Document production deployment workflow
+- [ ] Add health-check endpoint for monitoring
 
-CODE QUALITY:
--------------
-- [ ] Add PHPUnit tests for controllers and services
-- [ ] Add PHPStan/Psalm for static analysis
-- [ ] Add CS-Fixer for code style enforcement
-- [ ] Create custom exception classes for better error handling
-- [ ] Add API endpoints for potential mobile app or integrations
+### Runtime / Platform
+- [ ] Add ngrok setup/documentation
+- [ ] Decide if MySQL port `3307` should remain exposed in production
+- [ ] Resolve phpMyAdmin docs/config mismatch (documented but not configured)
 
-BACKUP SYSTEM:
---------------
-- [ ] Add backup integrity verification (checksum comparison)
-- [ ] Implement incremental backups for large databases
-- [ ] Add backup restoration script
-- [ ] Consider offsite backup to cloud storage (S3, Azure Blob, etc.)
+---
 
-DEPLOYMENT:
------------
-- [ ] Create GitHub Actions workflow for CI/CD
-- [ ] Add automated testing in CI pipeline
-- [ ] Create proper .env.prod template with placeholder values
-- [ ] Document production deployment process
-- [ ] Add health check endpoint for monitoring
+## Priority 6 - Feature Backlog
 
-💡 IDEAS FOR NEW FEATURES:
-==========================
-- [ ] Character relationship mapping (family trees, alliances, rivalries)
-- [ ] Interactive map integration with characters/events locations
-- [ ] Timeline visualization for character lifespans across world events
-- [ ] Version history / changelog for entities (audit trail)
-- [ ] Export to PDF for character sheets
-- [ ] Import/Export data in JSON format for backup/sharing
-- [ ] Tags/labels system for cross-entity organization
-- [ ] Search across all entities (global search)
-- [ ] Comments/Notes attached to any entity
-- [ ] Collaborative editing with user attribution 
+### Auth / Accounts
+- [ ] Add 2FA support
+- [ ] Add OAuth login providers
+- [ ] Add password reset by email
+- [ ] Add email verification
+- [ ] Add account lockout after failed attempts
+- [ ] Add active sessions view for users
 
-🧭 HUB SEARCH ROADMAP (NEW - 2026-06-14):
-=========================================
+### Data / Performance
+- [ ] Add DB indexes for frequent search/filter paths
+- [ ] Evaluate Redis/Memcached for sessions/cache
+- [ ] Add pagination where still missing
+- [ ] Evaluate soft-delete strategy
 
-CURRENTLY IMPLEMENTED (BASE VERSION):
--------------------------------------
-- ✅ New page: Search Hub (`/hub`)
-- ✅ Page-type redirect search (example: beings, characters)
-- ✅ Direct search suggestions by names/titles only
-- ✅ Max 10 suggestions
-- ✅ Search rules:
-   - contiguous characters search (hyphen included)
-   - tokenized search with spaces (`"el da"` style)
-   - ordered token match is prioritized over unordered
-- ✅ Suggestion metadata:
-   - icon displayed before name
-   - type shown at end in parentheses (Species, Race, Character)
-   - hierarchy priority (Species before Race before Character)
-   - hierarchy visual indentation by depth
-   - slight color variants by suggestion type
-   - matched token highlighting (darker + bordered)
+### Product Features
+- [ ] Character relationship mapping (family/alliance/rivalry)
+- [ ] Interactive map links for characters/events
+- [ ] Character lifetime overlays on world-events timeline
+- [ ] Entity version history/changelog
+- [ ] Character sheet PDF export
+- [ ] JSON import/export
+- [ ] Cross-entity tagging/labels
+- [ ] Global search across all entities
+- [ ] Notes/comments attached to entities
+- [ ] Collaborative editing with attribution
 
-NEXT TASKS FOR THIS SYSTEM:
----------------------------
-- [ ] Add/adjust Search Hub entry placement in main menu and user dropdown (final UX pass)
-- [ ] Add multiple future Navigation pages for Items and Materials
-- [ ] Define Items page hierarchy for Navigation search (example: item groups -> item types -> items)
-- [ ] Define Materials page hierarchy for Navigation search (example: material groups -> material types -> materials)
-- [ ] Add provider for Ideas page (title-only initially)
-- [ ] Add provider for World Events page (title-only initially)
-- [ ] Add provider for Map places/page names (title-only initially)
-- [ ] Add provider for future item pages (item groups + items)
-- [ ] Add all other existing pages to the Navigation page as direct clickable entries
-- [ ] Ensure every added page is also supported by the Navigation search system
-- [ ] Add a dedicated search integration plan for Maps because its internal structure differs from beings/characters/ideas
-- [ ] Define how Navigation search should index maps: map names, place names, place types, and possibly map layers
-- [ ] Define map-specific hierarchy/priority rules so map results rank coherently with other Navigation entities
+---
 
-GENERALIZATION / ARCHITECTURE TASKS (FUTURE-PROOF):
-----------------------------------------------------
-- [ ] Convert current providers to a shared "hierarchy search contract" for all pages
-- [ ] Support per-page local search mode (page searches its own tree only)
-- [ ] Support cross-page hub mode (hub searches across selected pages)
-- [ ] Add configurable page access-rank priority model:
-   - rank 1 = main menu root
-   - rank 2+ = pages accessed from previous page
-   - ignore header shortcuts for rank calculations
-- [ ] Add configurable type weights per page (e.g. item group > item)
-- [ ] Add configurable depth visuals (indentation + palette map)
-- [ ] Add synonym/alias support for page-type redirect (ex: "being", "beast", "chars")
-- [ ] Add locale-aware normalization strategy (accents/plurals)
-- [ ] Add cache layer for suggestion nodes to reduce DB reads
-
-SEARCH BEHAVIOR REFINEMENTS:
-----------------------------
-- [ ] Improve scoring for "near match" and typo tolerance
-- [ ] Add exact-order phrase bonus across word boundaries
-- [ ] Add optional transliteration aware matching (fantasy names)
-- [ ] Add optional fallback strategy when 0 results are found
-- [ ] Add optional category filters in hub UI (Species/Race/Character/etc.)
-
-UI/UX IMPROVEMENTS:
--------------------
-- [ ] Add keyboard shortcuts for quick focus (`/` to focus search)
-- [ ] Add arrow key + Enter navigation hint below search input
-- [ ] Add suggestion group headers when mixed entity types are returned
-- [ ] Add compact/mobile suggestion mode and tap target tuning
-- [ ] Add loading/skeleton state while suggestions are fetched
-
-BEINGS / CHARACTERS / SPECIES-RACES REWORK:
-===========================================
-
-BEINGS + CHARACTERS LISTING CLEANUP:
------------------------------------
-- [ ] Rework Beings and Characters pages together because their structures and UX problems are very similar
-- [ ] Reduce visual density on Beings page so it feels less stuffy and easier to scan
-- [ ] Review Characters page for the same “too much information everywhere” feeling and align its hierarchy/spacing with the Beings rework
-- [ ] Audit other public pages to make sure the same cluttered feeling is not present elsewhere
-- [ ] Remove redundant `Voir les détails` button on species cards because clicking the card already performs the same action
-- [ ] Improve race count label grammar so it displays `race` / `races` intelligently depending on the actual count
-
-SPECIES PAGE / RACES DISPLAY:
------------------------------
-- [ ] Redesign species detail page to better organize races with cleaner boxes, spacing, and borders
-- [ ] Remove the number of characters associated with each race from the species page display
-- [ ] Reassess visual hierarchy on species pages so the eye knows where to look first
-- [ ] Add full-image viewing for species artwork when clicking the species image, similar to the gallery/lightbox behavior used in map place pages
-- [ ] If full-screen image is too large/complex, provide at least a very large modal/lightbox preview for species images
-
-DATA MODEL / DISPLAY LOGIC:
----------------------------
-- [ ] Add a Species option/flag to indicate that a species does not have distinct races
-- [ ] If needed, add the new species “has/no races” behavior in the database schema and admin forms
-- [ ] Update Beings page display logic for species marked as having no different races
-- [ ] Update species detail page display logic for species marked as having no different races
-- [ ] Review Character page behavior for species without races so filtering/grouping stays coherent
-
-MODALS / LAYERING:
-------------------
-- [ ] Fix `Gérer les espèces` modal layering so the site header no longer overlaps or blocks part of the popup
-- [ ] Review z-index/modal layering consistency across the rest of the project
-
-ADMIN UX REWORK:
-----------------
-- [ ] Review the admin pages because they currently feel confusing and/or too numerous
-- [ ] Identify whether the problem is too many separate admin pages, weak grouping, unclear labels, or poor navigation flow
-- [ ] Simplify the species/races admin experience so it is easier to understand at a glance
-- [ ] Audit the broader admin information architecture and propose a clearer organization model
-
-TESTING / QUALITY:
-------------------
-- [ ] Add unit tests for scoring and token order logic
-- [ ] Add integration tests for `/hub/suggestions` endpoint
-- [ ] Add functional tests for hub page-type redirect
-- [ ] Validate behavior on large datasets (performance benchmarks)
+## Maintenance / Quick Cleanup
+- [ ] Review project files and update `.gitignore` where needed
+- [ ] Fix world-events `edit event dates` workflow
+- [ ] Rework timeline zoom behavior for world events
+- [ ] Remove debug `console.log` left in templates
+- [ ] Replace remaining user-facing `alert()` calls with proper notifications
+- [ ] Harden file upload validation with content-based checks (magic bytes)
+- [ ] Add explicit session cookie security config in `framework.yaml`
