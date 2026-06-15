@@ -13,12 +13,12 @@
 ## Priority 1 - Fix Soon
 
 ### Security (Critical)
-- [ ] Set a strong `APP_SECRET` in `.env`
-- [ ] Replace default Mercure JWT secret in `.env` and `compose.yaml`
-- [ ] Remove hardcoded DB password from `scripts/backup.ps1` and use env vars
-- [ ] Add login rate limiting / brute-force protection in `security.yaml`
-- [ ] Add missing security headers (CSP, X-Frame-Options, etc.)
-- [ ] Enforce `isActive` account checks during login
+- [x] Set a strong `APP_SECRET` in `.env`
+- [x] Replace default Mercure JWT secret in `.env` and `compose.yaml`
+- [x] Remove hardcoded DB password from `scripts/backup.ps1` and use env vars
+- [x] Add login rate limiting / brute-force protection in `security.yaml`
+- [x] Add missing security headers (CSP, X-Frame-Options, etc.)
+- [x] Enforce `isActive` account checks during login
 
 ### Beings / Characters UX Rework
 - [ ] Rework Beings and Characters pages together (shared structure, shared UX issues)

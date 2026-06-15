@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -31,6 +32,10 @@ class CustomUserProvider implements UserProviderInterface, PasswordUpgraderInter
             throw new UserNotFoundException(sprintf('User "%s" not found.', $identifier));
         }
 
+        if (!$user->isActive()) {
+            throw new CustomUserMessageAuthenticationException('Your account is disabled. Please contact an administrator.');
+        }
+
         return $user;
     }
 
@@ -48,6 +53,10 @@ class CustomUserProvider implements UserProviderInterface, PasswordUpgraderInter
         
         if (!$refreshedUser) {
             throw new UserNotFoundException(sprintf('User with ID "%s" not found.', $user->getId()));
+        }
+
+        if (!$refreshedUser->isActive()) {
+            throw new CustomUserMessageAuthenticationException('Your account is disabled. Please contact an administrator.');
         }
 
         return $refreshedUser;

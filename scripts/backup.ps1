@@ -15,7 +15,12 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Backing up database..." -ForegroundColor Yellow
 $databaseBackupPath = Join-Path $databaseFolder $databaseBackupFile
-docker compose exec database mysqldump -u chronicles_user -p"ChroniquesSecurePass2024!" chronicles > $databaseBackupPath
+
+$mysqlUser = if ($env:MYSQL_USER) { $env:MYSQL_USER } else { "chronicles_user" }
+$mysqlPassword = if ($env:MYSQL_PASSWORD) { $env:MYSQL_PASSWORD } else { throw "MYSQL_PASSWORD environment variable is not set." }
+$mysqlDatabase = if ($env:MYSQL_DATABASE) { $env:MYSQL_DATABASE } else { "chronicles" }
+
+docker compose exec database mysqldump -u $mysqlUser -p"$mysqlPassword" $mysqlDatabase > $databaseBackupPath
 
 if ($LASTEXITCODE -eq 0) {
     $size = (Get-Item $databaseBackupPath).Length / 1KB
