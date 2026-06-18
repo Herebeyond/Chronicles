@@ -372,6 +372,10 @@ World map viewer with clickable points of interest and admin editing functionali
   - crop square size is adjustable
 - Card settings are persisted through `App\Service\NavigationPageCardService` using local configuration storage.
 
+### Beings Page Visual Refresh (June 2026)
+- Beings search/filter controls are rendered inside the page header to reduce top-level layout fragmentation.
+- Species cards use lighter borders with centered larger icons and simplified actions to improve scan flow.
+
 ### Architecture
 - Implemented with a **provider-based search system** for future extension:
   - `App\Search\HubSearchProviderInterface`

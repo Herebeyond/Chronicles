@@ -80,6 +80,7 @@
 - [ ] Add keyboard shortcut to focus search (`/`)
 - [ ] Add arrow/Enter usage hint under search field
 - [ ] Add grouped suggestion headers when multiple types are mixed
+- [ ] Add a display strategy for multiple cultures/clans in Navigation suggestions/cards
 - [ ] Improve mobile/compact suggestion display
 - [ ] Add loading/skeleton state during search requests
 

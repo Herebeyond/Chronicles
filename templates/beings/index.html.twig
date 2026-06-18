@@ -10,6 +10,30 @@
     <div class="beings-header">
         <h1>Espèces et Créatures</h1>
         <p>Explorez les diverses espèces et races qui habitent les Mondes Oubliés</p>
+
+        <!-- Search and Filter Controls -->
+        <div class="beings-controls">
+            <div class="search-section">
+                <form method="GET" action="{{ path('beings_index') }}" class="search-form">
+                    <div class="search-group">
+                        <input type="text" name="search" value="{{ search }}" 
+                               placeholder="Rechercher des espèces, races ou contenus..." class="search-input">
+                        <select name="specie" class="filter-select">
+                            <option value="">Toutes les Espèces</option>
+                            {% for speciesName in allSpecies %}
+                                <option value="{{ speciesName }}" {{ filterSpecie == speciesName ? 'selected' : '' }}>
+                                    {{ speciesName }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="search-actions">
+                        <button type="submit" class="search-btn">Rechercher</button>
+                        <a href="{{ path('beings_index') }}" class="clear-btn">Effacer</a>
+                    </div>
+                </form>
+            </div>
+        </div>
         
         {% if is_granted('ROLE_ADMIN') %}
         <div class="admin-tools">
@@ -18,30 +42,6 @@
             </button>
         </div>
         {% endif %}
-    </div>
-
-    <!-- Search and Filter Controls -->
-    <div class="beings-controls">
-        <div class="search-section">
-            <form method="GET" action="{{ path('beings_index') }}" class="search-form">
-                <div class="search-group">
-                    <input type="text" name="search" value="{{ search }}" 
-                           placeholder="Rechercher des espèces, races ou contenus..." class="search-input">
-                    <select name="specie" class="filter-select">
-                        <option value="">Toutes les Espèces</option>
-                        {% for speciesName in allSpecies %}
-                            <option value="{{ speciesName }}" {{ filterSpecie == speciesName ? 'selected' : '' }}>
-                                {{ speciesName }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="search-actions">
-                    <button type="submit" class="search-btn">Rechercher</button>
-                    <a href="{{ path('beings_index') }}" class="clear-btn">Effacer</a>
-                </div>
-            </form>
-        </div>
     </div>
 
     <!-- Results Summary -->
@@ -77,10 +77,6 @@
                     </div>
                     <div class="species-info">
                         <h2 class="species-name">{{ species.name }}</h2>
-                        <div class="species-meta">
-                            {% set raceCount = species.races|length %}
-                            <span class="species-race-count">{{ raceCount }} {{ raceCount > 1 ? 'races' : 'race' }}</span>
-                        </div>
                     </div>
                 </div>
 
@@ -98,7 +94,7 @@
                     {% if species.races is not empty %}
                     <button class="btn-show-races" id="btn-races-{{ species.id }}" onclick="event.stopPropagation(); toggleSpeciesRaces('{{ species.id }}')">
                         <span class="races-toggle-icon" id="toggle-icon-{{ species.id }}">▼</span>
-                        Afficher les races
+                        Races
                     </button>
                     {% endif %}
                 </div>
@@ -335,7 +331,7 @@ function closeDropdownsOnOutsideClick(event) {
                     const toggleIcon = document.getElementById('toggle-icon-' + speciesId);
                     const button = document.getElementById('btn-races-' + speciesId);
                     if (toggleIcon) toggleIcon.textContent = '▼';
-                    if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Afficher les races';
+                    if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Races';
                 }
             }
         });
@@ -372,7 +368,7 @@ function toggleSpeciesRaces(speciesId) {
             const otherIcon = document.getElementById('toggle-icon-' + otherId);
             const otherButton = document.getElementById('btn-races-' + otherId);
             if (otherIcon) otherIcon.textContent = '▼';
-            if (otherButton) otherButton.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + otherId + '">▼</span> Afficher les races';
+            if (otherButton) otherButton.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + otherId + '">▼</span> Races';
         }
     });
     
@@ -403,7 +399,7 @@ function toggleSpeciesRaces(speciesId) {
         
         // Update button
         if (toggleIcon) toggleIcon.textContent = '▲';
-        if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▲</span> Masquer les races';
+        if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▲</span> Races';
     } else {
         // Hide the dropdown
         globalDropdown.style.display = 'none';
@@ -411,7 +407,7 @@ function toggleSpeciesRaces(speciesId) {
         
         // Update button
         if (toggleIcon) toggleIcon.textContent = '▼';
-        if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Afficher les races';
+        if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Races';
     }
 }
 
@@ -429,7 +425,7 @@ function closeAllDropdowns() {
             const toggleIcon = document.getElementById('toggle-icon-' + speciesId);
             const button = document.getElementById('btn-races-' + speciesId);
             if (toggleIcon) toggleIcon.textContent = '▼';
-            if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Afficher les races';
+            if (button) button.innerHTML = '<span class="races-toggle-icon" id="toggle-icon-' + speciesId + '">▼</span> Races';
         }
     });
 }
