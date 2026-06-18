@@ -375,6 +375,7 @@ World map viewer with clickable points of interest and admin editing functionali
 ### Beings Page Visual Refresh (June 2026)
 - Beings search/filter controls are rendered inside the page header to reduce top-level layout fragmentation.
 - Species cards use lighter borders with centered larger icons and simplified actions to improve scan flow.
+- The in-page races dropdown on beings cards was removed; the `Races` action now redirects to the species page so race URLs/routes remain reusable for future navigation behavior.
 
 ### Architecture
 - Implemented with a **provider-based search system** for future extension:
